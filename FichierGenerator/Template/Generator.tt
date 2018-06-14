@@ -14,6 +14,7 @@
 <#@ include file="StringHelper.ttinclude"#>
 <#@ parameter name="input_name" type="System.String" #>
 <#@ parameter name="types" type="System.String[]" #>
+<#@ parameter name="groups" type="System.String[]" #>
 
 using System.Collections.Generic;
 
@@ -28,7 +29,7 @@ namespace MyProject
     XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
 	// Map group_name - list_id_elements
-	//Dictionary<string, List<string>> dict_group = new Dictionary<string, List<string>>();
+	Dictionary<string, List<string>> dict_group = new Dictionary<string, List<string>>();
 	
 	// Map identifier - element
 	Dictionary<string, Element> dict_element = new Dictionary<string, Element>();
@@ -51,6 +52,30 @@ namespace MyProject
 	// List of class created
 	List<string> classes = new List<string>();
 	
+	// Make the map of groups
+	if (groups!=null&&!groups.Equals(""))
+	{
+		IEnumerable<XElement> xeles_group = from e in doc.Descendants(NP + "element")
+											where (e.Attribute(xmlns_xsi + "type").Value == "Grouping")&&(groups.Contains(e.Element(NP+"name").Value))
+											select e;
+		foreach(var ele in xeles_group)
+		{
+			List<string> list_target = new List<string>();
+			IEnumerable<XElement> xeles_target = from e in doc.Descendants(NP + "relationship")
+												 where e.Attribute("source").Value == ele.Attribute("identifier").Value
+												 select e;
+			if (xeles_target!=null&&xeles_target.Count()!=0)
+			{
+				foreach(var eg in xeles_target)
+				{
+					list_target.Add(eg.Attribute("target").Value);
+				}
+				dict_group.Add(ele.Attribute("identifier").Value,list_target);
+			}
+			
+		}
+	}
+
 	// Make the map of id - element
 	foreach(var ele in doc.Descendants(NP + "element"))
     {
@@ -144,8 +169,8 @@ namespace MyProject
 	{
 		Element ele; 
 		string class_name;
-		//if (groups==null||groups.Equals("")||isInSelectedGroups(xele.Attribute("identifier").Value,dict_group))
-		//{
+		if (groups==null||groups.Equals("")||isInSelectedGroups(xele.Attribute("identifier").Value,dict_group))
+		{
 			classes.Add(xele.Attribute("identifier").Value);
 			ele = dict_element[xele.Attribute("identifier").Value];
 			class_name = xele.Element(NP + "name").Value;
@@ -153,16 +178,21 @@ namespace MyProject
 	[ModelElement("<#= class_name #>","<#= StringHelper.DocumentationTraitement(ele.Documentation_) #>, ElementType = "<#= ele.Type_ #>Archimate")]
 	partial class <#= StringHelper.UpperString(class_name) #> {}
 <#
-		//}
+		}
 	}
 
 	// Generate composition relationship.
+#>
+	// Composition relationship
+
+<#
 	foreach (var idSource in mmap_compostion.Keys)
 	{
 		Element elementSource = dict_element[idSource];
 		if(classes.Contains(elementSource.Identifier_))
 		{
 #>
+	[ModelElement("<#= elementSource.Name_ #>","<#= StringHelper.DocumentationTraitement(elementSource.Documentation_) #>, ElementType = "<#= elementSource.Type_ #>Archimate")]
     partial class <#= StringHelper.UpperString(elementSource.Name_) #>
     {
 <#
@@ -190,6 +220,10 @@ namespace MyProject
 
 <#
 	// Generate specialization relationship.
+#>
+	// Specialization relationship
+
+<#
 	foreach (var idChild in dict_specialization.Keys)
 	{
 		Element elementChild = dict_element[idChild];
@@ -199,6 +233,7 @@ namespace MyProject
 		if(classes.Contains(elementChild.Identifier_)&&classes.Contains(elementParent.Identifier_))
 		{
 #>
+	[ModelElement("<#= elementChild.Name_ #>","<#= StringHelper.DocumentationTraitement(elementChild.Documentation_) #>, ElementType = "<#= elementChild.Type_ #>Archimate")]
 	partial class <#= StringHelper.UpperString(elementChild.Name_) #> : <#= StringHelper.UpperString(elementParent.Name_) #> {}
 <#
 		}
@@ -207,12 +242,17 @@ namespace MyProject
 
 <#
 	// Generate aggregation relationship.
+#>
+	// Aggregation relationship
+
+<#
 	foreach (var idSource in mmap_aggregation.Keys)
 	{
 		Element elementSource = dict_element[idSource];
 		if(classes.Contains(elementSource.Identifier_))
 		{
 #>
+	[ModelElement("<#= elementSource.Name_ #>","<#= StringHelper.DocumentationTraitement(elementSource.Documentation_) #>, ElementType = "<#= elementSource.Type_ #>Archimate")]
     partial class <#= StringHelper.UpperString(elementSource.Name_) #>
     {
 <#
@@ -238,12 +278,17 @@ namespace MyProject
 
 <#
 	// Generate association relationship.
+#>
+	// Association relationship
+
+<#
 	foreach (var idSource in mmap_association.Keys)
 	{
 		Element elementSource = dict_element[idSource];
-		if(types.Contains(elementSource.Type_))
+		if(classes.Contains(elementSource.Identifier_))
 		{
 #>
+	[ModelElement("<#= elementSource.Name_ #>","<#= StringHelper.DocumentationTraitement(elementSource.Documentation_) #>, ElementType = "<#= elementSource.Type_ #>Archimate")]
     partial class <#= StringHelper.UpperString(elementSource.Name_) #>
     {
 <#
@@ -251,7 +296,7 @@ namespace MyProject
 		foreach (var idTarget in mmap_association[idSource])
 		{
 			Element elementTarget = dict_element[idTarget];
-			if(classes.Contains(elementSource.Identifier_))
+			if(classes.Contains(elementTarget.Identifier_))
 			{
 #>
 		<#= StringHelper.UpperString(elementTarget.Name_) #> <#= StringHelper.LowerString(elementTarget.Name_) #>_ ;

@@ -6,7 +6,22 @@ namespace FichierGenerator
     public class Program
     {
         public static readonly string[] all_types = {
+            "BusinessActor",
+            "BusinessCollaboration",
+            "BusinessComponent",
+            "BusinessEvent",
+            "BusinessFunction",
+            "BusinessProcess",
+            "BusinessRole",
+            "BusinessService",
             "BusinessObject",
+            "BusinessInteraction",
+            "BusinessInterface",
+            "TechnologyCollaboration",
+            "TechnologyFunction",
+            "TechnologyInteraction",
+            "TechnologyInterface",
+            "TechnologyService",
             "ApplicationInterface",
             "ApplicationService",
             "ApplicationFunction",
@@ -18,12 +33,13 @@ namespace FichierGenerator
         /// </summary>
         /// <param name="input_name"> The name of xml fichier which describe the architecture</param>
         /// <param name="output_name"> The name of the fichier created</param>
-        public static void Generate(string input_name, string output_name, string[] types = null)
+        public static void Generate(string input_name, string output_name, string[] types = null, string[] groups = null)
         {
             var generator = new Generator();
             generator.Session = new Microsoft.VisualStudio.TextTemplating.TextTemplatingSession();
             generator.Session["input_name"] = input_name;
-            if(types==null)
+            generator.Session["groups"] = groups;
+            if (types==null)
                 generator.Session["types"] = all_types;
             else
                 generator.Session["types"] = types;
@@ -46,7 +62,8 @@ namespace FichierGenerator
         static void Main(string[] args)
         {
             string[] types = { "BusinessObject" };
-            Generate("D:\\documents\\INSA\\maidis\\vs\\Projet\\FichierGenerator\\FichierGenerator\\PLATEFORME_VNEXT.xml", "BusinessObjectenerated.cs",types);
+            string[] groups = { "Web" };
+            Generate("D:\\documents\\INSA\\maidis\\vs\\Projet\\FichierGenerator\\FichierGenerator\\PLATEFORME_VNEXT.xml", "BusinessObjectenerated.cs",null, groups);
         }
     }
 }
