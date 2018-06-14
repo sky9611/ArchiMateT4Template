@@ -20,3 +20,4 @@
 		<Error> Class CADOResourceWindows has more than one parent class, only the first was considered </Error>
 	</Errors>
 </Log>
+

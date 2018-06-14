@@ -28,7 +28,7 @@ namespace MyProject
     XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
 	// Map group_name - list_id_elements
-	//Dictionary<string, List<string>> dict_group = new Dictionary<string, List<string>>();
+	Dictionary<string, List<string>> dict_group = new Dictionary<string, List<string>>();
 	
 	// Map identifier - element
 	Dictionary<string, Element> dict_element = new Dictionary<string, Element>();
@@ -87,7 +87,7 @@ namespace MyProject
 												 where e.Attribute(xmlns_xsi + "type").Value == "Specialization"
 												 select e;
 	foreach(var ele in xeles_specialization)
-    {
+	{
 		string id_child = ele.Attribute("source").Value;
 		string id_parent = ele.Attribute("target").Value;
 		Element element_child = dict_element[id_child];
@@ -95,7 +95,7 @@ namespace MyProject
 			dict_specialization.Add(id_child,id_parent);
 		else 
 			errors.Add("Class "+element_child.Name_+" has more than one parent class, only the first was considered");
-    }
+	}
 
 	// Make the multimap of aggregation-relationship
 	IEnumerable<XElement> xeles_aggregation = from e in doc.Descendants(NP + "relationship")
@@ -145,6 +145,7 @@ namespace MyProject
 		Element ele; 
 		string class_name;
 		//if (groups==null||groups.Equals("")||isInSelectedGroups(xele.Attribute("identifier").Value,dict_group))
+		//if (groups==null||groups.Equals(""))
 		//{
 			classes.Add(xele.Attribute("identifier").Value);
 			ele = dict_element[xele.Attribute("identifier").Value];
@@ -269,34 +270,3 @@ namespace MyProject
 #>
 }
 
-<Log> 
-<#
-	if (errors.Count()>0)
-	{
-#>
-	<Errors>
-<#
-		foreach(string err in errors)
-		{
-#>
-		<Error> <#= err #> </Error>
-<#
-		}
-#>
-	</Errors>
-<#
-	}
-#>
-</Log>
-
-<#+
-	private bool isInSelectedGroups(string id, Dictionary<string, List<string>> dict_group)
-	{
-		foreach(var g in dict_group.Keys)
-		{
-			if(dict_group[g].Contains(id))
-				return true;
-		}
-		return false;
-	}
-#>

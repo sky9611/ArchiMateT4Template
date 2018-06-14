@@ -43,10 +43,10 @@ namespace FichierGenerator
             System.IO.File.WriteAllText(path_log, log);
         }
 
-        //static void Main(string[] args)
-        //{
-        //    string[] types = { "BusinessObject" };
-        //    Generate("D:\\documents\\INSA\\maidis\\vs\\Projet\\FichierGenerator\\FichierGenerator\\PLATEFORME_VNEXT.xml", "BusinessObjectenerated.cs");
-        //}
+        static void Main(string[] args)
+        {
+            string[] types = { "BusinessObject" };
+            Generate("D:\\documents\\INSA\\maidis\\vs\\Projet\\FichierGenerator\\FichierGenerator\\PLATEFORME_VNEXT.xml", "BusinessObjectenerated.cs",types);
+        }
     }
 }
