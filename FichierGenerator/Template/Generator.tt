@@ -15,6 +15,7 @@
 <#@ parameter name="input_name" type="System.String" #>
 <#@ parameter name="types" type="System.String[]" #>
 <#@ parameter name="groups" type="System.String[]" #>
+<#@ parameter name="views" type="System.String[]" #>
 
 using System.Collections.Generic;
 
@@ -30,6 +31,9 @@ namespace MyProject
 
 	// Map group_name - list_id_elements
 	Dictionary<string, List<string>> dict_group = new Dictionary<string, List<string>>();
+
+	// Map view_name - list_id_elements
+	Dictionary<string, List<string>> dict_view = new Dictionary<string, List<string>>();
 	
 	// Map identifier - element
 	Dictionary<string, Element> dict_element = new Dictionary<string, Element>();
@@ -73,6 +77,20 @@ namespace MyProject
 				dict_group.Add(ele.Attribute("identifier").Value,list_target);
 			}
 			
+		}
+	}
+
+	// Make the map of views
+	if (views!=null&&!views.Equals(""))
+	{
+		IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
+										   where views.Contains(e.Element(NP+"name").Value)
+										   select e;
+		foreach(var ele in xeles_view)
+		{
+			List<string> list_child = new List<string>();
+			findAllElement(xmlns_xsi, NP, doc, ele, ref list_child);
+			dict_view.Add(ele.Attribute("identifier").Value,list_child);
 		}
 	}
 
@@ -169,7 +187,7 @@ namespace MyProject
 	{
 		Element ele; 
 		string class_name;
-		if (groups==null||groups.Equals("")||isInSelectedGroups(xele.Attribute("identifier").Value,dict_group))
+		if ((groups==null||groups.Equals("")||isInSelectedGroups(xele.Attribute("identifier").Value,dict_group))&&(views==null||views.Equals("")||isInSelectedViews(xele.Attribute("identifier").Value,dict_view)))
 		{
 			classes.Add(xele.Attribute("identifier").Value);
 			ele = dict_element[xele.Attribute("identifier").Value];
@@ -192,7 +210,6 @@ namespace MyProject
 		if(classes.Contains(elementSource.Identifier_))
 		{
 #>
-	[ModelElement("<#= elementSource.Name_ #>","<#= StringHelper.DocumentationTraitement(elementSource.Documentation_) #>, ElementType = "<#= elementSource.Type_ #>Archimate")]
     partial class <#= StringHelper.UpperString(elementSource.Name_) #>
     {
 <#
@@ -233,7 +250,6 @@ namespace MyProject
 		if(classes.Contains(elementChild.Identifier_)&&classes.Contains(elementParent.Identifier_))
 		{
 #>
-	[ModelElement("<#= elementChild.Name_ #>","<#= StringHelper.DocumentationTraitement(elementChild.Documentation_) #>, ElementType = "<#= elementChild.Type_ #>Archimate")]
 	partial class <#= StringHelper.UpperString(elementChild.Name_) #> : <#= StringHelper.UpperString(elementParent.Name_) #> {}
 <#
 		}
@@ -252,7 +268,6 @@ namespace MyProject
 		if(classes.Contains(elementSource.Identifier_))
 		{
 #>
-	[ModelElement("<#= elementSource.Name_ #>","<#= StringHelper.DocumentationTraitement(elementSource.Documentation_) #>, ElementType = "<#= elementSource.Type_ #>Archimate")]
     partial class <#= StringHelper.UpperString(elementSource.Name_) #>
     {
 <#
@@ -288,7 +303,6 @@ namespace MyProject
 		if(classes.Contains(elementSource.Identifier_))
 		{
 #>
-	[ModelElement("<#= elementSource.Name_ #>","<#= StringHelper.DocumentationTraitement(elementSource.Documentation_) #>, ElementType = "<#= elementSource.Type_ #>Archimate")]
     partial class <#= StringHelper.UpperString(elementSource.Name_) #>
     {
 <#
@@ -343,5 +357,37 @@ namespace MyProject
 				return true;
 		}
 		return false;
+	}
+
+	private bool isInSelectedViews(string id, Dictionary<string, List<string>> dict_view)
+	{
+		foreach(var v in dict_view.Keys)
+		{
+			if(dict_view[v].Contains(id))
+				return true;
+		}
+		return false;
+	}
+
+	private void findAllElement(XNamespace xmlns_xsi, XNamespace NP, XElement root, XElement node, ref List<string> list)
+	{
+		IEnumerable<XElement> xeles_node = from e in node.Descendants(NP + "node")
+										   select e;
+		foreach(var n in xeles_node)
+		{
+			if(n.Attribute(xmlns_xsi + "type").Value=="Element")
+			{
+				list.Add(n.Attribute("elementRef").Value);
+			}
+			else if(n.Attribute(xmlns_xsi + "type").Value=="Label" && n.Element(NP + "viewRef")!=null)
+			{
+				XElement container = root.Descendants(NP + "view").FirstOrDefault(el => el.Attribute("identifier").Value == n.Element(NP + "viewRef").Attribute("ref").Value);
+				findAllElement(xmlns_xsi, NP, root, n, ref list);
+			}
+			else if(n.Attribute(xmlns_xsi + "type").Value=="Container")
+			{
+				findAllElement(xmlns_xsi, NP, root, n, ref list);
+			}
+		}
 	}
 #>
