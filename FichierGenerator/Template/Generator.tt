@@ -1,0 +1,324 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ assembly name="mscorlib" #>
+<#@ assembly name="EnvDTE" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ include file="Element.ttinclude"#>
+<#@ include file="StringHelper.ttinclude"#>
+<#@ parameter name="input_name" type="System.String" #>
+<#@ parameter name="types" type="System.String[]" #>
+<#@ parameter name="groups" type="System.String[]" #>
+<#@ parameter name="views" type="System.String[]" #>
+
+using System.Collections.Generic;
+
+namespace MyProject
+{
+<#	
+	// Open the prototype document.
+	XElement doc = XElement.Load(input_name);
+
+	// Get the nampespaces 
+	XNamespace NP = doc.GetDefaultNamespace();
+    XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
+
+	// Map group_name - list_id_elements
+	Dictionary<string, List<string>> dict_group = new Dictionary<string, List<string>>();
+	
+	// Map identifier - element
+	Dictionary<string, Element> dict_element = new Dictionary<string, Element>();
+
+	// MultiMap of composition
+	Dictionary<string, List<string>> mmap_compostion = new Dictionary<string, List<string>>();
+
+	// MultiMap of aggregation
+	Dictionary<string, List<string>> mmap_aggregation = new Dictionary<string, List<string>>();
+
+	// Map of specialization
+	Dictionary<string, string> dict_specialization = new Dictionary<string, string>();
+
+	// MultiMap of association
+	Dictionary<string, List<string>> mmap_association = new Dictionary<string, List<string>>();
+
+	// List of errors
+	List<string> errors = new List<string>();
+
+	// List of class created
+	List<string> classes = new List<string>();
+
+	// Make the map of groups
+	IEnumerable<XElement> xeles_group = from e in doc.Descendants(NP + "element")
+										where e.Attribute(xmlns_xsi + "type").Value == "Grouping"
+										select e;
+	foreach(var ele in xeles_group)
+	{
+		List<string> list_target = new List<string>();
+		IEnumerable<XElement> xeles_target = from e in doc.Descendants(NP + "relationship")
+												where e.Attribute("source").Value == ele.Attribute("indentifier").Value
+												select e;
+		if (xeles_target!=null&&xeles_target.Count()!=0)
+		{
+			foreach(var eg in xeles_group)
+			{
+				list_target.Add(eg.Attribute("target").Value);
+			}
+		}
+		dict_group.Add(ele.Attribute("indentifier").Value,list_target);
+	}
+	
+	// Make the map of id - element
+	foreach(var ele in doc.Descendants(NP + "element"))
+    {
+		Element element = new Element();
+		element.Identifier_ = ele.Attribute("identifier").Value;
+		element.Name_ = (ele.Element(NP + "name") != null) ? ele.Element(NP + "name").Value : "";
+		element.Documentation_ = (ele.Element(NP + "documentation") != null) ? ele.Element(NP + "documentation").Value : "";	
+		element.Type_ = ele.Attribute(xmlns_xsi + "type").Value;	
+		dict_element.Add(element.Identifier_, element);
+    }
+	
+	// Make the multimap of compostion-relationship
+	IEnumerable<XElement> xeles_compostion = from e in doc.Descendants(NP + "relationship")
+											 where e.Attribute(xmlns_xsi + "type").Value == "Composition"
+											 select e;
+	foreach(var ele in xeles_compostion)
+    {
+		List<string> list_target;
+		if (mmap_compostion.TryGetValue(ele.Attribute("source").Value, out list_target))
+        {
+            list_target.Add(ele.Attribute("target").Value);
+        }
+        else
+        {
+            list_target = new List<string>();
+            list_target.Add(ele.Attribute("target").Value);
+            mmap_compostion[ele.Attribute("source").Value] = list_target;
+        }
+		//mmap_compostion.Add(ele.Attribute("source").Value,ele.Attribute("target").Value);
+    }
+
+	// Make the map of specialzation-relationship
+	IEnumerable<XElement> xeles_specialization = from e in doc.Descendants(NP + "relationship")
+												 where e.Attribute(xmlns_xsi + "type").Value == "Specialization"
+												 select e;
+	foreach(var ele in xeles_specialization)
+    {
+		string id_child = ele.Attribute("source").Value;
+		string id_parent = ele.Attribute("target").Value;
+		Element element_child = dict_element[id_child];
+		if (!dict_specialization.ContainsKey(id_child))
+			dict_specialization.Add(id_child,id_parent);
+		else 
+			errors.Add("Class "+element_child.Name_+" has more than one parent class, only the first was considered");
+    }
+
+	// Make the multimap of aggregation-relationship
+	IEnumerable<XElement> xeles_aggregation = from e in doc.Descendants(NP + "relationship")
+											  where e.Attribute(xmlns_xsi + "type").Value == "Aggregation"
+											  select e;
+	foreach(var ele in xeles_aggregation)
+    {
+		List<string> list_target;
+		if (mmap_aggregation.TryGetValue(ele.Attribute("source").Value, out list_target))
+        {
+            list_target.Add(ele.Attribute("target").Value);
+        }
+        else
+        {
+            list_target = new List<string>();
+            list_target.Add(ele.Attribute("target").Value);
+            mmap_aggregation[ele.Attribute("source").Value] = list_target;
+        }
+    }
+
+	// Make the multimap of association-relationship
+	IEnumerable<XElement> xeles_association = from e in doc.Descendants(NP + "relationship")
+											  where e.Attribute(xmlns_xsi + "type").Value == "Association"
+											  select e;
+	foreach(var ele in xeles_association)
+    {
+		List<string> list_target;
+		if (mmap_association.TryGetValue(ele.Attribute("source").Value, out list_target))
+        {
+            list_target.Add(ele.Attribute("target").Value);
+        }
+        else
+        {
+            list_target = new List<string>();
+            list_target.Add(ele.Attribute("target").Value);
+            mmap_association[ele.Attribute("source").Value] = list_target;
+        }
+    }
+
+	// Generate classes 
+	// Get all the Xelements 
+	IEnumerable<XElement> xelements = from e in doc.Descendants(NP + "element")
+									  where types.Contains(e.Attribute(xmlns_xsi + "type").Value) 
+									  select e;
+	foreach(var xele in xelements)
+	{
+		Element ele; 
+		string class_name;
+		if (groups==null||groups.Equals("")||isInSelectedGroups(xele.Attribute("identifier").Value,dict_group))
+		{
+			classes.Add(xele.Attribute("identifier").Value);
+			ele = dict_element[xele.Attribute("identifier").Value];
+			class_name = xele.Element(NP + "name").Value;
+#>
+	[ModelElement("<#= class_name #>","<#= StringHelper.DocumentationTraitement(ele.Documentation_) #>, ElementType = "<#= ele.Type_ #>Archimate")]
+	partial class <#= StringHelper.UpperString(class_name) #> {}
+<#
+		}
+	}
+
+	// Generate composition relationship.
+	foreach (var idSource in mmap_compostion.Keys)
+	{
+		Element elementSource = dict_element[idSource];
+		if(classes.Contains(elementSource.Identifier_))
+		{
+#>
+    partial class <#= StringHelper.UpperString(elementSource.Name_) #>
+    {
+<#
+		//list_class_created.Add(elementSource.Identifier_);
+		foreach (var idTarget in mmap_compostion[elementSource.Identifier_])
+		{
+			Element elementTarget = dict_element[idTarget];
+			if(classes.Contains(elementTarget.Identifier_))
+			{
+#>
+		List<<#= StringHelper.UpperString(elementTarget.Name_) #>> <#= StringHelper.LowerString(elementTarget.Name_) #>_ = 
+			new List<<#= StringHelper.UpperString(elementTarget.Name_) #>>();
+		public List<<#= StringHelper.UpperString(elementTarget.Name_) #>> <#= StringHelper.UpperString(elementTarget.Name_) #>_ { get => <#= StringHelper.LowerString(elementTarget.Name_) #>_; set => <#= StringHelper.LowerString(elementTarget.Name_) #>_ = value; }
+
+<#
+			}
+		}
+#>
+	}
+
+<#		
+	}
+}
+#>
+
+<#
+	// Generate specialization relationship.
+	foreach (var idChild in dict_specialization.Keys)
+	{
+		Element elementChild = dict_element[idChild];
+		Element elementParent = dict_element[dict_specialization[idChild]];
+		//if(elementChild.Type_.Equals("BusinessObject")&&elementParent.Type_.Equals("BusinessObject"))
+		//{
+		if(classes.Contains(elementChild.Identifier_)&&classes.Contains(elementParent.Identifier_))
+		{
+#>
+	partial class <#= StringHelper.UpperString(elementChild.Name_) #> : <#= StringHelper.UpperString(elementParent.Name_) #> {}
+<#
+		}
+	}
+#>
+
+<#
+	// Generate aggregation relationship.
+	foreach (var idSource in mmap_aggregation.Keys)
+	{
+		Element elementSource = dict_element[idSource];
+		if(classes.Contains(elementSource.Identifier_))
+		{
+#>
+    partial class <#= StringHelper.UpperString(elementSource.Name_) #>
+    {
+<#
+		//list_class_created.Add(elementSource.Identifier_);
+		foreach (var idTarget in mmap_aggregation[idSource])
+		{
+			Element elementTarget = dict_element[idTarget];
+			if(classes.Contains(elementTarget.Identifier_))
+			{
+#>
+		List<<#= StringHelper.UpperString(elementTarget.Name_) #>> <#= StringHelper.LowerString(elementTarget.Name_) #>_ ;
+		public List<<#= StringHelper.UpperString(elementTarget.Name_) #>> <#= StringHelper.UpperString(elementTarget.Name_) #>_ { get => <#= StringHelper.LowerString(elementTarget.Name_) #>_; set => <#= StringHelper.LowerString(elementTarget.Name_) #>_ = value; }
+
+<#
+			}
+		}
+#>
+	}
+<#		
+	}
+}
+#>
+
+<#
+	// Generate association relationship.
+	foreach (var idSource in mmap_association.Keys)
+	{
+		Element elementSource = dict_element[idSource];
+		if(types.Contains(elementSource.Type_))
+		{
+#>
+    partial class <#= StringHelper.UpperString(elementSource.Name_) #>
+    {
+<#
+		//list_class_created.Add(elementSource.Identifier_);
+		foreach (var idTarget in mmap_association[idSource])
+		{
+			Element elementTarget = dict_element[idTarget];
+			if(classes.Contains(elementSource.Identifier_))
+			{
+#>
+		<#= StringHelper.UpperString(elementTarget.Name_) #> <#= StringHelper.LowerString(elementTarget.Name_) #>_ ;
+		public <#= StringHelper.UpperString(elementTarget.Name_) #> <#= StringHelper.UpperString(elementTarget.Name_) #>_ { get => <#= StringHelper.LowerString(elementTarget.Name_) #>_; set => <#= StringHelper.LowerString(elementTarget.Name_) #>_ = value; }
+
+<#
+			}
+		}
+#>
+	}
+
+<#		
+	}
+}
+#>
+}
+
+<Log> 
+<#
+	if (errors.Count()>0)
+	{
+#>
+	<Errors>
+<#
+		foreach(string err in errors)
+		{
+#>
+		<Error> <#= err #> </Error>
+<#
+		}
+#>
+	</Errors>
+<#
+	}
+#>
+</Log>
+
+<#+
+	private bool isInSelectedGroups(string id, Dictionary<string, List<string>> dict_group)
+	{
+		foreach(var g in dict_group.Keys)
+		{
+			if(dict_group[g].Contains(id))
+				return true;
+		}
+		return false;
+	}
+#>
