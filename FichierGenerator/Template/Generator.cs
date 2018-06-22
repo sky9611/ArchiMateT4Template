@@ -34,10 +34,11 @@ namespace FichierGenerator.Template
             this.Write("\r\n");
             this.Write("\r\n");
             this.Write("\r\n");
-            this.Write("\r\nusing System.Collections.Generic;\r\n\r\nnamespace MyProject\r\n{\r\n");
+            this.Write("\r\n\r\n{\r\n");
             
-            #line 24 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 22 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 	
+	string class_namespace = "Maidis.VNext.";
 	// Open the prototype document.
 	XElement doc = XElement.Load(input_name);
 
@@ -45,10 +46,19 @@ namespace FichierGenerator.Template
 	XNamespace NP = doc.GetDefaultNamespace();
     XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
-	// Map group_name - list_id_elements
+	// Map idProperty - PropertyName
+	Dictionary<string, string> property_definition_map = new Dictionary<string, string>();
+
+	// Map group_id - list_id_elements
 	Dictionary<string, List<string>> dict_group = new Dictionary<string, List<string>>();
 
-	// Map view_name - list_id_elements
+	// Map group_id - namespace
+	Dictionary<string, string> dict_group_name = new Dictionary<string, string>();
+
+	// Map id_element - namespace
+	Dictionary<string, string> dict_namespace = new Dictionary<string, string>();
+
+	// Map view_id - list_id_elements
 	Dictionary<string, List<string>> dict_view = new Dictionary<string, List<string>>();
 	
 	// Map identifier - element
@@ -66,6 +76,9 @@ namespace FichierGenerator.Template
 	// MultiMap of association
 	Dictionary<string, List<string>> mmap_association = new Dictionary<string, List<string>>();
 
+	// MultiMap of access
+	Dictionary<string, List<string>> mmap_access = new Dictionary<string, List<string>>();
+
 	// List of errors
 	List<string> errors = new List<string>();
 
@@ -73,42 +86,58 @@ namespace FichierGenerator.Template
 	List<string> classes = new List<string>();
 	
 	// Make the map of groups
-	if (groups!=null&&!groups.Equals(""))
+	IEnumerable<XElement> xeles_group = from e in doc.Descendants(NP + "element")
+										where e.Attribute(xmlns_xsi + "type").Value == "Grouping"
+										select e;
+	foreach(var ele in xeles_group)
 	{
-		IEnumerable<XElement> xeles_group = from e in doc.Descendants(NP + "element")
-											where (e.Attribute(xmlns_xsi + "type").Value == "Grouping")&&(groups.Contains(e.Element(NP+"name").Value))
-											select e;
-		foreach(var ele in xeles_group)
+		dict_group_name.Add(ele.Attribute("identifier").Value,class_namespace + ele.Element(NP + "name").Value);
+		List<string> list_target = new List<string>();
+		IEnumerable<XElement> xeles_target = from e in doc.Descendants(NP + "relationship")
+												where e.Attribute("source").Value == ele.Attribute("identifier").Value && e.Attribute(xmlns_xsi + "type").Value == "Composition"
+												select e;
+		if (xeles_target!=null&&xeles_target.Count()!=0)
 		{
-			List<string> list_target = new List<string>();
-			IEnumerable<XElement> xeles_target = from e in doc.Descendants(NP + "relationship")
-												 where e.Attribute("source").Value == ele.Attribute("identifier").Value
-												 select e;
-			if (xeles_target!=null&&xeles_target.Count()!=0)
+			foreach(var eg in xeles_target)
 			{
-				foreach(var eg in xeles_target)
-				{
-					list_target.Add(eg.Attribute("target").Value);
-				}
-				dict_group.Add(ele.Attribute("identifier").Value,list_target);
+				list_target.Add(eg.Attribute("target").Value);
+				dict_namespace.Add(eg.Attribute("target").Value, class_namespace + ele.Element(NP + "name").Value);
 			}
-			
+			dict_group.Add(ele.Attribute("identifier").Value,list_target);
 		}
+
+		IEnumerable<XElement> xeles_access = from e in doc.Descendants(NP + "relationship")
+												where e.Attribute("source").Value == ele.Attribute("identifier").Value && e.Attribute(xmlns_xsi + "type").Value == "Access"
+												select e;
+		List<string> list_lib = new List<string>();
+		if (xeles_access!=null&&xeles_access.Count()!=0)
+		{
+			foreach(var eg in xeles_access)
+			{
+				list_lib.Add(eg.Attribute("target").Value);
+			}
+			mmap_access.Add(ele.Attribute("identifier").Value,list_lib);
+		}
+			
 	}
 
 	// Make the map of views
-	if (views!=null&&!views.Equals(""))
+	IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
+										select e;
+	foreach(var ele in xeles_view)
 	{
-		IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
-										   where views.Contains(e.Element(NP+"name").Value)
-										   select e;
-		foreach(var ele in xeles_view)
-		{
-			List<string> list_child = new List<string>();
-			findAllElement(xmlns_xsi, NP, doc, ele, ref list_child);
-			dict_view.Add(ele.Attribute("identifier").Value,list_child);
-		}
+		List<string> list_child = new List<string>();
+		findAllElement(xmlns_xsi, NP, doc, ele, ref list_child);
+		dict_view.Add(ele.Attribute("identifier").Value,list_child);
 	}
+
+	// Make the map of property definition
+	IEnumerable<XElement> prop_defs = from element in doc.Descendants(NP + "propertyDefinition")
+                                                  select element;
+    foreach (XElement ele in prop_defs)
+    {
+        property_definition_map.Add(ele.Attribute("identifier").Value, (ele.Element(NP + "name").Value != null) ? ele.Element(NP + "name").Value.Replace("att_","") : "");
+    }
 
 	// Make the map of id - element
 	foreach(var ele in doc.Descendants(NP + "element"))
@@ -118,6 +147,13 @@ namespace FichierGenerator.Template
 		element.Name_ = (ele.Element(NP + "name") != null) ? ele.Element(NP + "name").Value : "";
 		element.Documentation_ = (ele.Element(NP + "documentation") != null) ? ele.Element(NP + "documentation").Value : "";	
 		element.Type_ = ele.Attribute(xmlns_xsi + "type").Value;	
+		Dictionary<string, string> properties = new Dictionary<string, string>();
+		if(ele.Descendants(NP + "properties") != null)
+			foreach(var i in ele.Descendants(NP + "property"))
+				properties.Add(property_definition_map[i.Attribute("propertyDefinitionRef").Value],i.Element(NP + "value").Value);
+		element.Properties_ = properties;
+		if(properties.Keys.Contains("Implementation"))
+			element.Class_name_ = properties["Implementation"];
 		dict_element.Add(element.Identifier_, element);
     }
 	
@@ -194,56 +230,137 @@ namespace FichierGenerator.Template
         }
     }
 
-	// Generate classes 
-	// Get all the Xelements 
-	IEnumerable<XElement> xelements = from e in doc.Descendants(NP + "element")
-									  where types.Contains(e.Attribute(xmlns_xsi + "type").Value) 
-									  select e;
-	foreach(var xele in xelements)
+            
+            #line default
+            #line hidden
+            this.Write("\r\nusing System.Collections.Generic;\r\n\r\n");
+            
+            #line 218 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+
+	// Generate used namespaces
+	foreach(var id_group in mmap_access.Keys)
 	{
-		Element ele; 
-		string class_name;
-		if ((groups==null||groups.Equals("")||isInSelectedGroups(xele.Attribute("identifier").Value,dict_group))&&(views==null||views.Equals("")||isInSelectedViews(xele.Attribute("identifier").Value,dict_view)))
+		foreach(var id in mmap_access[id_group])
 		{
-			classes.Add(xele.Attribute("identifier").Value);
-			ele = dict_element[xele.Attribute("identifier").Value];
-			class_name = xele.Element(NP + "name").Value;
+
+            
+            #line default
+            #line hidden
+            this.Write("using ");
+            
+            #line 225 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id]));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 226 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+
+		}
+	}
+
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 231 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+
+	// Generate classes from group
+	// Get all the Xelements 
+	//IEnumerable<XElement> xelements = from e in doc.Descendants(NP + "element")
+	//								  where types.Contains(e.Attribute(xmlns_xsi + "type").Value) 
+	//								  select e;
+	foreach(var id_group in dict_group.Keys)
+	{
+		List<string> list_idElement = dict_group[id_group];
+
+            
+            #line default
+            #line hidden
+            this.Write("namespace ");
+            
+            #line 241 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id_group]));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n{\r\n");
+            
+            #line 243 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+
+		foreach(var id_element in list_idElement)
+		{
+			Element ele; 
+			string class_name;
+			if (((groups==null||groups.Length==0)&&(views==null||views.Length==0))||isInSelectedGroups(id_element,dict_group)||isInSelectedViews(id_element,dict_view))
+			{
+				classes.Add(id_element);
+				ele = dict_element[id_element];
+				class_name = ele.Class_name_;
 
             
             #line default
             #line hidden
             this.Write("\t[ModelElement(\"");
             
-            #line 196 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 254 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(class_name));
             
             #line default
             #line hidden
             this.Write("\",\"");
             
-            #line 196 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 254 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.DocumentationTraitement(ele.Documentation_)));
             
             #line default
             #line hidden
             this.Write(", ElementType = \"");
             
-            #line 196 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 254 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate\")]\r\n\tpartial class ");
             
-            #line 197 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 255 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(class_name)));
             
             #line default
             #line hidden
-            this.Write(" {}\r\n");
+            this.Write(" \r\n\t{\r\n");
             
-            #line 198 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 257 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+	
+				foreach(var p in ele.Properties_.Keys)
+				{
 
+            
+            #line default
+            #line hidden
+            this.Write("\t\r\n\t\t");
+            
+            #line 261 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 261 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(p));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n\t}\r\n");
+            
+            #line 263 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+
+				}
+			}
 		}
 	}
 
@@ -252,9 +369,9 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\t// Composition relationship\r\n\r\n");
+            this.Write("}\r\n\t// Composition relationship\r\n\r\n");
             
-            #line 206 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 274 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	foreach (var idSource in mmap_compostion.Keys)
 	{
@@ -267,14 +384,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("    partial class ");
             
-            #line 213 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementSource.Name_)));
+            #line 281 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementSource.Class_name_)));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n");
             
-            #line 215 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 283 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		//list_class_created.Add(elementSource.Identifier_);
 		foreach (var idTarget in mmap_compostion[elementSource.Identifier_])
@@ -288,56 +405,56 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\tList<");
             
-            #line 223 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 291 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("> ");
             
-            #line 223 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 291 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ = \r\n\t\t\tnew List<");
             
-            #line 224 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 292 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write(">();\r\n\t\tpublic List<");
             
-            #line 225 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 293 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("> ");
             
-            #line 225 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 293 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ { get => ");
             
-            #line 225 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 293 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_; set => ");
             
-            #line 225 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 293 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ = value; }\r\n\r\n");
             
-            #line 227 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 295 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 			}
 		}
@@ -347,7 +464,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t}\r\n\r\n");
             
-            #line 233 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 301 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 		
 	}
 }
@@ -357,7 +474,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\r\n");
             
-            #line 238 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 306 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	// Generate specialization relationship.
 
@@ -366,7 +483,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t// Specialization relationship\r\n\r\n");
             
-            #line 243 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 311 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	foreach (var idChild in dict_specialization.Keys)
 	{
@@ -382,21 +499,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\tpartial class ");
             
-            #line 253 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementChild.Name_)));
+            #line 321 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementChild.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" : ");
             
-            #line 253 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementParent.Name_)));
+            #line 321 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementParent.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" {}\r\n");
             
-            #line 254 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 322 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		}
 	}
@@ -406,7 +523,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\r\n");
             
-            #line 259 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 327 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	// Generate aggregation relationship.
 
@@ -415,7 +532,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t// Aggregation relationship\r\n\r\n");
             
-            #line 264 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 332 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	foreach (var idSource in mmap_aggregation.Keys)
 	{
@@ -428,14 +545,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("    partial class ");
             
-            #line 271 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementSource.Name_)));
+            #line 339 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementSource.Class_name_)));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n");
             
-            #line 273 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 341 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		//list_class_created.Add(elementSource.Identifier_);
 		foreach (var idTarget in mmap_aggregation[idSource])
@@ -449,49 +566,49 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\tList<");
             
-            #line 281 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 349 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("> ");
             
-            #line 281 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 349 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n\t\tpublic List<");
             
-            #line 282 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 350 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("> ");
             
-            #line 282 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 350 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ { get => ");
             
-            #line 282 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 350 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_; set => ");
             
-            #line 282 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 350 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ = value; }\r\n\r\n");
             
-            #line 284 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 352 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 			}
 		}
@@ -501,7 +618,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t}\r\n");
             
-            #line 289 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 357 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 		
 	}
 }
@@ -511,7 +628,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\r\n");
             
-            #line 294 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 362 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	// Generate association relationship.
 
@@ -520,7 +637,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t// Association relationship\r\n\r\n");
             
-            #line 299 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 367 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	foreach (var idSource in mmap_association.Keys)
 	{
@@ -533,14 +650,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("    partial class ");
             
-            #line 306 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementSource.Name_)));
+            #line 374 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementSource.Class_name_)));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n");
             
-            #line 308 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 376 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		//list_class_created.Add(elementSource.Identifier_);
 		foreach (var idTarget in mmap_association[idSource])
@@ -554,49 +671,49 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t");
             
-            #line 316 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 384 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 316 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 384 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n\t\tpublic ");
             
-            #line 317 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 385 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 317 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Name_)));
+            #line 385 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ { get => ");
             
-            #line 317 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 385 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_; set => ");
             
-            #line 317 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Name_)));
+            #line 385 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.LowerString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("_ = value; }\r\n\r\n");
             
-            #line 319 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 387 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 			}
 		}
@@ -606,7 +723,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t}\r\n\r\n");
             
-            #line 325 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 393 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 		
 	}
 }
@@ -616,7 +733,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("}\r\n\r\n<Log> \r\n");
             
-            #line 332 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 400 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	if (errors.Count()>0)
 	{
@@ -626,7 +743,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t<Errors>\r\n");
             
-            #line 337 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 405 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		foreach(string err in errors)
 		{
@@ -636,14 +753,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t<Error> ");
             
-            #line 341 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 409 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(err));
             
             #line default
             #line hidden
             this.Write(" </Error>\r\n");
             
-            #line 342 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 410 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		}
 
@@ -652,7 +769,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t</Errors>\r\n");
             
-            #line 346 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 414 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	}
 
@@ -678,7 +795,7 @@ namespace FichierGenerator.Template
             }
         }
         
-        #line 351 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+        #line 419 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	private bool isInSelectedGroups(string id, Dictionary<string, List<string>> dict_group)
 	{
@@ -713,7 +830,7 @@ namespace FichierGenerator.Template
 			else if(n.Attribute(xmlns_xsi + "type").Value=="Label" && n.Element(NP + "viewRef")!=null)
 			{
 				XElement container = root.Descendants(NP + "view").FirstOrDefault(el => el.Attribute("identifier").Value == n.Element(NP + "viewRef").Attribute("ref").Value);
-				findAllElement(xmlns_xsi, NP, root, n, ref list);
+				findAllElement(xmlns_xsi, NP, root, container, ref list);
 			}
 			else if(n.Attribute(xmlns_xsi + "type").Value=="Container")
 			{
@@ -734,21 +851,24 @@ namespace FichierGenerator.Template
 		public string Type_ { get; set; }
 		public string Name_ { get; set; }
 		public string Documentation_ { get; set; }
-		public List<Property> Properties_ { get; set; }
+		public Dictionary<string, string> Properties_ { get; set; }
+		public string Class_name_ { get; set; }
 
 		public Element()
 		{
 		}
 
-		public Element(string identifier_, string type_, string name_, string documentation_="", List<Property> properties_=null)
+		public Element(string identifier_, string type_, string name_, string documentation_="", Dictionary<string, string> properties_=null)
 		{
 			this.Identifier_ = identifier_;
 			this.Type_ = type_;
 			this.Name_ = name_;
+			this.Class_name_ = name_;
 			this.Documentation_ = documentation_;
-			this.Properties_ = (properties_==null)? new List<Property>() : properties_;
+			this.Properties_ = (properties_==null)? new Dictionary<string, string>() : properties_;
 		}
-
+		
+		/*
 		public override string ToString()
 		{
 			string s;
@@ -766,6 +886,7 @@ namespace FichierGenerator.Template
 			}
 			return s;
 		}
+		*/
 	}
 
 	public struct Property

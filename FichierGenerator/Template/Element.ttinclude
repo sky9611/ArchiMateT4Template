@@ -11,21 +11,24 @@
 		public string Type_ { get; set; }
 		public string Name_ { get; set; }
 		public string Documentation_ { get; set; }
-		public List<Property> Properties_ { get; set; }
+		public Dictionary<string, string> Properties_ { get; set; }
+		public string Class_name_ { get; set; }
 
 		public Element()
 		{
 		}
 
-		public Element(string identifier_, string type_, string name_, string documentation_="", List<Property> properties_=null)
+		public Element(string identifier_, string type_, string name_, string documentation_="", Dictionary<string, string> properties_=null)
 		{
 			this.Identifier_ = identifier_;
 			this.Type_ = type_;
 			this.Name_ = name_;
+			this.Class_name_ = name_;
 			this.Documentation_ = documentation_;
-			this.Properties_ = (properties_==null)? new List<Property>() : properties_;
+			this.Properties_ = (properties_==null)? new Dictionary<string, string>() : properties_;
 		}
-
+		
+		/*
 		public override string ToString()
 		{
 			string s;
@@ -43,6 +46,7 @@
 			}
 			return s;
 		}
+		*/
 	}
 
 	public struct Property

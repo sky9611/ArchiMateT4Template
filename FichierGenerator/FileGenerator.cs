@@ -20,27 +20,27 @@ namespace FichierGenerator
         }
 
         public static readonly string[] all_types = {
-            "BusinessActor",
-            "BusinessCollaboration",
-            "BusinessComponent",
-            "BusinessEvent",
-            "BusinessFunction",
+            //"BusinessActor",
+            //"BusinessCollaboration",
+            //"BusinessComponent",
+            //"BusinessEvent",
+            //"BusinessFunction",
             "BusinessProcess",
-            "BusinessRole",
-            "BusinessService",
+            //"BusinessRole",
+            //"BusinessService",
             "BusinessObject",
-            "BusinessInteraction",
-            "BusinessInterface",
-            "TechnologyCollaboration",
-            "TechnologyFunction",
-            "TechnologyInteraction",
-            "TechnologyInterface",
-            "TechnologyService",
-            "ApplicationInterface",
-            "ApplicationService",
-            "ApplicationFunction",
-            "ApplicationComponent",
-            "ApplicationEvent",
+            //"BusinessInteraction",
+            //"BusinessInterface",
+            //"TechnologyCollaboration",
+            //"TechnologyFunction",
+            //"TechnologyInteraction",
+            //"TechnologyInterface",
+            //"TechnologyService",
+            //"ApplicationInterface",
+            //"ApplicationService",
+            //"ApplicationFunction",
+            //"ApplicationComponent",
+            //"ApplicationEvent",
             "ApplicationProcess"};
 
         public string File_path { get => file_path; set => file_path = value; }
@@ -52,14 +52,14 @@ namespace FichierGenerator
         /// <param name="types"> The selected types </param>
         /// <param name="groups"> The selected groups </param>
         /// <param name="views"> The selected views </param>
-        public void Generate(string output_name, string[] types = null, string[] groups = null, string[] views = null)
+        public void Generate(string output_name, string[] types, string[] groups, string[] views)
         {
             var generator = new Generator();
             generator.Session = new Microsoft.VisualStudio.TextTemplating.TextTemplatingSession();
             generator.Session["input_name"] = file_path;
-            generator.Session["groups"] = groups;
-            generator.Session["views"] = views;
-            if (types==null)
+            generator.Session["groups"] = (groups != null) && (groups.Length > 0) ? groups : null;
+            generator.Session["views"] = (views != null) && (views.Length > 0) ? views : null;
+            if (types==null||types.Length==0)
                 generator.Session["types"] = all_types;
             else
                 generator.Session["types"] = types;
@@ -106,12 +106,18 @@ namespace FichierGenerator
             return list_view.ToArray();
         }
 
-        //static void Main(string[] args)
-        //{
-        //    string[] types = { "BusinessObject" };
-        //    string[] groups = { "Web" };
-        //    string[] views = { "Digramme d'entit¨¦s ADF.NET" };
-        //    Generate("D:\\documents\\INSA\\maidis\\vs\\Projet\\FichierGenerator\\FichierGenerator\\PLATEFORME_VNEXT.xml", "BusinessObjectenerated.cs",null, null, views);
-        //}
+        static void Main(string[] args)
+        {
+            FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vs\\Projet\\FichierGenerator\\FichierGenerator\\PLATEFORME_VNEXT.xml");
+            
+            List<string> list = new List<string>();
+            //string[] types = { "BusinessObject" };
+            string[] types = list.ToArray();
+            //string[] groups = { "Web" };
+            string[] groups = list.ToArray();
+            string[] views = { "Digramme d'entit¨¦s ADF.NET" };
+            //string[] views = list.ToArray();
+            fileGenerator.Generate("BusinessObjectenerated.cs", types, groups, views);
+        }
     }
 }

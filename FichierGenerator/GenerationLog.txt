@@ -1,0 +1,23 @@
+<Log> 
+	<Errors>
+		<Error> Class Exécuter du code via Corba has more than one parent class, only the first was considered </Error>
+		<Error> Class Sécurité des données (vie privée) has more than one parent class, only the first was considered </Error>
+		<Error> Class Tool externe métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Application métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Composant client métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Exception métier has more than one parent class, only the first was considered </Error>
+		<Error> Class ADO métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Service CRUD métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Entité métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Service métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Vue métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Workflow métier has more than one parent class, only the first was considered </Error>
+		<Error> Class Règle métier has more than one parent class, only the first was considered </Error>
+		<Error> Class CViewExample has more than one parent class, only the first was considered </Error>
+		<Error> Class CADOResourceIOS has more than one parent class, only the first was considered </Error>
+		<Error> Class CADOResourceLinux has more than one parent class, only the first was considered </Error>
+		<Error> Class CADOResourceLinux has more than one parent class, only the first was considered </Error>
+		<Error> Class CADOResourceWindows has more than one parent class, only the first was considered </Error>
+	</Errors>
+</Log>
+
