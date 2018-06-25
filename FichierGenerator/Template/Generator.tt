@@ -347,9 +347,12 @@ namespace <#= dict_group_name[id_group] #>
 
 				foreach(var p in ele.Properties_.Keys)
 				{
+					if (p!="Implementation")
+					{
 #>	
 		<#= ele.Properties_[p] #> <#= p #>;
 <#
+					}
 				}
 
 				// Generate composition relationship.
