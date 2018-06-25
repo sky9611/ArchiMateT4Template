@@ -25,10 +25,12 @@ namespace FichierGenerator
             //"BusinessComponent",
             //"BusinessEvent",
             //"BusinessFunction",
-            "BusinessProcess",
             //"BusinessRole",
             //"BusinessService",
             "BusinessObject",
+            "Contract",
+            "Representation",
+            "DataObject",
             //"BusinessInteraction",
             //"BusinessInterface",
             //"TechnologyCollaboration",
@@ -37,10 +39,10 @@ namespace FichierGenerator
             //"TechnologyInterface",
             //"TechnologyService",
             //"ApplicationInterface",
-            //"ApplicationService",
+            "ApplicationService",
             //"ApplicationFunction",
-            //"ApplicationComponent",
-            //"ApplicationEvent",
+            "ApplicationComponent",
+            "ApplicationEvent",
             "ApplicationProcess"};
 
         public string File_path { get => file_path; set => file_path = value; }

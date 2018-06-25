@@ -70,6 +70,11 @@
       <LastGenOutput>Element1.txt</LastGenOutput>
     </None>
     <Content Include="PLATEFORME_VNEXT.xml" />
+    <Content Include="Template\Element1.txt">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Element.ttinclude</DependentUpon>
+    </Content>
     <Content Include="Template\Generator.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>Generator.cs</LastGenOutput>
