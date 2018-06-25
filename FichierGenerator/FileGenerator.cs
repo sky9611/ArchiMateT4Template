@@ -110,16 +110,16 @@ namespace FichierGenerator
 
         static void Main(string[] args)
         {
-            FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vs\\Projet\\FichierGenerator\\FichierGenerator\\PLATEFORME_VNEXT.xml");
+            FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vnext\\modele_vnext\\MODELE_VNEXT.xml");
             
             List<string> list = new List<string>();
             //string[] types = { "BusinessObject" };
             string[] types = list.ToArray();
             //string[] groups = { "Web" };
             string[] groups = list.ToArray();
-            string[] views = { "Digramme d'entit¨¦s ADF.NET" };
+            string[] views = { "g¨¦n¨¦ration couches client" };
             //string[] views = list.ToArray();
-            fileGenerator.Generate("BusinessObjectenerated.cs", types, groups, views);
+            fileGenerator.Generate("generated.cs", types, groups, views);
         }
     }
 }
