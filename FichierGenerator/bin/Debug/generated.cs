@@ -5,9 +5,9 @@
 
 using System.Collections.Generic;
 
-using Maidis.VNext.Consultation
-using Maidis.VNext.Personne
-using Maidis.VNext.Examen
+using Maidis.VNext.Consultation;
+using Maidis.VNext.Personne;
+using Maidis.VNext.Examen;
 
 namespace Maidis.VNext.Patient
 {
@@ -51,8 +51,8 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
-	[ModelElement("EPatient","informations d'identification du patient et de ses caractéristiques, ElementType = "BusinessObjectArchimate")]
-	partial class EPatient : EPersonne
+	[ModelElement("EPatient","informations d'identification du patient et de ses caractéristiques", ElementType = "BusinessObjectArchimate")]
+	partial class EPatient : EPersonne,IBusinessObject
 	{
 	
 		Alphabétique Nom;
@@ -62,69 +62,81 @@ namespace Maidis.VNext.Patient
 		Date DateNaissance;
 		List<EConsultation> eConsultation_ = 
 			new List<EConsultation>();
-		List<EContact> eContact_ ;
+		List<EContact> contacts_ ;
 	}
-	[ModelElement("EContact","contact du patient, ElementType = "BusinessObjectArchimate")]
-	partial class EContact : EPersonne
-	{
-	}
-	[ModelElement("ServiceGestionPatient","opération CRUD sur patient et associé, ElementType = "ApplicationServiceArchimate")]
-	partial class ServiceGestionPatient 
-	{
-	}
-	[ModelElement("StartToolEvent("Accueil patient")",", ElementType = "ApplicationEventArchimate")]
-	partial class StartToolEventAccueil_patient 
-	{
-	}
-	[ModelElement("ViewPatient",", ElementType = "RepresentationArchimate")]
-	partial class ViewPatient 
-	{
-		EPatient ePatient_ ;
 
-		Button button_ ;
-
-	}
-	[ModelElement("UseCaseAccueilPatient","pilotage des vues et services pour l'accueil d'un patient, ElementType = "ApplicationProcessArchimate")]
-	partial class UseCaseAccueilPatient 
+	[ModelElement("EContact","contact du patient", ElementType = "BusinessObjectArchimate")]
+	partial class EContact : EPersonne,IBusinessObject
 	{
-		List<Traitement_scénario_accueil_patient> traitement_scénario_accueil_patient_ = 
-			new List<Traitement_scénario_accueil_patient>();
-		IGererAccueilPatient iGererAccueilPatient_ ;
+	}
 
-		DemandeRecherchePatient demandeRecherchePatient_ ;
+	[ModelElement("ServiceGestionPatient","opération CRUD sur patient et associé", ElementType = "ApplicationServiceArchimate")]
+	partial class ServiceGestionPatient : UseCaseWorkflow
+	{
+	}
+
+	[ModelElement("StartToolEvent("Accueil patient")","", ElementType = "ApplicationEventArchimate")]
+	partial class StartToolEventAccueil_patient : EventArgs
+	{
+	}
+
+	[ModelElement("ViewPatient","", ElementType = "RepresentationArchimate")]
+	partial class ViewPatient : ViewPatient,IView
+	{
+		EPatient enCours_ ;
 
 	}
-	[ModelElement("PAPatient",", ElementType = "DataObjectArchimate")]
-	partial class PAPatient 
+
+	[ModelElement("UseCaseAccueilPatient","pilotage des vues et services pour l'accueil d'un patient", ElementType = "ApplicationProcessArchimate")]
+	partial class UseCaseAccueilPatient : IVisualiserPatient,IGererAccueilPatient,DemandeRecherchePatient,UseCaseWorkflow
+	{
+		EPatient patientEnCours_ ;
+
+		ViewPatient vuePatient_ ;
+
+	}
+
+	[ModelElement("PAPatient","", ElementType = "DataObjectArchimate")]
+	partial class PAPatient : DAO
 	{
 		EPatient ePatient_ ;
 
 		EPersonne ePersonne_ ;
 
 	}
+
 }
+
 namespace Maidis.VNext.Consultation
 {
-	[ModelElement("UseCaseConsultation","pilotage des vues et services pour la gestion d'une consultation, ElementType = "ApplicationProcessArchimate")]
-	partial class UseCaseConsultation 
+	[ModelElement("UseCaseConsultation","pilotage des vues et services pour la gestion d'une consultation", ElementType = "ApplicationProcessArchimate")]
+	partial class UseCaseConsultation : UseCaseWorkflow
+	{
+		Vue_consultation vue_consultation_ ;
+
+	}
+
+	[ModelElement("EConsultation","", ElementType = "BusinessObjectArchimate")]
+	partial class EConsultation : IBusinessObject
 	{
 	}
-	[ModelElement("EConsultation",", ElementType = "BusinessObjectArchimate")]
-	partial class EConsultation 
-	{
-	}
-	[ModelElement("Vue consultation",", ElementType = "RepresentationArchimate")]
-	partial class Vue_consultation 
+
+	[ModelElement("Vue consultation","", ElementType = "RepresentationArchimate")]
+	partial class Vue_consultation : Action Consultation,IView
 	{
 		EConsultation eConsultation_ ;
 
 	}
+
 }
+
 namespace Maidis.VNext.Personne
 {
-	[ModelElement("EPersonne",", ElementType = "BusinessObjectArchimate")]
-	partial class EPersonne 
+	[ModelElement("EPersonne","", ElementType = "BusinessObjectArchimate")]
+	partial class EPersonne : IBusinessObject
 	{
 	}
+
 }
+
 
