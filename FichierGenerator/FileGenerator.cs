@@ -117,7 +117,7 @@ namespace FichierGenerator
             string[] types = list.ToArray();
             //string[] groups = { "Web" };
             string[] groups = list.ToArray();
-            string[] views = { "g¨¦n¨¦ration couches client" };
+            string[] views = { "g¨¦n¨¦ration m¨¦tier structure" };
             //string[] views = list.ToArray();
             fileGenerator.Generate("generated.cs", types, groups, views);
         }
