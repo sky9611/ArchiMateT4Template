@@ -15,6 +15,8 @@ namespace Maidis.VNext.Personne
 	[ModelElement("EPersonne","", ElementType = "BusinessObjectArchimate")]
 	partial class EPersonne : IBusinessObject
 	{
+		PAPatient pAPatient_ ;
+
 	}
 
 }
@@ -74,6 +76,10 @@ namespace Maidis.VNext.Patient
 		List<EConsultation> eConsultation_ = 
 			new List<EConsultation>();
 		List<EContact> contacts_ ;
+		ViewPatient viewPatient_ ;
+
+		PAPatient pAPatient_ ;
+
 	}
 
 
@@ -100,7 +106,7 @@ namespace Maidis.VNext.Patient
 
 
 	[ModelElement("ViewPatient","", ElementType = "RepresentationArchimate")]
-	partial class ViewPatient : ViewPatient, IView
+	partial class ViewPatient : Button, IViewPatient
 	{
 		IUseCaseAccueilPatient workflowPatient;
 		public	ViewPatient(IWorkflow caller)
@@ -108,6 +114,9 @@ namespace Maidis.VNext.Patient
 			workflowPatient = caller as UseCaseAccueilPatient;
 		}
 		EPatient enCours_ ;
+
+		[reference("Action Création")]
+		Button btnCreerPatient_ ;
 
 	}
 
@@ -119,6 +128,12 @@ namespace Maidis.VNext.Patient
 	[ModelElement("UseCaseAccueilPatient","pilotage des vues et services pour l'accueil d'un patient", ElementType = "ApplicationProcessArchimate")]
 	partial class UseCaseAccueilPatient : IVisualiserPatient, IGererAccueilPatient, DemandeRecherchePatient, UseCaseWorkflow
 	{
+		IVisualiserPatient iVisualiserPatient_ ;
+
+		IGererAccueilPatient iGererAccueilPatient_ ;
+
+		DemandeRecherchePatient demandeRecherchePatient_ ;
+
 		EPatient patientEnCours_ ;
 
 		IViewPatient vuePatient_ ;
@@ -155,6 +170,8 @@ namespace Maidis.VNext.Consultation
 	[ModelElement("EConsultation","", ElementType = "BusinessObjectArchimate")]
 	partial class EConsultation : IBusinessObject
 	{
+		Vue_consultation vue_consultation_ ;
+
 	}
 
 	public interface IVue_consultation
@@ -163,7 +180,7 @@ namespace Maidis.VNext.Consultation
 
 
 	[ModelElement("Vue consultation","", ElementType = "RepresentationArchimate")]
-	partial class Vue_consultation : Action_Consultation, IView
+	partial class Vue_consultation : Action_Consultation, IVue_consultation
 	{
 		IUseCaseConsultation useCaseConsultation;
 		public	Vue_consultation(IWorkflow caller)

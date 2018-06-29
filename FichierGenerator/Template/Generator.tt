@@ -35,6 +35,9 @@
 	XNamespace NP = doc.GetDefaultNamespace();
     XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
+	// Map id_element - all elements related
+	Dictionary<string, List<string>> dict_related_element = new Dictionary<string, List<string>>();
+
 	// list of group
 	List<string> list_group = new List<string>();
 
@@ -178,8 +181,6 @@
 			dict.Add("interface",list_interface);
 			dict_group.Add(ele.Attribute("identifier").Value, dict);
 		}
-
-
 	}	
 
 	// Make the list of related group and elements
@@ -202,6 +203,46 @@
 		list_element.AddRange(dict_group[g]["interface"]);
 	}
 	list_element = list_element.Distinct().ToList();
+
+	// Make the map of relationship
+	foreach(var ele in list_element)
+	{
+		IEnumerable<XElement> xeles_related = from e in doc.Descendants(NP + "relationship")
+											  where e.Attribute("source").Value.Equals(ele) ||
+												    e.Attribute("target").Value.Equals(ele)
+											  select e;
+		foreach(var i in xeles_related)
+		{
+			if (i.Attribute("source").Value.Equals(ele))
+			{
+				List<string> list;
+				if (dict_related_element.TryGetValue(ele, out list))
+				{
+					list.Add(i.Attribute("target").Value);
+				}
+				else
+				{
+					list = new List<string>();
+					list.Add(i.Attribute("target").Value);
+					dict_related_element[ele] = list;
+				}
+			}
+			else
+			{
+				List<string> list;
+				if (dict_related_element.TryGetValue(ele, out list))
+				{
+					list.Add(i.Attribute("source").Value);
+				}
+				else
+				{
+					list = new List<string>();
+					list.Add(i.Attribute("source").Value);
+					dict_related_element[ele] = list;
+				}
+			}
+		}
+	}
 
 	// Make the mmap of group access
 
@@ -323,7 +364,7 @@
 			{
 				if (!mmap_specialization.ContainsKey(id_source))
 				{
-					list_parent.Add(id_source);
+					list_parent.Add(id_target);
 					mmap_specialization.Add(id_source,list_parent);
 				}
 				else 
@@ -334,12 +375,12 @@
 		}
     }
 
-	foreach(var id in dict_element.Keys)
+	foreach(var id in list_element)
 	{
 		switch(dict_element[id].Type_)
 		{
 			case "BusinessObject": addImplementation(ref mmap_specialization, id, "IBusinessObject");break;
-			case "Representation": addImplementation(ref mmap_specialization, id, "IView");break;
+			case "Representation": addImplementation(ref mmap_specialization, id, "I"+StringHelper.UpperString(dict_element[id].Class_name_));break;
 			case "Contract": addImplementation(ref mmap_specialization, id, "CContract");break;
 			case "ApplicationEvent": addImplementation(ref mmap_specialization, id, "EventArgs");break;
 			case "ApplicationComponent": addImplementation(ref mmap_specialization, id, "Component");break;
@@ -376,6 +417,7 @@
 	foreach(var ele in xeles_association)
     {
 		List<string> list_target;
+		List<string> list_target2;
 		if (mmap_association.TryGetValue(ele.Attribute("source").Value, out list_target))
         {
             list_target.Add(ele.Attribute("target").Value);
@@ -385,6 +427,16 @@
             list_target = new List<string>();
             list_target.Add(ele.Attribute("target").Value);
             mmap_association[ele.Attribute("source").Value] = list_target;
+        }
+		if (mmap_association.TryGetValue(ele.Attribute("target").Value, out list_target))
+        {
+            list_target.Add(ele.Attribute("source").Value);
+        }
+        else
+        {
+            list_target2 = new List<string>();
+            list_target2.Add(ele.Attribute("source").Value);
+            mmap_association[ele.Attribute("target").Value] = list_target2;
         }
     }
 #>
@@ -581,12 +633,24 @@ namespace <#= dict_group_name[id_group] #>
 						foreach (var idTarget in mmap_association[id_element])
 						{
 							Element elementTarget = dict_element[idTarget];
-							if (class_types.Contains(elementTarget.Type_))
+							if (class_types.Contains(elementTarget.Type_)||elementTarget.Type_.Contains("Interface"))
 							{
 								if (((groups==null||groups.Length==0)&&(views==null||views.Length==0))||isInSelectedGroups(idTarget,dict_group)||isInSelectedViews(idTarget,dict_view))
 								{
 									Tuple<string, string> tuple =  new Tuple<string, string>(id_element,idTarget);
 									string var_name = dict_relationship.ContainsKey(tuple) ? StringHelper.LowerString(dict_relationship[tuple]) : StringHelper.LowerString(elementTarget.Class_name_);
+									if(elementTarget.Type_.Equals("ApplicationInterface"))
+									{
+										foreach(var j in dict_related_element[idTarget])
+										{
+											if (dict_element[j].Type_.Equals("BusinessInterface")) 
+											{
+#>
+		[reference("<#= dict_element[j].Name_#>")]
+<#	
+											}
+										}
+									}
 #>
 		<#= StringHelper.UpperString(elementTarget.Class_name_) #> <#= var_name #>_ ;
 
