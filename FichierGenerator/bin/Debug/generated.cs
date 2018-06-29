@@ -5,98 +5,175 @@
 
 using System.Collections.Generic;
 
-using Maidis.VNext.Domaine_métier;
+using Maidis.VNext.Consultation;
+using Maidis.VNext.Personne;
+using Maidis.VNext.Examen;
 
-namespace Maidis.VNext.Domaine_métier
+namespace Maidis.VNext.Personne
 {
-	[ModelElement("Composant applicatif","Une partie modulaire, déployable, et remplaçable d'un système logiciel qui encapsule son comportement et ses données et expose ceux-ci à travers un ensemble d'interfaces exemple: couche présentation tool consultation", ElementType = "ApplicationComponentArchimate")]
-	partial class Composant_applicatif : Component
-	{
-		Objet_données objet_données_ ;
 
+	[ModelElement("EPersonne","", ElementType = "BusinessObjectArchimate")]
+	partial class EPersonne : IBusinessObject
+	{
 	}
 
 }
 
-namespace Maidis.VNext.Traitements_métier
+namespace Maidis.VNext.Patient
 {
-}
+	public interface MenuDossierPatientID 
+	{
+	}
 
-namespace Maidis.VNext.Structuration_métier
-{
-	[ModelElement("NomClasseMetier","Un élément passif d'information qui est pertinent d'un point de vue métier exemple: patient le nom et le type des attributs sont définis dans les propriétés de l'entité métier sous la forme \"att_\" plus le nom de l'attribut et le type pour valeur", ElementType = "BusinessObjectArchimate")]
-	partial class NomClasseMetier : NomClasseMetier, IBusinessObject
+	public interface DemandeRecherchePatient 
+	{
+	}
+
+	public interface ISaisirNouveauPatient : IGererAccueilPatient
+	{
+	}
+
+	public interface IVisualiserPatient : IGererAccueilPatient
+	{
+	}
+
+	public interface ListerPatients 
+	{
+	}
+
+	public interface RechercherPatients 
+	{
+	}
+
+	public interface IGererAccueilPatient 
+	{
+	}
+
+	public interface Button 
+	{
+	}
+
+	public interface DemandeCreerPatient 
+	{
+	}
+
+	public interface Action_Création 
+	{
+	}
+
+
+	[ModelElement("EPatient","informations d'identification du patient et de ses caractéristiques", ElementType = "BusinessObjectArchimate")]
+	partial class EPatient : EPersonne, IBusinessObject
 	{
 	
-		typeAttribut nomAttribut;
-		List<NomClasseMetier> entité_Base_ ;
-	}
-
-	[ModelElement("NomClasseVue","élément perceptible (visible) associé aux entités métiers exemple: vue état-civil patient", ElementType = "RepresentationArchimate")]
-	partial class NomClasseVue : NomClasseVue, Interface_applicative, Interface_IHM, Interface_métier, IView
-	{
+		Alphabétique Nom;
 	
-		 Type;
-		NomClasseMetier nomClasseMetier_ ;
+		Alphabétique Prenom;
+	
+		Date DateNaissance;
+		List<EConsultation> eConsultation_ = 
+			new List<EConsultation>();
+		List<EContact> contacts_ ;
+	}
 
-		NomClasseVue vue_Base_ ;
+
+	[ModelElement("EContact","contact du patient", ElementType = "BusinessObjectArchimate")]
+	partial class EContact : EPersonne, IBusinessObject
+	{
+	}
+
+
+	[ModelElement("ServiceGestionPatient","opération CRUD sur patient et associé", ElementType = "ApplicationServiceArchimate")]
+	partial class ServiceGestionPatient : UseCaseWorkflow
+	{
+	}
+
+
+	[ModelElement("StartToolEvent("Accueil patient")","", ElementType = "ApplicationEventArchimate")]
+	partial class StartToolEventAccueil_patient : EventArgs
+	{
+	}
+
+	public interface IViewPatient
+	{
+	}
+
+
+	[ModelElement("ViewPatient","", ElementType = "RepresentationArchimate")]
+	partial class ViewPatient : ViewPatient, IView
+	{
+		IUseCaseAccueilPatient workflowPatient;
+		public	ViewPatient(IWorkflow caller)
+		{
+			workflowPatient = caller as UseCaseAccueilPatient;
+		}
+		EPatient enCours_ ;
+
+	}
+
+	public interface IUseCaseAccueilPatient
+	{
+	}
+
+
+	[ModelElement("UseCaseAccueilPatient","pilotage des vues et services pour l'accueil d'un patient", ElementType = "ApplicationProcessArchimate")]
+	partial class UseCaseAccueilPatient : IVisualiserPatient, IGererAccueilPatient, DemandeRecherchePatient, UseCaseWorkflow
+	{
+		EPatient patientEnCours_ ;
+
+		IViewPatient vuePatient_ ;
+
+	}
+
+
+	[ModelElement("PAPatient","", ElementType = "DataObjectArchimate")]
+	partial class PAPatient : DAO
+	{
+		EPatient ePatient_ ;
+
+		EPersonne ePersonne_ ;
 
 	}
 
 }
 
-namespace Maidis.VNext.Entrants_métier
+namespace Maidis.VNext.Consultation
 {
-	public interface Interface_métier 
+	public interface IUseCaseConsultation
 	{
 	}
 
-	[ModelElement("Contrat","Une spécification formelle ou informelle d'un accord qui précise les droits et obligations liés à un produit ou un service métier exemple: application du PMSI", ElementType = "ContractArchimate")]
-	partial class Contrat : Contrat, CContract
+
+	[ModelElement("UseCaseConsultation","pilotage des vues et services pour la gestion d'une consultation", ElementType = "ApplicationProcessArchimate")]
+	partial class UseCaseConsultation : UseCaseWorkflow
 	{
-		List<Contrat> contrat_ ;
-	}
-
-}
-
-namespace Maidis.VNext.Traitements_applicatifs
-{
-	[ModelElement("Processus applicatif","suite de fonctions applicatives en vue de la réalisation d'un résultat. Peut intégrer des comportements non automatisés exemple: cas d'utilisation accueil consultation", ElementType = "ApplicationProcessArchimate")]
-	partial class Processus_applicatif : UseCaseWorkflow
-	{
-		NomClasseVue workflow_ ;
-
-		NomClasseMetier nomClasseMetier_ ;
+		IVue_consultation vue_consultation_ ;
 
 	}
 
-}
 
-namespace Maidis.VNext.Entrants_applicatif
-{
-	public interface Interface_applicative 
+	[ModelElement("EConsultation","", ElementType = "BusinessObjectArchimate")]
+	partial class EConsultation : IBusinessObject
 	{
 	}
 
-	[ModelElement("NomClasseEvenement ou NomMethodeEvenement","un comportement applicatif qui provoque un changement d'état exemple: réception d'un message \"mise à jour du dossier patient\"", ElementType = "ApplicationEventArchimate")]
-	partial class NomClasseEvenement_ou_NomMethodeEvenement : EventArgs
+	public interface IVue_consultation
 	{
-		NomClasseVue nomClasseVue_ ;
+	}
+
+
+	[ModelElement("Vue consultation","", ElementType = "RepresentationArchimate")]
+	partial class Vue_consultation : Action_Consultation, IView
+	{
+		IUseCaseConsultation useCaseConsultation;
+		public	Vue_consultation(IWorkflow caller)
+		{
+			useCaseConsultation = caller as UseCaseConsultation;
+		}
+		EConsultation eConsultation_ ;
 
 	}
 
-	[ModelElement("Service applicatif","Un service qui expose un comportement automatisé peut être associé à une fonctionnalité applicative exemple: gestion de la prise de rendez-vous", ElementType = "ApplicationServiceArchimate")]
-	partial class Service_applicatif : UseCaseWorkflow
-	{
-		List<Service_applicatif> service_applicatif_ ;
-		Contrat contrat_ ;
-
-	}
-
-}
-
-namespace Maidis.VNext.Structuration_technique
-{
 }
 
 
