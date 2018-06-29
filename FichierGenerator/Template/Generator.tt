@@ -476,6 +476,16 @@ namespace <#= dict_group_name[id_group] #>
 			{
 				Element ele_interface = dict_element[id_interface]; 
 				string class_name = ele_interface.Class_name_;
+				foreach(var id_ele in dict_related_element[id_interface])
+				{
+					var element_related = dict_element[id_ele];
+					if(element_related.Type_.Equals("BusinessFunction")||element_related.Type_.Equals("BusinessProcess"))
+					{
+#>
+	[reference("<#= element_related.Name_#>")]
+<#
+					}
+				}
 				if (!mmap_specialization.Keys.Contains(id_interface))
 				{
 #>

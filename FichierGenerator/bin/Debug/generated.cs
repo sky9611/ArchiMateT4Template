@@ -27,6 +27,7 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
+	[reference("Recherche d'un patient")]
 	public interface DemandeRecherchePatient 
 	{
 	}
@@ -95,8 +96,8 @@ namespace Maidis.VNext.Patient
 	}
 
 
-	[ModelElement("StartToolEvent("Accueil patient")","", ElementType = "ApplicationEventArchimate")]
-	partial class StartToolEventAccueil_patient : EventArgs
+	[ModelElement(""StartToolEvent"","", ElementType = "ApplicationEventArchimate")]
+	partial class StartToolEvent : EventArgs
 	{
 	}
 
@@ -120,26 +121,6 @@ namespace Maidis.VNext.Patient
 
 	}
 
-	public interface IUseCaseAccueilPatient
-	{
-	}
-
-
-	[ModelElement("UseCaseAccueilPatient","pilotage des vues et services pour l'accueil d'un patient", ElementType = "ApplicationProcessArchimate")]
-	partial class UseCaseAccueilPatient : IVisualiserPatient, IGererAccueilPatient, DemandeRecherchePatient, UseCaseWorkflow
-	{
-		IVisualiserPatient iVisualiserPatient_ ;
-
-		IGererAccueilPatient iGererAccueilPatient_ ;
-
-		DemandeRecherchePatient demandeRecherchePatient_ ;
-
-		EPatient patientEnCours_ ;
-
-		IViewPatient vuePatient_ ;
-
-	}
-
 
 	[ModelElement("PAPatient","", ElementType = "DataObjectArchimate")]
 	partial class PAPatient : DAO
@@ -147,6 +128,26 @@ namespace Maidis.VNext.Patient
 		EPatient ePatient_ ;
 
 		EPersonne ePersonne_ ;
+
+	}
+
+	public interface IUseCaseAccueilPatient
+	{
+	}
+
+
+	[ModelElement("UseCaseAccueilPatient","pilotage des vues et services pour l'accueil d'un patient", ElementType = "ApplicationProcessArchimate")]
+	partial class UseCaseAccueilPatient : IVisualiserPatient, ISaisirNouveauPatient, DemandeRecherchePatient, UseCaseWorkflow
+	{
+		IVisualiserPatient iVisualiserPatient_ ;
+
+		ISaisirNouveauPatient iSaisirNouveauPatient_ ;
+
+		DemandeRecherchePatient demandeRecherchePatient_ ;
+
+		EPatient patientEnCours_ ;
+
+		IViewPatient vuePatient_ ;
 
 	}
 
