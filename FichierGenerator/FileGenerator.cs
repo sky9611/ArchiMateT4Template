@@ -54,13 +54,14 @@ namespace FichierGenerator
         /// <param name="types"> The selected types </param>
         /// <param name="groups"> The selected groups </param>
         /// <param name="views"> The selected views </param>
-        public void Generate(string output_name, string[] types, string[] groups, string[] views)
+        public void Generate(string output_name, string[] types, string[] groups, string[] views, string name_space)
         {
             var generator = new Generator();
             generator.Session = new Microsoft.VisualStudio.TextTemplating.TextTemplatingSession();
             generator.Session["input_name"] = file_path;
             generator.Session["groups"] = (groups != null) && (groups.Length > 0) ? groups : null;
             generator.Session["views"] = (views != null) && (views.Length > 0) ? views : null;
+            generator.Session["name_space"] = (views != null) && (views.Length > 0) ? name_space : null;
             if (types==null||types.Length==0)
                 generator.Session["types"] = all_types;
             else
@@ -108,18 +109,18 @@ namespace FichierGenerator
             return list_view.ToArray();
         }
 
-        static void Main(string[] args)
-        {
-            FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vnext\\modele_vnext\\MODELE_VNEXT.xml");
+        //static void Main(string[] args)
+        //{
+        //    FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vnext\\modele_vnext\\MODELE_VNEXT.xml");
             
-            List<string> list = new List<string>();
-            //string[] types = { "BusinessObject" };
-            string[] types = list.ToArray();
-            //string[] groups = { "Web" };
-            string[] groups = list.ToArray();
-            string[] views = { "g¨¦n¨¦ration couches client" };
-            //string[] views = list.ToArray();
-            fileGenerator.Generate("generated.cs", types, groups, views);
-        }
+        //    List<string> list = new List<string>();
+        //    //string[] types = { "BusinessObject" };
+        //    string[] types = list.ToArray();
+        //    //string[] groups = { "Web" };
+        //    string[] groups = list.ToArray();
+        //    string[] views = { "g¨¦n¨¦ration couches client" };
+        //    //string[] views = list.ToArray();
+        //    fileGenerator.Generate("generated.cs", types, groups, views, "Maidis.VNext.");
+        //}
     }
 }

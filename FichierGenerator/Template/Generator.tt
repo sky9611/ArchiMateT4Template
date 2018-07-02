@@ -16,6 +16,7 @@
 <#@ parameter name="types" type="System.String[]" #>
 <#@ parameter name="groups" type="System.String[]" #>
 <#@ parameter name="views" type="System.String[]" #>
+<#@ parameter name="name_space" type="System.String" #>
 
 <#	
 	string[] class_types = {
@@ -27,7 +28,7 @@
             "ApplicationComponent",
             "ApplicationEvent",
             "ApplicationProcess"};
-	string class_namespace = "Maidis.VNext.";
+	string class_namespace = name_space;
 	// Open the prototype document.
 	XElement doc = XElement.Load(input_name);
 
