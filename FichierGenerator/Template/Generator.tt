@@ -160,6 +160,8 @@
 										select e;
 	foreach(var ele in xeles_group)
 	{
+		if(!dict_namespace.ContainsKey(ele.Element(NP+"name").Value))
+			dict_namespace.Add(ele.Element(NP+"name").Value, ele.Attribute("identifier").Value);
 		Dictionary<string,List<string>> dict = new Dictionary<string,List<string>>();
 		
 		List<string> list_target = new List<string>();
@@ -186,7 +188,14 @@
 
 	// Make the list of related group and elements
 	if(groups!=null)
-		list_group.AddRange(new List<string>(groups));
+	{
+		foreach(var g in groups)
+		{
+			var key = dict_namespace[g];
+			if (dict_group.ContainsKey(key))
+				list_group.Add(key);
+		}
+	}
 	foreach(var ele in dict_view.Keys)
 	{
 		foreach(var i in dict_view[ele])
@@ -198,10 +207,15 @@
 	}
 	list_group = list_group.Distinct().ToList();
 
-	foreach(var g in list_group)
+	var list_group_new = list_group.Intersect(dict_group.Keys);
+	foreach(var g in list_group_new)
 	{
-		list_element.AddRange(dict_group[g]["class"]);
-		list_element.AddRange(dict_group[g]["interface"]);
+		if (dict_group.ContainsKey(g))
+		{
+			list_element.AddRange(dict_group[g]["class"]);
+			list_element.AddRange(dict_group[g]["interface"]);
+		}
+
 	}
 	list_element = list_element.Distinct().ToList();
 
@@ -247,7 +261,7 @@
 
 	// Make the mmap of group access
 
-	foreach(var g in list_group)
+	foreach(var g in list_group_new)
 	{
 		if(!mmap_group_access.ContainsKey(g))
 		{
@@ -272,7 +286,7 @@
 	
 	// Make the mmap of element access
 	IEnumerable<XElement> xeles_element_access = from e in doc.Descendants(NP + "relationship")
-										 where (!list_group.Contains(e.Attribute("source").Value)) && e.Attribute(xmlns_xsi + "type").Value == "Access"
+										 where (!list_group_new.Contains(e.Attribute("source").Value)) && e.Attribute(xmlns_xsi + "type").Value == "Access"
 										 select e;
 	foreach(var ele in xeles_element_access)
     {
@@ -463,7 +477,7 @@ using <#= dict_group_name[id] #>;
 	//IEnumerable<XElement> xelements = from e in doc.Descendants(NP + "element")
 	//								  where types.Contains(e.Attribute(xmlns_xsi + "type").Value) 
 	//								  select e;
-	foreach(var id_group in list_group)
+	foreach(var id_group in list_group_new)
 	{
 		List<string> list_idElement = dict_group[id_group]["class"];
 		List<string> list_idInterface = dict_group[id_group]["interface"];
@@ -766,7 +780,8 @@ namespace <#= dict_group_name[id_group] #>
 			else if(n.Attribute(xmlns_xsi + "type").Value=="Label" && n.Element(NP + "viewRef")!=null)
 			{
 				XElement container = root.Descendants(NP + "view").FirstOrDefault(el => el.Attribute("identifier").Value == n.Element(NP + "viewRef").Attribute("ref").Value);
-				findAllElement(dict_element, xmlns_xsi, NP, root, container, ref list, ref list_group);
+				if (container != null )
+					findAllElement(dict_element, xmlns_xsi, NP, root, container, ref list, ref list_group);
 			}
 			else if(n.Attribute(xmlns_xsi + "type").Value=="Container")
 			{

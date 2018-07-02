@@ -109,18 +109,18 @@ namespace FichierGenerator
             return list_view.ToArray();
         }
 
-        //static void Main(string[] args)
-        //{
-        //    FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vnext\\modele_vnext\\MODELE_VNEXT.xml");
-            
-        //    List<string> list = new List<string>();
-        //    //string[] types = { "BusinessObject" };
-        //    string[] types = list.ToArray();
-        //    //string[] groups = { "Web" };
-        //    string[] groups = list.ToArray();
-        //    string[] views = { "g¨¦n¨¦ration couches client" };
-        //    //string[] views = list.ToArray();
-        //    fileGenerator.Generate("generated.cs", types, groups, views, "Maidis.VNext.");
-        //}
+        static void Main(string[] args)
+        {
+            FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vnext\\modele_vnext\\MODELE_VNEXT.xml");
+
+            List<string> list = new List<string>();
+            //string[] types = { "BusinessObject" };
+            string[] types = list.ToArray();
+            //string[] groups = { "Web" };
+            string[] groups = list.ToArray();
+            string[] views = { "g¨¦n¨¦ration couches client" };
+            //string[] views = list.ToArray();
+            fileGenerator.Generate("generated.cs", fileGenerator.getAllType(), fileGenerator.getAllGroup(), fileGenerator.getAllView(), "Maidis.VNext.");
+        }
     }
 }
