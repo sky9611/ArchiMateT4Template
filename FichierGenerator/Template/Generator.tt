@@ -155,6 +155,13 @@
 	}
 
 	// Make the map of all groups
+	dict_group_name.Add("id-GroupeUnConnu", class_namespace + "Unconnu");
+	Dictionary<string,List<string>> dict_temp = new Dictionary<string,List<string>>();
+	List<string> list_element_temp = new List<string>();
+	List<string> list_interface_temp = new List<string>();
+	dict_temp.Add("class",list_element_temp);
+	dict_temp.Add("interface",list_interface_temp);
+	dict_group.Add("id-GroupeUnConnu", dict_temp);
 	IEnumerable<XElement> xeles_group = from e in doc.Descendants(NP + "element")
 										where e.Attribute(xmlns_xsi + "type").Value == "Grouping"
 										select e;
@@ -218,6 +225,23 @@
 
 	}
 	list_element = list_element.Distinct().ToList();
+
+	foreach(var e in list_element)
+	{
+		if(!dict_element.ContainsKey(e))
+		{
+			list_element.Remove(e);
+		}
+		else if(!dict_element_group.ContainsKey(e))
+		{
+			if (!list_group.Contains("id-GroupeUnConnu"))
+				list_group.Add("id-GroupeUnConnu");
+			if (dict_element[e].Type_.Contains("Interface"))
+				dict_group["id-GroupeUnConnu"]["interface"].Add(e);
+			else
+				dict_group["id-GroupeUnConnu"]["class"].Add(e);
+		}
+	}
 
 	// Make the map of relationship
 	foreach(var ele in list_element)
@@ -491,14 +515,21 @@ namespace <#= dict_group_name[id_group] #>
 			{
 				Element ele_interface = dict_element[id_interface]; 
 				string class_name = ele_interface.Class_name_;
-				foreach(var id_ele in dict_related_element[id_interface])
+				if (dict_related_element.ContainsKey(id_interface))
 				{
-					var element_related = dict_element[id_ele];
-					if(element_related.Type_.Equals("BusinessFunction")||element_related.Type_.Equals("BusinessProcess"))
+					foreach(var id_ele in dict_related_element[id_interface])
 					{
+						Element element_related = new Element();
+						if(dict_element.ContainsKey(id_ele))
+						{
+							element_related = dict_element[id_ele];
+							if(element_related.Type_.Equals("BusinessFunction")||element_related.Type_.Equals("BusinessProcess"))
+							{
 #>
 	[reference("<#= element_related.Name_#>")]
 <#
+							}
+						}
 					}
 				}
 				if (!mmap_specialization.Keys.Contains(id_interface))
@@ -668,11 +699,14 @@ namespace <#= dict_group_name[id_group] #>
 									{
 										foreach(var j in dict_related_element[idTarget])
 										{
-											if (dict_element[j].Type_.Equals("BusinessInterface")) 
+											if (dict_element.ContainsKey(j))
 											{
+												if (dict_element[j].Type_.Equals("BusinessInterface")) 
+												{
 #>
 		[reference("<#= dict_element[j].Name_#>")]
 <#	
+												}
 											}
 										}
 									}
