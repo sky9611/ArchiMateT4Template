@@ -120,7 +120,7 @@ namespace FichierGenerator
             string[] groups = list.ToArray();
             string[] views = { "g¨¦n¨¦ration couches client" };
             //string[] views = list.ToArray();
-            fileGenerator.Generate("generated.cs", fileGenerator.getAllType(), fileGenerator.getAllGroup(), fileGenerator.getAllView(), "Maidis.VNext.");
+            fileGenerator.Generate("generated.cs", fileGenerator.getAllType(), groups, views, "Maidis.VNext.");
         }
     }
 }

@@ -69,6 +69,9 @@
 	// Map identifier - relationship name
 	Dictionary<Tuple<string, string>, string> dict_relationship = new Dictionary<Tuple<string, string>, string>();
 
+	// MultiMap of id_element - [source|target] - [type de relation] - list_id_element
+	Dictionary<string, Dictionary<string, Dictionary<string, List<string>>>> mmap_relationship = new Dictionary<string, Dictionary<string, Dictionary<string, List<string>>>>();
+
 	// MultiMap of composition
 	Dictionary<string, List<string>> mmap_compostion = new Dictionary<string, List<string>>();
 
@@ -128,6 +131,71 @@
 			element.Class_name_ = element.Name_;
 		dict_element.Add(element.Identifier_, element);
     }
+
+	// Make the map of relationship
+	foreach(var ele in doc.Descendants(NP + "relationship"))
+    {
+		string relationship_type = ele.Attribute(xmlns_xsi + "type").Value;
+		string id_source = ele.Attribute("source").Value;
+		string id_target = ele.Attribute("target").Value;
+		Dictionary<string, Dictionary<string, List<string>>> dict_source_relationship;
+		Dictionary<string, Dictionary<string, List<string>>> dict_target_relationship;
+		if (mmap_relationship.TryGetValue(id_source, out dict_source_relationship))
+		{
+			List<string> list;
+			if (dict_source_relationship["source"].TryGetValue(relationship_type, out list))
+			{
+				list.Add(id_target);
+				dict_source_relationship["source"][relationship_type] = list;
+			}
+			else
+			{
+				list = new List<string>();
+				list.Add(id_target);
+				dict_source_relationship["source"].Add(relationship_type, list);
+			}
+			mmap_relationship[id_source] = dict_source_relationship;
+		}
+		else
+		{
+			dict_source_relationship = new Dictionary<string, Dictionary<string, List<string>>>();
+			Dictionary<string, List<string>> dict2 = new Dictionary<string, List<string>>();
+			List<string> list = new List<string>();
+			list.Add(id_target);
+			dict2.Add(relationship_type, list);
+			dict_source_relationship.Add("source", dict2);
+			dict_source_relationship.Add("target", new Dictionary<string, List<string>>());
+			mmap_relationship.Add(id_source, dict_source_relationship);
+		}
+
+		if (mmap_relationship.TryGetValue(id_target, out dict_target_relationship))
+		{
+			List<string> list;
+			if (dict_target_relationship["target"].TryGetValue(relationship_type, out list))
+			{
+				list.Add(id_source);
+				dict_target_relationship["target"][relationship_type] = list;
+			}
+			else
+			{
+				list = new List<string>();
+				list.Add(id_source);
+				dict_target_relationship["target"].Add(relationship_type, list);
+			}
+			mmap_relationship[id_target] = dict_target_relationship;
+		}
+		else
+		{
+			dict_target_relationship = new Dictionary<string, Dictionary<string, List<string>>>();
+			Dictionary<string, List<string>> dict2 = new Dictionary<string, List<string>>();
+			List<string> list = new List<string>();
+			list.Add(id_source);
+			dict2.Add(relationship_type, list);
+			dict_target_relationship.Add("target", dict2);
+			dict_target_relationship.Add("source", new Dictionary<string, List<string>>());
+			mmap_relationship.Add(id_target, dict_target_relationship);
+		}
+	}
 
 	// Make the map of views
 	IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
@@ -327,26 +395,6 @@
         }
     }
 
-	// Make the multimap of compostion-relationship
-	IEnumerable<XElement> xeles_compostion = from e in doc.Descendants(NP + "relationship")
-											 where e.Attribute(xmlns_xsi + "type").Value == "Composition"
-											 select e;
-	foreach(var ele in xeles_compostion)
-    {
-		List<string> list_target;
-		if (mmap_compostion.TryGetValue(ele.Attribute("source").Value, out list_target))
-        {
-            list_target.Add(ele.Attribute("target").Value);
-        }
-        else
-        {
-            list_target = new List<string>();
-            list_target.Add(ele.Attribute("target").Value);
-            mmap_compostion[ele.Attribute("source").Value] = list_target;
-        }
-		//mmap_compostion.Add(ele.Attribute("source").Value,ele.Attribute("target").Value);
-    }
-
 	// Make the map of specialzation-relationship
 	IEnumerable<XElement> xeles_specialization = from e in doc.Descendants(NP + "relationship")
 												 where e.Attribute(xmlns_xsi + "type").Value == "Specialization"
@@ -429,25 +477,6 @@
 			defaut:break;
 		}
 	}
-
-	// Make the multimap of aggregation-relationship
-	IEnumerable<XElement> xeles_aggregation = from e in doc.Descendants(NP + "relationship")
-											  where e.Attribute(xmlns_xsi + "type").Value == "Aggregation"
-											  select e;
-	foreach(var ele in xeles_aggregation)
-    {
-		List<string> list_target;
-		if (mmap_aggregation.TryGetValue(ele.Attribute("source").Value, out list_target))
-        {
-            list_target.Add(ele.Attribute("target").Value);
-        }
-        else
-        {
-            list_target = new List<string>();
-            list_target.Add(ele.Attribute("target").Value);
-            mmap_aggregation[ele.Attribute("source").Value] = list_target;
-        }
-    }
 
 	// Make the multimap of association-relationship
 	IEnumerable<XElement> xeles_association = from e in doc.Descendants(NP + "relationship")
@@ -645,9 +674,11 @@ namespace <#= dict_group_name[id_group] #>
 					}
 
 					// Generate composition relationship.
-					if(mmap_compostion.Keys.Contains(id_element))
+					if( mmap_relationship.ContainsKey(id_element) && 
+					    mmap_relationship[id_element].ContainsKey("source") && 
+						mmap_relationship[id_element]["source"].ContainsKey("Composition") )
 					{
-						foreach (var idTarget in mmap_compostion[id_element])
+						foreach (var idTarget in mmap_relationship[id_element]["source"]["Composition"])
 						{
 							Element elementTarget = dict_element[idTarget];
 							if (class_types.Contains(elementTarget.Type_))
@@ -664,9 +695,11 @@ namespace <#= dict_group_name[id_group] #>
 					}
 
 					// Generate aggregation relationship.
-					if(mmap_aggregation.Keys.Contains(id_element))
+					if( mmap_relationship.ContainsKey(id_element) && 
+					    mmap_relationship[id_element].ContainsKey("source") && 
+						mmap_relationship[id_element]["source"].ContainsKey("Aggregation") )
 					{
-						foreach (var idTarget in mmap_aggregation[id_element])
+						foreach (var idTarget in mmap_relationship[id_element]["source"]["Aggregation"])
 						{
 							Element elementTarget = dict_element[idTarget];
 							if (class_types.Contains(elementTarget.Type_))
