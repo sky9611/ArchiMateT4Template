@@ -47,6 +47,14 @@ namespace FichierGenerator
 
         public string File_path { get => file_path; set => file_path = value; }
 
+        private string GetPart(string source, string part_name)
+        {
+            int start = source.IndexOf("<" + part_name + ">");
+            int end = source.IndexOf("</" + part_name + ">");
+            string result = source.Substring(start,end - start+1);
+            return result;
+        }
+
         /// <summary>
         ///     Method to run the t4 template
         /// </summary>
@@ -69,9 +77,7 @@ namespace FichierGenerator
             generator.Initialize();
             var generatedCode = generator.TransformText();
 
-            int start = generatedCode.IndexOf("<Log>");
-            int end = generatedCode.IndexOf("</Log>"); 
-            string log = generatedCode.Substring(start);
+            string log = GetPart(generatedCode, "log");
             generatedCode = generatedCode.Replace(log, "");
             System.IO.File.WriteAllText(output_name, generatedCode);
             string path_log;
