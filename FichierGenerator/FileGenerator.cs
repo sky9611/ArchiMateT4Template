@@ -51,7 +51,7 @@ namespace FichierGenerator
         {
             int start = source.IndexOf("<" + part_name + ">");
             int end = source.IndexOf("</" + part_name + ">");
-            string result = source.Substring(start,end - start+6);
+            string result = source.Substring(start,end - start+ part_name.Length+3);
             return result;
         }
 
@@ -79,13 +79,28 @@ namespace FichierGenerator
 
             string log = GetPart(generatedCode, "Log");
             generatedCode = generatedCode.Replace(log, "");
-            System.IO.File.WriteAllText(output_name, generatedCode);
+
+            string scripts = GetPart(generatedCode, "scripts");
+            generatedCode = generatedCode.Replace(scripts, "");
+            XElement xml = XElement.Parse(scripts);
+            string path_script;
+            foreach (var node in xml.Descendants("script"))
+            {
+                if (output_name.Contains("\\"))
+                    path_script = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + node.Attribute("name").Value+".sql";
+                else
+                    path_script = node.Attribute("name").Value + ".sql";
+                System.IO.File.WriteAllText(path_script, node.Value);
+            }
+
             string path_log;
             if (output_name.Contains("\\"))
                 path_log = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + "GenerationLog.txt";
             else
                 path_log = "GenerationLog.txt";
             System.IO.File.WriteAllText(path_log, log);
+
+            System.IO.File.WriteAllText(output_name, generatedCode);
         }
 
         public string[] getAllType() { return all_types; }

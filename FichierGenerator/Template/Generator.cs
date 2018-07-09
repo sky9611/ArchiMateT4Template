@@ -2655,7 +2655,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("<Scripts>\r\n");
+            this.Write("<scripts>\r\n");
             
             #line 1573 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
@@ -2665,25 +2665,45 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\t<Script> \r\n");
+            this.Write("\t<script name=\"");
+            
+            #line 1577 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Name_));
+            
+            #line default
+            #line hidden
+            this.Write("\"> \r\nCREATE TABLE ");
             
             #line 1578 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n(\r\n");
+            
+            #line 1580 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 	
-
-
-            
-            #line default
-            #line hidden
-            this.Write("\t</Script>\r\n");
-            
-            #line 1582 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
-
-		}
+	foreach(var p in ele.Properties_.Keys)
+	{
 
             
             #line default
             #line hidden
-            this.Write("</Scripts>\r\n");
+            this.Write("\t");
+            
+            #line 1584 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(p));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 1584 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
+            
+            #line default
+            #line hidden
+            this.Write(" \r\n\r\n");
             
             #line 1586 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
@@ -2692,9 +2712,27 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\r\n<Log> \r\n");
+            this.Write(")\r\n\t</script>\r\n");
             
             #line 1591 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+
+		}
+
+            
+            #line default
+            #line hidden
+            this.Write("</scripts>\r\n");
+            
+            #line 1595 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+
+	}
+
+            
+            #line default
+            #line hidden
+            this.Write("\r\n<Log> \r\n");
+            
+            #line 1600 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	if (errors.Count()>0)
 	{
@@ -2704,7 +2742,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t<Errors>\r\n");
             
-            #line 1596 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 1605 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		foreach(string err in errors)
 		{
@@ -2714,14 +2752,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t<Error> ");
             
-            #line 1600 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 1609 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(err));
             
             #line default
             #line hidden
             this.Write(" </Error>\r\n");
             
-            #line 1601 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 1610 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 		}
 
@@ -2730,7 +2768,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t</Errors>\r\n");
             
-            #line 1605 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+            #line 1614 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	}
 
@@ -2756,7 +2794,7 @@ namespace FichierGenerator.Template
             }
         }
         
-        #line 1610 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
+        #line 1619 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 
 	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
 	{

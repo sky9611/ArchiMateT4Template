@@ -1569,20 +1569,29 @@ namespace <#= dict_group_name[id_group] #>
 	if (list_data_object.Count()>0)
 	{
 #>
-<Scripts>
+<scripts>
 <#
 		foreach(Element ele in list_data_object)
 		{
 #>
-	<Script> 
+	<script name="<#= ele.Name_ #>"> 
+CREATE TABLE <#= ele.Class_name_ #>
+(
 <#	
-
+	foreach(var p in ele.Properties_.Keys)
+	{
 #>
-	</Script>
+	<#= p #> <#= ele.Properties_[p] #> 
+
+<#
+	}
+#>
+)
+	</script>
 <#
 		}
 #>
-</Scripts>
+</scripts>
 <#
 	}
 #>
