@@ -51,7 +51,7 @@ namespace FichierGenerator
         {
             int start = source.IndexOf("<" + part_name + ">");
             int end = source.IndexOf("</" + part_name + ">");
-            string result = source.Substring(start,end - start+1);
+            string result = source.Substring(start,end - start+6);
             return result;
         }
 
@@ -77,7 +77,7 @@ namespace FichierGenerator
             generator.Initialize();
             var generatedCode = generator.TransformText();
 
-            string log = GetPart(generatedCode, "log");
+            string log = GetPart(generatedCode, "Log");
             generatedCode = generatedCode.Replace(log, "");
             System.IO.File.WriteAllText(output_name, generatedCode);
             string path_log;
@@ -124,7 +124,8 @@ namespace FichierGenerator
             string[] types = list.ToArray();
             //string[] groups = { "Web" };
             string[] groups = list.ToArray();
-            string[] views = { "g¨¦n¨¦ration couches client" };
+            //string[] views = { "g¨¦n¨¦ration couches client" };
+            string[] views = { "g¨¦n¨¦ration couches serveur" };
             //string[] views = list.ToArray();
             fileGenerator.Generate("generated.cs", fileGenerator.getAllType(), groups, views, "Maidis.VNext.");
         }

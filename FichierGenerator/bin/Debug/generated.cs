@@ -5,18 +5,41 @@
 
 using System.Collections.Generic;
 
+using Maidis.VNext.Examen;
 using Maidis.VNext.Consultation;
 using Maidis.VNext.Personne;
-using Maidis.VNext.Examen;
 
-namespace Maidis.VNext.Personne
+namespace Maidis.VNext.Consultation
 {
-
-	[ModelElement("EPersonne","", ElementType = "BusinessObjectArchimate")]
-	partial class EPersonne : IBusinessObject
+	[Model(ApplicationProcessArchimate, "UseCaseConsultation")]
+	[ReferenceModel(BusinessProcessArchimate, "Gestion d'une consultation")]
+	partial class UseCaseConsultation : UseCaseWorkflow
 	{
-		PAPatient pAPatient_ ;
+		Vue_consultation vue_consultation_ ;
 
+	}
+
+	[Model(BusinessObjectArchimate, "EConsultation")]
+	partial class EConsultation : IBusinessObject
+	{
+	}
+
+	[Model(DataObjectArchimate, "PAConsultation")]
+	partial class PAConsultation : DAO
+	{
+		List<PAPatient> pAPatient_ ;
+	}
+
+	public interface IVue_consultation{}
+
+	[Model(RepresentationArchimate, "Vue consultation")]
+	partial class Vue_consultation : IVue_consultation
+	{
+		IUseCaseConsultation useCaseConsultation;
+		public	Vue_consultation(IWorkflow caller)
+		{
+			useCaseConsultation = caller as UseCaseConsultation;
+		}
 	}
 
 }
@@ -27,17 +50,18 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
-	[reference("Recherche d'un patient")]
 	public interface DemandeRecherchePatient 
 	{
 	}
 
 	public interface ISaisirNouveauPatient : IGererAccueilPatient
 	{
+
 	}
 
 	public interface IVisualiserPatient : IGererAccueilPatient
 	{
+
 	}
 
 	public interface ListerPatients 
@@ -52,6 +76,7 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
+	[ReferenceModel(BusinessInterfaceArchimate, "Action Création")]
 	public interface Button 
 	{
 	}
@@ -60,53 +85,37 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
-	public interface Action_Création 
-	{
-	}
-
-
-	[ModelElement("EPatient","informations d'identification du patient et de ses caractéristiques", ElementType = "BusinessObjectArchimate")]
+	[Model(BusinessObjectArchimate, "EPatient")]
 	partial class EPatient : EPersonne, IBusinessObject
 	{
-	
 		Alphabétique Nom;
-	
+
 		Alphabétique Prenom;
-	
+
 		Date DateNaissance;
-		List<EConsultation> eConsultation_ = 
-			new List<EConsultation>();
+
 		List<EContact> contacts_ ;
-		ViewPatient viewPatient_ ;
-
-		PAPatient pAPatient_ ;
-
 	}
 
-
-	[ModelElement("EContact","contact du patient", ElementType = "BusinessObjectArchimate")]
+	[Model(BusinessObjectArchimate, "EContact")]
 	partial class EContact : EPersonne, IBusinessObject
 	{
 	}
 
-
-	[ModelElement("ServiceGestionPatient","opération CRUD sur patient et associé", ElementType = "ApplicationServiceArchimate")]
+	[Model(ApplicationServiceArchimate, "ServiceGestionPatient")]
+	[ReferenceModel(BusinessServiceArchimate, "Accueillir dans un service")]
 	partial class ServiceGestionPatient : UseCaseWorkflow
 	{
 	}
 
-
-	[ModelElement(""StartToolEvent"","", ElementType = "ApplicationEventArchimate")]
 	partial class StartToolEvent : EventArgs
 	{
 	}
 
-	public interface IViewPatient
-	{
-	}
+	public interface IViewPatient{}
 
-
-	[ModelElement("ViewPatient","", ElementType = "RepresentationArchimate")]
+	[Reference("vue Patient générée")]
+	[Model(RepresentationArchimate, "ViewPatient")]
 	partial class ViewPatient : Button, IViewPatient
 	{
 		IUseCaseAccueilPatient workflowPatient;
@@ -114,105 +123,57 @@ namespace Maidis.VNext.Patient
 		{
 			workflowPatient = caller as UseCaseAccueilPatient;
 		}
-		EPatient enCours_ ;
-
-		[reference("Action Création")]
-		Button btnCreerPatient_ ;
-
 	}
 
-
-	[ModelElement("PAPatient","", ElementType = "DataObjectArchimate")]
+	[Model(DataObjectArchimate, "PAPatient")]
 	partial class PAPatient : DAO
 	{
 	
 		CHAR(25) Nom;
+
 	
 		CHAR(25) Prenom;
+
 	
 		DATETIME DateNaissance;
-		EPatient ePatient_ ;
-
-		EPersonne ePersonne_ ;
 
 	}
 
-	public interface IUseCaseAccueilPatient
-	{
-	}
-
-
-	[ModelElement("UseCaseAccueilPatient","pilotage des vues et services pour l'accueil d'un patient", ElementType = "ApplicationProcessArchimate")]
+	[Model(ApplicationProcessArchimate, "UseCaseAccueilPatient")]
+	[ReferenceModel(BusinessProcessArchimate, "Accueil d'un patient")]
 	partial class UseCaseAccueilPatient : IVisualiserPatient, IGererAccueilPatient, DemandeRecherchePatient, UseCaseWorkflow
 	{
-		IVisualiserPatient iVisualiserPatient_ ;
+		Vue_recherche_patient vue_recherche_patient_ ;
 
-		IGererAccueilPatient iGererAccueilPatient_ ;
+		ViewPatient vuePatient_ ;
 
-		DemandeRecherchePatient demandeRecherchePatient_ ;
+		UseCaseConsultation demandeConsultation_ ;
 
-		EPatient patientEnCours_ ;
-
-		IViewPatient vuePatient_ ;
+		GestionPatient gestionPatient_ ;
 
 	}
 
-
-	[ModelElement("ServiceGestionContact","", ElementType = "ApplicationServiceArchimate")]
+	[Model(ApplicationServiceArchimate, "ServiceGestionContact")]
 	partial class ServiceGestionContact : UseCaseWorkflow
 	{
 	}
 
 }
 
-namespace Maidis.VNext.Consultation
+namespace Maidis.VNext.Personne
 {
-	public interface IUseCaseConsultation
+	[Model(BusinessObjectArchimate, "EPersonne")]
+	partial class EPersonne : IBusinessObject
 	{
 	}
 
+}
 
-	[ModelElement("UseCaseConsultation","pilotage des vues et services pour la gestion d'une consultation", ElementType = "ApplicationProcessArchimate")]
-	partial class UseCaseConsultation : UseCaseWorkflow
+namespace Maidis.VNext.Framework_ADF_NET
+{
+	[Model(ApplicationServiceArchimate, "ServiceCRUD<P>")]
+	partial class ServiceCRUDP : UseCaseWorkflow
 	{
-		IVue_consultation vue_consultation_ ;
-
-	}
-
-
-	[ModelElement("EConsultation","", ElementType = "BusinessObjectArchimate")]
-	partial class EConsultation : IBusinessObject
-	{
-		Vue_consultation vue_consultation_ ;
-
-		PAConsultation pAConsultation_ ;
-
-	}
-
-
-	[ModelElement("PAConsultation","", ElementType = "DataObjectArchimate")]
-	partial class PAConsultation : DAO
-	{
-		List<PAPatient> pAPatient_ ;
-		EConsultation eConsultation_ ;
-
-	}
-
-	public interface IVue_consultation
-	{
-	}
-
-
-	[ModelElement("Vue consultation","", ElementType = "RepresentationArchimate")]
-	partial class Vue_consultation : Action_Consultation, IVue_consultation
-	{
-		IUseCaseConsultation useCaseConsultation;
-		public	Vue_consultation(IWorkflow caller)
-		{
-			useCaseConsultation = caller as UseCaseConsultation;
-		}
-		EConsultation eConsultation_ ;
-
 	}
 
 }
@@ -220,5 +181,7 @@ namespace Maidis.VNext.Consultation
 namespace Maidis.VNext.Unconnu
 {
 }
+
+
 
 
