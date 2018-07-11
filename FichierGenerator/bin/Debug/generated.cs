@@ -2,25 +2,24 @@
 
 
 
-
 using System.Collections.Generic;
 
-using Maidis.VNext.Examen;
-using Maidis.VNext.Consultation;
-using Maidis.VNext.Personne;
+using Maidis.VnextExamen;
+using Maidis.VnextConsultation;
+using Maidis.VnextPersonne;
 
-namespace Maidis.VNext.Consultation
+namespace Maidis.VnextConsultation
 {
-	[Model(ApplicationProcessArchimate, "UseCaseConsultation")]
+	[Model(ApplicationProcessArchimate, "Cas d'utilisation Consultation")]
 	[ReferenceModel(BusinessProcessArchimate, "Gestion d'une consultation")]
-	partial class UseCaseConsultation : UseCaseWorkflow
+	partial class Cas_dutilisation_Consultation : UseCaseWorkflow
 	{
 		Vue_consultation vue_consultation_ ;
 
 	}
 
-	[Model(BusinessObjectArchimate, "EConsultation")]
-	partial class EConsultation : IBusinessObject
+	[Model(BusinessObjectArchimate, "Consultation")]
+	partial class Consultation : IBusinessObject
 	{
 	}
 
@@ -35,18 +34,13 @@ namespace Maidis.VNext.Consultation
 	[Model(RepresentationArchimate, "Vue consultation")]
 	partial class Vue_consultation : IVue_consultation
 	{
-		IUseCaseConsultation useCaseConsultation;
-		public	Vue_consultation(IWorkflow caller)
-		{
-			useCaseConsultation = caller as UseCaseConsultation;
-		}
 	}
 
 }
 
-namespace Maidis.VNext.Patient
+namespace Maidis.VnextPatient
 {
-	public interface MenuDossierPatientID 
+	public interface MenuDossierPatient 
 	{
 	}
 
@@ -54,12 +48,12 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
-	public interface ISaisirNouveauPatient : IGererAccueilPatient
+	public interface SaisirNouveauPatient : GererAccueilPatient
 	{
 
 	}
 
-	public interface IVisualiserPatient : IGererAccueilPatient
+	public interface VisualiserPatient : GererAccueilPatient
 	{
 
 	}
@@ -68,16 +62,16 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
-	public interface IRechercherPatient 
+	public interface RechercherPatients 
 	{
 	}
 
-	public interface IGererAccueilPatient 
+	public interface GererAccueilPatient 
 	{
 	}
 
 	[ReferenceModel(BusinessInterfaceArchimate, "Action Création")]
-	public interface Button 
+	public interface Bouton_Créer_Patient 
 	{
 	}
 
@@ -85,8 +79,8 @@ namespace Maidis.VNext.Patient
 	{
 	}
 
-	[Model(BusinessObjectArchimate, "EPatient")]
-	partial class EPatient : EPersonne, IBusinessObject
+	[Model(BusinessObjectArchimate, "Patient")]
+	partial class Patient : Personne, IBusinessObject
 	{
 		Alphabétique Nom;
 
@@ -94,35 +88,31 @@ namespace Maidis.VNext.Patient
 
 		Date DateNaissance;
 
-		List<EContact> contacts_ ;
+		List<Contact> contacts_ ;
 	}
 
-	[Model(BusinessObjectArchimate, "EContact")]
-	partial class EContact : EPersonne, IBusinessObject
+	[Model(BusinessObjectArchimate, "Contact")]
+	partial class Contact : Personne, IBusinessObject
 	{
 	}
 
-	[Model(ApplicationServiceArchimate, "ServiceGestionPatient")]
+	[Model(ApplicationServiceArchimate, "Gestion données patient")]
 	[ReferenceModel(BusinessServiceArchimate, "Accueillir dans un service")]
-	partial class ServiceGestionPatient : UseCaseWorkflow
+	partial class Gestion_données_patient : UseCaseWorkflow
 	{
 	}
 
-	partial class StartToolEvent : EventArgs
-	{
-	}
-
-	public interface IViewPatient{}
+	public interface IVue_patient{}
 
 	[Reference("vue Patient générée")]
-	[Model(RepresentationArchimate, "ViewPatient")]
-	partial class ViewPatient : Button, IViewPatient
+	[Reference("Template vue Entité")]
+	[Model(RepresentationArchimate, "Vue patient")]
+	partial class Vue_patient : Bouton_Créer_Patient, IVue_patient
 	{
-		IUseCaseAccueilPatient workflowPatient;
-		public	ViewPatient(IWorkflow caller)
-		{
-			workflowPatient = caller as UseCaseAccueilPatient;
-		}
+	
+		ViewPatient $Implementation;
+	
+		VueCRUD.T4 $Template;
 	}
 
 	[Model(DataObjectArchimate, "PAPatient")]
@@ -139,51 +129,47 @@ namespace Maidis.VNext.Patient
 
 	}
 
-	[Model(ApplicationProcessArchimate, "UseCaseAccueilPatient")]
+	[Model(ApplicationProcessArchimate, "Cas d'utilisation accueil Patient")]
 	[ReferenceModel(BusinessProcessArchimate, "Accueil d'un patient")]
-	partial class UseCaseAccueilPatient : IVisualiserPatient, IGererAccueilPatient, DemandeRecherchePatient, UseCaseWorkflow
+	partial class Cas_dutilisation_accueil_Patient : VisualiserPatient, GererAccueilPatient, DemandeRecherchePatient, UseCaseWorkflow
 	{
 		Vue_recherche_patient vue_recherche_patient_ ;
 
-		ViewPatient vuePatient_ ;
+		Vue_patient vuePatient_ ;
 
-		UseCaseConsultation demandeConsultation_ ;
+		Cas_dutilisation_Consultation demandeConsultation_ ;
 
-		GestionPatient gestionPatient_ ;
+		Traitement_métier_gestion_Patient traitement_métier_gestion_Patient_ ;
 
 	}
 
-	[Model(ApplicationServiceArchimate, "ServiceGestionContact")]
-	partial class ServiceGestionContact : UseCaseWorkflow
+	[Model(ApplicationServiceArchimate, "Gestion données contact")]
+	partial class Gestion_données_contact : UseCaseWorkflow
 	{
 	}
 
 }
 
-namespace Maidis.VNext.Personne
+namespace Maidis.VnextPersonne
 {
-	[Model(BusinessObjectArchimate, "EPersonne")]
-	partial class EPersonne : IBusinessObject
+	[Model(BusinessObjectArchimate, "Personne")]
+	partial class Personne : IBusinessObject
 	{
 	}
 
 }
 
-namespace Maidis.VNext.Framework_ADF_NET
+namespace Maidis.VnextFramework_ADF_NET
 {
-	[Model(ApplicationServiceArchimate, "ServiceCRUD<P>")]
-	partial class ServiceCRUDP : UseCaseWorkflow
+	[Model(ApplicationServiceArchimate, "Accès CRUD sur entité métier")]
+	partial class Accès_CRUD_sur_entité_métier : UseCaseWorkflow
 	{
 	}
 
 }
 
-namespace Maidis.VNext.Unconnu
+namespace Maidis.VnextUnconnu
 {
 }
-
-
-
-
 
 

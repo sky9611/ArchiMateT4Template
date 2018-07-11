@@ -1,5 +1,9 @@
 using FichierGenerator.Template;
+using Microsoft.VisualStudio.TextTemplating;
+using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -7,45 +11,42 @@ namespace FichierGenerator
 {
     public class FileGenerator
     {
-        string file_path;
+        ArchiDocument archiDocument;
+        ArchiDocumentSerialized archiDocumentSerialized;
         XElement doc;
         XNamespace NP;
         XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
         public FileGenerator(string file_path)
         {
-            this.file_path = file_path;
+            this.File_path = file_path;
             doc = XElement.Load(file_path);
             NP = doc.GetDefaultNamespace();
+            archiDocument = new ArchiDocument(file_path);
+            archiDocumentSerialized = new ArchiDocumentSerialized(archiDocument);
         }
 
         public static readonly string[] all_types = {
-            //"BusinessActor",
-            //"BusinessCollaboration",
-            //"BusinessComponent",
-            //"BusinessEvent",
-            //"BusinessFunction",
-            //"BusinessRole",
-            //"BusinessService",
+            "Product",
             "BusinessObject",
             "Contract",
             "Representation",
             "DataObject",
-            //"BusinessInteraction",
-            //"BusinessInterface",
-            //"TechnologyCollaboration",
-            //"TechnologyFunction",
-            //"TechnologyInteraction",
-            //"TechnologyInterface",
-            //"TechnologyService",
-            //"ApplicationInterface",
+            "ApplicationInterface",
             "ApplicationService",
-            //"ApplicationFunction",
+            "ApplicationFunction",
             "ApplicationComponent",
             "ApplicationEvent",
             "ApplicationProcess"};
 
-        public string File_path { get => file_path; set => file_path = value; }
+        public string File_path { get; set; }
+
+        public static T LoadObject<T>(string contents) where T : new()
+        {
+            T t = new T();
+            // do whatever
+            return t;
+        }
 
         private string GetPart(string source, string part_name)
         {
@@ -62,43 +63,63 @@ namespace FichierGenerator
         /// <param name="types"> The selected types </param>
         /// <param name="groups"> The selected groups </param>
         /// <param name="views"> The selected views </param>
+        /// <param name="name_space"> The namespace of generated class </param>
         public void Generate(string output_name, string[] types, string[] groups, string[] views, string name_space)
         {
-            var generator = new Generator();
-            generator.Session = new Microsoft.VisualStudio.TextTemplating.TextTemplatingSession();
-            generator.Session["input_name"] = file_path;
-            generator.Session["groups"] = (groups != null) && (groups.Length > 0) ? groups : null;
-            generator.Session["views"] = (views != null) && (views.Length > 0) ? views : null;
-            generator.Session["name_space"] = (views != null) && (views.Length > 0) ? name_space : null;
-            if (types==null||types.Length==0)
-                generator.Session["types"] = all_types;
-            else
-                generator.Session["types"] = types;
-            generator.Initialize();
-            var generatedCode = generator.TransformText();
+            var my_types = (types != null) && (types.Length > 0) ? types : all_types;
+            var my_groups = (groups != null) && (groups.Length > 0) ? groups : null;
+            var my_views = (views != null) && (views.Length > 0) ? views : null;
+            archiDocument.Update(my_types, my_groups, my_views, name_space);
+            archiDocumentSerialized.Update(archiDocument);
 
-            string log = GetPart(generatedCode, "Log");
-            generatedCode = generatedCode.Replace(log, "");
+            CustomCmdLineHost host = new CustomCmdLineHost();
+            Engine engine = new Engine();
+            host.TemplateFileValue = "..\\..\\Template\\Generator2.t4";
+            //Read the text template.  
+            string input = File.ReadAllText("..\\..\\Template\\Generator2.t4");
+            var extensionPath = Path.GetDirectoryName(GetType().Assembly.Location) + Path.DirectorySeparatorChar;
+            input = input.Replace("$(binDir)", extensionPath);
+            
+            
+            host.Session = host.CreateSession();
+            // Add parameter values to the Session:  
+            host.Session["archiDocument"] = archiDocumentSerialized;
+            //Transform the text template.  
+            string generatedCode = engine.ProcessTemplate(input, host);
 
-            string scripts = GetPart(generatedCode, "scripts");
-            generatedCode = generatedCode.Replace(scripts, "");
-            XElement xml = XElement.Parse(scripts);
-            string path_script;
-            foreach (var node in xml.Descendants("script"))
+            foreach (CompilerError error in host.Errors)
             {
-                if (output_name.Contains("\\"))
-                    path_script = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + node.Attribute("name").Value+".sql";
-                else
-                    path_script = node.Attribute("name").Value + ".sql";
-                System.IO.File.WriteAllText(path_script, node.Value);
+                Console.WriteLine(error.ToString());
             }
 
-            string path_log;
-            if (output_name.Contains("\\"))
-                path_log = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + "GenerationLog.txt";
-            else
-                path_log = "GenerationLog.txt";
-            System.IO.File.WriteAllText(path_log, log);
+            //var generator = new Generator();
+            //generator.Session = new Microsoft.VisualStudio.TextTemplating.TextTemplatingSession();
+            //generator.Session["archiDocument"] = archiDocument;
+            //generator.Initialize();
+            //var generatedCode = generator.TransformText();
+
+            //string log = GetPart(generatedCode, "Log");
+            //generatedCode = generatedCode.Replace(log, "");
+
+            //string scripts = GetPart(generatedCode, "scripts");
+            //generatedCode = generatedCode.Replace(scripts, "");
+            //XElement xml = XElement.Parse(scripts);
+            //string path_script;
+            //foreach (var node in xml.Descendants("script"))
+            //{
+            //    if (output_name.Contains("\\"))
+            //        path_script = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + node.Attribute("name").Value+".sql";
+            //    else
+            //        path_script = node.Attribute("name").Value + ".sql";
+            //    System.IO.File.WriteAllText(path_script, node.Value);
+            //}
+
+            //string path_log;
+            //if (output_name.Contains("\\"))
+            //    path_log = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + "GenerationLog.txt";
+            //else
+            //    path_log = "GenerationLog.txt";
+            //System.IO.File.WriteAllText(path_log, log);
 
             System.IO.File.WriteAllText(output_name, generatedCode);
         }
