@@ -56,9 +56,9 @@ namespace FichierGenerator
             string[] groups,
             string[] views,
             string name_space,
-            string CSTemplateFilePath,
-            string SQLTemplateFilePath,
-            string XamlTemplateFilePath)
+            string CSTemplateFilePath = "..\\..\\Template\\Generator2.t4",
+            string SQLTemplateFilePath = "..\\..\\Template\\SQLScriptTemplate.t4",
+            string XamlTemplateFilePath = "..\\..\\Template\\ViewTemplate.t4")
         {
             var my_types = (types != null) && (types.Length > 0) ? types : all_types;
             var my_groups = (groups != null) && (groups.Length > 0) ? groups : null;
@@ -111,6 +111,46 @@ namespace FichierGenerator
             }
         }
 
+        private void GenerateSolutionXaml(string solution_path, string solution_name, string id_solution, Dictionary<string, Element> dict_element)
+        {
+            var appXamlTemplate = new AppXamlTemplate();
+            appXamlTemplate.Session = new TextTemplatingSession();
+            appXamlTemplate.Session["solutionName"] = solution_name;
+            List<string> list_FT;
+            List<string> list_view = new List<string>();
+            if (archiDocument.Mmap_relationship.ContainsKey(id_solution))
+            {
+                if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Triggering", out list_FT))
+                    foreach (var i in list_FT)
+                        if (dict_element[i].Type_.Equals("Representation"))
+                            list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_) + ".xaml");
+                if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_FT))
+                    foreach (var i in list_FT)
+                        if (dict_element[i].Type_.Equals("Representation"))
+                            list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_) + ".xaml");
+            }
+
+            string views;
+            if (list_view.Count() > 0)
+                views = string.Join(",", list_view);
+            else
+                views = "null";
+            appXamlTemplate.Session["launcherName"] = views;
+            appXamlTemplate.Initialize();
+            var generatedText = appXamlTemplate.TransformText();
+            File.WriteAllText(solution_path + "\\App.xaml", generatedText);
+        }
+
+        private void GenerateSolutionXamlCs(string solution_path, string solution_name)
+        {
+            var appXamlCsTemplate = new AppXamlCsTemplate();
+            appXamlCsTemplate.Session = new TextTemplatingSession();
+            appXamlCsTemplate.Session["solutionName"] = solution_name;
+            appXamlCsTemplate.Initialize();
+            var generatedText = appXamlCsTemplate.TransformText();
+            File.WriteAllText(solution_path + "\\App.xaml.cs", generatedText);
+        }
+
         [STAThread]
         private void GenerateSolution(string destinationFolder, Dictionary<string, List<string>> dict)
         {
@@ -132,33 +172,11 @@ namespace FichierGenerator
                 System.IO.Directory.CreateDirectory(solution_path);
 
                 // Generate App.xaml
-                var appXamlTemplate = new AppXamlTemplate();
-                appXamlTemplate.Session = new TextTemplatingSession();
-                appXamlTemplate.Session["solutionName"] = solution_name;
-                List<string> list_FT;
-                List<string> list_view = new List<string>();
-                if (archiDocument.Mmap_relationship.ContainsKey(id_solution))
-                {
-                    if(archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Triggering", out list_FT))
-                        foreach (var i in list_FT)
-                            if (dict_element[i].Type_.Equals("Representation"))
-                                list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_)+".xaml");
-                    if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_FT))
-                        foreach (var i in list_FT)
-                            if (dict_element[i].Type_.Equals("Representation"))
-                                list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_)+".xaml");
-                }
+                GenerateSolutionXaml(solution_path, solution_name, id_solution, dict_element);
 
-                string views;
-                if (list_view.Count() > 0)
-                    views = string.Join(",", list_view);
-                else
-                    views = "null";
-                appXamlTemplate.Session["launcherName"] = views;
-                appXamlTemplate.Initialize();
-                var generatedText = appXamlTemplate.TransformText();
-                File.WriteAllText(solution_path + "\\App.xaml", generatedText);
-                
+                // Generate App.xaml
+                GenerateSolutionXamlCs(solution_path, solution_name);
+
                 // create a new solution
                 dte.Solution.Create(solution_path, solution_name);
                 var solution = dte.Solution;
@@ -285,7 +303,7 @@ namespace FichierGenerator
         [STAThread]
         static void Main(string[] args)
         {
-            FileGenerator fileGenerator = new FileGenerator("D:\\documents\\INSA\\maidis\\vnext\\modele_vnext\\MODELE_VNEXT.xml");
+            FileGenerator fileGenerator = new FileGenerator(@"..\..\lib\MODELE_VNEXT.xml");
 
             List<string> list = new List<string>();
             //string[] types = { "BusinessObject" };
@@ -295,7 +313,7 @@ namespace FichierGenerator
             //string[] views = { "g¨¦n¨¦ration couches client" };
             //string[] views = { "g¨¦n¨¦ration couches serveur" };
             string[] views = list.ToArray();
-            fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, "Maidis.VNext.", "..\\..\\Template\\Generator2.t4", "..\\..\\Template\\SQLScriptTemplate.t4", "..\\..\\Template\\ViewTemplate.t4");
+            fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, "Maidis.VNext.");
         }
     }
 }
