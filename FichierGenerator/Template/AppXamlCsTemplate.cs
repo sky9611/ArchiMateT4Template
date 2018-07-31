@@ -18,9 +18,9 @@ namespace FichierGenerator.Template
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RuntimeTextTemplate1.tt"
+    #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\AppXamlCsTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class RuntimeTextTemplate1 : RuntimeTextTemplate1Base
+    public partial class AppXamlCsTemplate : AppXamlCsTemplateBase
     {
 #line hidden
         /// <summary>
@@ -28,8 +28,78 @@ namespace FichierGenerator.Template
         /// </summary>
         public virtual string TransformText()
         {
+            this.Write("\r\n");
+            this.Write("\r\nusing System.Windows;\r\n \r\nusing Maidis.Fwk.Bootstrap.Implementation;\r\n \r\nnamesp" +
+                    "ace ");
+            
+            #line 13 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\AppXamlCsTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(solutionName));
+            
+            #line default
+            #line hidden
+            this.Write(@"
+{
+    /// <summary>
+    /// Logique d'interaction pour App.xaml
+    /// </summary>
+    public partial class App : Application
+    {
+        public  App()
+        {
+            CBootstrapApplicationWindows application = new CBootstrapApplicationWindows(this);
+            application.Start();
+        }
+    }
+}");
             return this.GenerationEnvironment.ToString();
         }
+        
+        #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\AppXamlCsTemplate.tt"
+
+private string _solutionNameField;
+
+/// <summary>
+/// Access the solutionName parameter of the template.
+/// </summary>
+private string solutionName
+{
+    get
+    {
+        return this._solutionNameField;
+    }
+}
+
+
+/// <summary>
+/// Initialize the template
+/// </summary>
+public virtual void Initialize()
+{
+    if ((this.Errors.HasErrors == false))
+    {
+bool solutionNameValueAcquired = false;
+if (this.Session.ContainsKey("solutionName"))
+{
+    this._solutionNameField = ((string)(this.Session["solutionName"]));
+    solutionNameValueAcquired = true;
+}
+if ((solutionNameValueAcquired == false))
+{
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("solutionName");
+    if ((data != null))
+    {
+        this._solutionNameField = ((string)(data));
+    }
+}
+
+
+    }
+}
+
+
+        
+        #line default
+        #line hidden
     }
     
     #line default
@@ -39,7 +109,7 @@ namespace FichierGenerator.Template
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class RuntimeTextTemplate1Base
+    public class AppXamlCsTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

@@ -15,8 +15,8 @@
 		public static string UpperString(string name)
 		{
 			//name = Regex.Replace(name, @"\s\(.*\)", "");
-			name = name.Replace(' ','_');
-			name = name.Replace('.','_');
+			name = name.Replace(' ','');
+			name = name.Replace('.','');
 			name = Regex.Replace(name, @"[^\w\.@_]", "");
 			return name[0].ToString().ToUpperInvariant() + name.Substring(1);
 		}
@@ -25,8 +25,8 @@
 		public static string LowerString(string name)
 		{
 			//name = Regex.Replace(name, @"\s\(.*\)", "");
-			name = name.Replace(' ','_');
-			name = name.Replace('.','_');
+			name = name.Replace(' ','');
+			name = name.Replace('.','');
 			name = Regex.Replace(name, @"[^\w\.@_]", "");
 			return name[0].ToString().ToLowerInvariant() + name.Substring(1);
 		}

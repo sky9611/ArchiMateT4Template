@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FichierGenerator
 {
-    [Serializable()]
+    [Serializable]
     public class Element
     {
         public string Identifier_ { get; set; }

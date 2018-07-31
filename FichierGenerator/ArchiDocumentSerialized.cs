@@ -37,6 +37,7 @@ namespace FichierGenerator
             errors = archiDocument.Errors;
             classes = archiDocument.Classes;
             list_group_new = new List<string>(archiDocument.List_group_new);
+            mmap_solution = archiDocument.Mmap_solution;
         }
 
         public void Update(ArchiDocument archiDocument)
@@ -132,6 +133,8 @@ namespace FichierGenerator
 
         List<string> list_group_new = new List<string>();
 
+        Dictionary<string, List<string>> mmap_solution = new Dictionary<string, List<string>>();
+
         public string Class_namespace { get => class_namespace; set => class_namespace = value; }
         public Dictionary<string, List<string>> Dict_related_element { get => dict_related_element; set => dict_related_element = value; }
         public List<string> List_group { get => list_group; set => list_group = value; }
@@ -155,5 +158,6 @@ namespace FichierGenerator
         public List<string> Classes { get => classes; set => classes = value; }
         public List<string> Types { get => types; set => types = value; }
         public List<string> List_group_new { get => list_group_new; set => list_group_new = value; }
+        public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
     }
 }

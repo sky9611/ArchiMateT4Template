@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Globalization;
 
 namespace FichierGenerator
 {
@@ -85,6 +84,9 @@ namespace FichierGenerator
         // List of class created
         List<string> classes = new List<string>();
 
+        // MultiMap of Produit - application composants (Solution - projects to be created)
+        Dictionary<string, List<string>> mmap_solution = new Dictionary<string, List<string>>();
+
         List<string> types = new List<string>();
 
         IEnumerable<string> list_group_new = new List<string>();
@@ -117,6 +119,7 @@ namespace FichierGenerator
         public List<string> Classes { get => classes; set => classes = value; }
         public IEnumerable<string> List_group_new { get => list_group_new; set => list_group_new = value; }
         public List<string> Types { get => types; set => types = value; }
+        public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
 
         public ArchiDocument(string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext")
         {
@@ -298,6 +301,24 @@ namespace FichierGenerator
                 }
             }
 
+            // Make the mmap of solution - projects
+            foreach(var id in dict_element.Keys)
+            {
+                if (dict_element[id].Type_.Equals("Product"))
+                {
+                    List<string> list;
+                    if ( mmap_relationship.ContainsKey(id) &&
+                         mmap_relationship[id]["source"].TryGetValue("Association", out list))
+                    {
+                        List<string> list_projet = new List<string>();
+                        foreach (var id_element in list)
+                            if (dict_element[id_element].Type_.Equals("ApplicationComponent"))
+                                list_projet.Add(id_element);
+                        mmap_solution.Add(id, list_projet);
+                    }
+                }
+            }
+
             // Make the map of group name
             IEnumerable<XElement> xeles_all_group = from e in doc.Descendants(NP + "element")
                                                     where e.Attribute(xmlns_xsi + "type").Value == "Grouping"
@@ -412,6 +433,20 @@ namespace FichierGenerator
                     else
                         dict_group["id-GroupeUnConnu"]["class"].Add(e);
                 }
+            }
+
+            // Make the list of scripts
+            foreach (var ele in list_element)
+            {
+                if (dict_element[ele].Type_.Equals("DataObject"))
+                    list_data_object.Add(dict_element[ele]);
+            }
+
+            // Make the list of Rresentation
+            foreach (var ele in list_element)
+            {
+                if (dict_element[ele].Type_.Equals("Representation"))
+                    list_representation.Add(dict_element[ele]);
             }
 
             // Make the map of relationship
@@ -676,8 +711,9 @@ namespace FichierGenerator
         public static string UpperString(string name)
         {
             //name = Regex.Replace(name, @"\s\(.*\)", "");
-            name = name.Replace(' ', '_');
-            name = name.Replace('.', '_');
+            name = name.Replace(".", " ");
+            name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+            name = name.Replace(" ", "");
             name = Regex.Replace(name, @"[^\w\.@_]", "");
             return name[0].ToString().ToUpperInvariant() + name.Substring(1);
         }

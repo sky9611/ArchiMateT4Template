@@ -1,5 +1,5 @@
 ﻿<#@ template debug="false" hostspecific="true" language="C#" #>
-<#@ output extension=".txt" #>
+<#@ output extension=".cs" #>
 <#@ assembly name="System.Core.dll" #>
 <#@ assembly name="System.Xml" #>
 <#@ assembly name="System.Xml.Linq" #>
@@ -336,10 +336,10 @@ namespace <#= dict_group_name[id_group] #>
 <#
 					}
 #>
-			public	<#= StringHelper.UpperString(class_name) #>(IWorkflow caller)
-			{
-				<#= varName#> = caller as <#= typeName#>;
-			}
+		public	<#= StringHelper.UpperString(class_name) #>(IWorkflow caller)
+		{
+			<#= varName#> = caller as <#= typeName#>;
+		}
 <#
 					// Generate référence d'une classe.
 					if( mmap_association.ContainsKey(id_element))

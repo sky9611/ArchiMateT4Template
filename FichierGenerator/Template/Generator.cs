@@ -651,14 +651,14 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\t\t\tpublic\t");
+            this.Write("\t\tpublic\t");
             
             #line 339 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StringHelper.UpperString(class_name)));
             
             #line default
             #line hidden
-            this.Write("(IWorkflow caller)\r\n\t\t\t{\r\n\t\t\t\t");
+            this.Write("(IWorkflow caller)\r\n\t\t{\r\n\t\t\t");
             
             #line 341 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(varName));
@@ -672,7 +672,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write(";\r\n\t\t\t}\r\n");
+            this.Write(";\r\n\t\t}\r\n");
             
             #line 343 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\Generator.tt"
 

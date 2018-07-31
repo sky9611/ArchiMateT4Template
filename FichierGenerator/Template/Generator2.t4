@@ -1,4 +1,4 @@
-﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
 
 <#@ import namespace="System" #>
 <#@ import namespace="System.Linq" #>
@@ -7,6 +7,7 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ import namespace="System.Collections" #>
 <#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Globalization" #>
 
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 
@@ -152,6 +153,22 @@ namespace <#= dict_group_name[id_group] #>
 								
 #>
 	[Contract("<#=element_associated.Name_#>","<#=element_associated.Class_name_#>")]
+<#
+							}
+						}
+					}
+
+					List<string> list_trigger;
+					if(mmap_relationship[id_interface]["target"].TryGetValue("Triggering", out list_trigger))
+					{
+						foreach(var i in list_trigger)
+						{
+							Element element_associated = dict_element[i];
+							if (element_associated.Type_.Equals("ApplicationEvent"))
+							{
+								
+#>
+	[EventHandler("<#=element_associated.Class_name_#>")]
 <#
 							}
 						}
@@ -472,6 +489,7 @@ namespace <#= dict_group_name[id_group] #>
 #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
 <#
+					// Generate attributes
 					if (mmap_relationship.ContainsKey(id_element))
 					{
 						List<string> list_associated;
@@ -488,6 +506,39 @@ namespace <#= dict_group_name[id_group] #>
 	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
 <#
 									}
+								}
+							}
+						}
+					
+						if ( mmap_relationship[id_element]["source"].TryGetValue("Assocciation", out list_associated))
+						{
+							foreach(var id_associated in list_associated)
+							{
+								if(dict_element.ContainsKey(id_associated))
+								{
+									Element element_associated = dict_element[id_associated];
+									if(element_associated.Properties_["$Type"].Equals("Macro")||element_associated.Type_.Equals("ApplicationService"))
+									{
+#>
+	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
+<#
+									}
+								}
+							}
+						}
+
+						List<string> list_access;
+						if(mmap_relationship[id_element]["source"].TryGetValue("Access", out list_access))
+						{
+							foreach(var i in list_access)
+							{
+								Element element_associated = dict_element[i];
+								if (element_associated.Type_.Equals("ApplicationService"))
+								{
+								
+#>
+	[Contract("<#=element_associated.Name_#>","<#=element_associated.Class_name_#>")]
+<#
 								}
 							}
 						}
@@ -585,6 +636,31 @@ namespace <#= dict_group_name[id_group] #>
 									{
 										Element element_associated = dict_element[id_associated];
 										if(element_associated.Type_.Equals("Requirement")||element_associated.Type_.Equals("BusinessService"))
+										{
+#>
+	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
+<#
+										}
+									}
+								}
+							}
+						}
+
+						if ( mmap_relationship[id_element].ContainsKey("target") && 
+							 mmap_relationship[id_element]["target"].ContainsKey("Serving") )
+						{
+							List<string> list_associated;
+							if (mmap_relationship[id_element]["target"].TryGetValue("Serving", out list_associated))
+							{
+								foreach(var id_associated in list_associated)
+								{
+									if(dict_element.ContainsKey(id_associated))
+									{
+										Element element_associated = dict_element[id_associated];
+										if( ( element_associated.Properties_.ContainsKey("$Type") && element_associated.Properties_["$Type"].Equals("Macro")) ||
+											element_associated.Type_.Equals("BusinessInteraction") ||
+											element_associated.Type_.Equals("BusinessFunction") ||
+											element_associated.Type_.Equals("BusinessProcess"))
 										{
 #>
 	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
@@ -827,10 +903,8 @@ namespace <#= dict_group_name[id_group] #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
 <#
 					// Generate attributes
-					if( mmap_relationship.ContainsKey(id_element) &&
-						mmap_relationship[id_element].ContainsKey("source") && 
-						mmap_relationship[id_element]["source"].ContainsKey("Realization") )
-					{
+					if( mmap_relationship.ContainsKey(id_element) )
+					{ 
 						List<string> list_associated;
 						if (mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_associated))
 						{
@@ -847,6 +921,21 @@ namespace <#= dict_group_name[id_group] #>
 	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
 <#
 									}
+								}
+							}
+						}
+
+						List<string> list_trigger;
+						if(mmap_relationship[id_element]["target"].TryGetValue("Triggering", out list_trigger))
+						{
+							foreach(var i in list_trigger)
+							{
+								Element element_associated = dict_element[i];
+								if (element_associated.Type_.Equals("ApplicationEvent"))
+								{								
+#>
+	[EventHandler("<#=element_associated.Class_name_#>")]
+<#
 								}
 							}
 						}
@@ -1091,8 +1180,9 @@ namespace <#= dict_group_name[id_group] #>
 	public string UpperString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(' ','_');
-		name = name.Replace('.','_');
+		name = name.Replace(".", " ");
+        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+        name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToUpperInvariant() + name.Substring(1);
 	}
@@ -1101,8 +1191,9 @@ namespace <#= dict_group_name[id_group] #>
 	public string LowerString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(' ','_');
-		name = name.Replace('.','_');
+		name = name.Replace(".", " ");
+        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+        name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToLowerInvariant() + name.Substring(1);
 	}
