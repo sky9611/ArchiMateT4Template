@@ -13,6 +13,7 @@ namespace FichierGenerator
     public class FileGenerator
     {
         ArchiDocument archiDocument;
+        Dictionary<string, Element> dict_element;
         XElement doc;
         XNamespace NP;
         XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
@@ -22,7 +23,8 @@ namespace FichierGenerator
             this.File_path = file_path;
             doc = XElement.Load(file_path);
             NP = doc.GetDefaultNamespace();
-            archiDocument = new ArchiDocument(file_path);            
+            archiDocument = new ArchiDocument(file_path);
+            dict_element = archiDocument.Dict_element;
         }
 
         public static readonly string[] all_types = {
@@ -71,8 +73,36 @@ namespace FichierGenerator
 
             if (CSTemplateFilePath.Length > 0)
             {
-                var output = Transform(archiDocumentSerialized, CSTemplateFilePath);
-                File.WriteAllText(Path.Combine(destinationFolder, targetFileName + ".cs"), output);
+                foreach (var id_element in archiDocumentSerialized.List_element)
+                {
+                    Element ele = dict_element[id_element];
+                    if (ele.Type_.Equals("ApplicationEvent") && ele.Properties_.ContainsKey("Implementation"))
+                        GenerateApplicationEvent(archiDocumentSerialized, id_element);
+                    switch (ele.Type_)
+                    {
+                        case "Contract":
+                            GenerateContract(archiDocumentSerialized, id_element);
+                            break;
+                        case "BusinessObject":
+                            GenerateBusinessObject(archiDocumentSerialized, id_element);
+                            break;
+                        case "ApplicationService":
+                            GenerateApplicationService(archiDocumentSerialized, id_element);
+                            break;
+                        case "ApplicationProcess":
+                            GenerateApplicationProcess(archiDocumentSerialized, id_element);
+                            break;
+                        case "ApplicationInterface":
+                            GenerateInterface(archiDocumentSerialized, id_element);
+                            break;
+                        case "Representation":
+                            GenerateRepresentation(archiDocumentSerialized, id_element);
+                            break;
+                        case "DataObject":
+                            GenerateRepresentation(archiDocumentSerialized, id_element);
+                            break;
+                    }
+                }
             }
 
             if (SQLTemplateFilePath.Length > 0)
@@ -111,7 +141,8 @@ namespace FichierGenerator
             }
         }
 
-        private void GenerateSolutionXaml(string solution_path, string solution_name, string id_solution, Dictionary<string, Element> dict_element)
+
+        private void GenerateSolutionXaml(string solution_path, string solution_name, string id_solution)
         {
             var appXamlTemplate = new AppXamlTemplate();
             appXamlTemplate.Session = new TextTemplatingSession();
@@ -154,7 +185,6 @@ namespace FichierGenerator
         [STAThread]
         private void GenerateSolution(string destinationFolder, Dictionary<string, List<string>> dict)
         {
-            Dictionary<string, Element> dict_element = archiDocument.Dict_element;
             System.Type type = Type.GetTypeFromProgID("VisualStudio.DTE.15.0");
             Object obj = System.Activator.CreateInstance(type, true);
             EnvDTE.DTE dte = (EnvDTE.DTE)obj;
@@ -172,9 +202,9 @@ namespace FichierGenerator
                 System.IO.Directory.CreateDirectory(solution_path);
 
                 // Generate App.xaml
-                GenerateSolutionXaml(solution_path, solution_name, id_solution, dict_element);
+                GenerateSolutionXaml(solution_path, solution_name, id_solution);
 
-                // Generate App.xaml
+                // Generate App.xaml.cs
                 GenerateSolutionXamlCs(solution_path, solution_name);
 
                 // create a new solution
@@ -236,41 +266,7 @@ namespace FichierGenerator
                 }
             }
             
-
             return result;
-
-            
-
-            //var generator = new Generator();
-            //generator.Session = new Microsoft.VisualStudio.TextTemplating.TextTemplatingSession();
-            //generator.Session["archiDocument"] = archiDocument;
-            //generator.Initialize();
-            //var generatedCode = generator.TransformText();
-
-            //string log = GetPart(generatedCode, "Log");
-            //generatedCode = generatedCode.Replace(log, "");
-
-            //string scripts = GetPart(generatedCode, "scripts");
-            //generatedCode = generatedCode.Replace(scripts, "");
-            //XElement xml = XElement.Parse(scripts);
-            //string path_script;
-            //foreach (var node in xml.Descendants("script"))
-            //{
-            //    if (output_name.Contains("\\"))
-            //        path_script = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + node.Attribute("name").Value+".sql";
-            //    else
-            //        path_script = node.Attribute("name").Value + ".sql";
-            //    System.IO.File.WriteAllText(path_script, node.Value);
-            //}
-
-            //string path_log;
-            //if (output_name.Contains("\\"))
-            //    path_log = output_name.Replace(output_name.Substring(output_name.LastIndexOf("\\") + 1), "") + "GenerationLog.txt";
-            //else
-            //    path_log = "GenerationLog.txt";
-            //System.IO.File.WriteAllText(path_log, log);
-
-            //System.IO.File.WriteAllText(output_name, generatedCode);
         }
 
         public string[] getAllType() { return all_types; }
@@ -315,5 +311,102 @@ namespace FichierGenerator
             string[] views = list.ToArray();
             fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, "Maidis.VNext.");
         }
+
+        private void GenerateContract(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new ContractTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\"+ name + ".cs", generatedText);
+        }
+
+        private void GenerateBusinessObject(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new BusinessObjectTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+        }
+
+        private void GenerateApplicationService(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new ApplicationServiceTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+        }
+
+        private void GenerateApplicationEvent(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new ApplicationEventTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+        }
+
+        private void GenerateApplicationProcess(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new ApplicationProcessTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+        }
+
+        private void GenerateInterface(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new InterfaceTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+        }
+
+        private void GenerateRepresentation(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new RepresentationTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+        }
+
+        private void GenerateDataObject(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
+        {
+            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            var template = new DataObjectTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_element;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+        }
+
     }
 }

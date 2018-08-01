@@ -1,0 +1,313 @@
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ assembly name="mscorlib" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="Microsoft.VisualStudio.TextTemplating.Interfaces" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Globalization" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="FichierGenerator" #>
+<#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
+<#@ parameter name="id_element" type="System.String" #>
+using System.Collections.Generic;
+<#	
+	string class_namespace = archiDocument.Class_namespace;
+
+	// Map id_element - all elements related
+	Dictionary<string, List<string>> dict_related_element = archiDocument.Dict_related_element;
+
+	// list of group
+	List<string> list_group = archiDocument.List_group;
+
+	// list of elements
+	List<string> list_element = archiDocument.List_element;
+
+	// Map idProperty - PropertyName
+	Dictionary<string, string> property_definition_map = archiDocument.Property_definition_map;
+
+	// Map group_id - list_id_elements + list_id_interface
+	Dictionary<string, Dictionary<string,List<string>>> dict_group = archiDocument.Dict_group;
+
+	// Map group_id - namespace
+	Dictionary<string, string> dict_group_name = archiDocument.Dict_group_name;
+
+	// Map id_element - namespace
+	Dictionary<string, string> dict_namespace = archiDocument.Dict_namespace;
+
+	// Map id_element - group
+	Dictionary<string, string> dict_element_group = archiDocument.Dict_element_group;
+
+	// Map view_id - list_id_elements
+	Dictionary<string, List<string>> dict_view = archiDocument.Dict_view;
+	
+	// Map identifier - element
+	Dictionary<string, Element> dict_element = archiDocument.Dict_element;
+
+	// Map identifier - relationship name
+	Dictionary<Tuple<string, string>, string> dict_relationship = archiDocument.Dict_relationship;
+
+	// MultiMap of id_element - [source|target] - [type de relation] - list_id_element
+	Dictionary<string, Dictionary<string, Dictionary<string, List<string>>>> mmap_relationship = archiDocument.Mmap_relationship;
+
+	// Map of specialization of class
+	Dictionary<string, List<string>> mmap_specialization = archiDocument.Mmap_specialization;
+
+	// MultiMap of association
+	Dictionary<string, List<string>> mmap_association = archiDocument.Mmap_association;
+
+	// MultiMap of group access (to generate using ...)
+	Dictionary<string, List<string>> mmap_group_access = archiDocument.Mmap_group_access;
+
+	// MultiMap of element access (a kind of relationship between elements)
+	Dictionary<string, List<string>> mmap_element_access = archiDocument.Mmap_element_access;
+
+	// List of representation
+	List<string> list_representation = new List<string>();
+	
+	// List of data object
+	List<string> list_data_object = new List<string>();
+
+	// List of errors
+	List<string> errors = archiDocument.Errors;
+
+	// List of class created
+	List<string> classes = archiDocument.Classes;
+
+	List<string> list_group_new = archiDocument.List_group_new;
+
+	string id_group;
+	if (!dict_element_group.ContainsKey(id_element))
+		id_group = "id-GroupeUnConnu";
+	else
+		id_group = dict_element_group[id_element];
+
+	Element ele = dict_element[id_element];
+	string class_name = UpperString(ele.Class_name_);
+
+	// Generate used namespaces
+	List<string> list_using;
+	if(mmap_group_access.TryGetValue(id_group, out list_using))
+	{
+		foreach(var id in list_using)
+		{
+#>
+using <#= dict_group_name[id] #>;
+<#
+		}
+	}
+#>
+
+namespace <#= dict_group_name[id_group] #>
+{
+
+	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
+<#
+	// Generate attributes
+	if( mmap_relationship.ContainsKey(id_element) )
+	{ 
+		List<string> list_associated;
+		if (mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_associated))
+		{
+			foreach(var id_associated in list_associated)
+			{
+				if(dict_element.ContainsKey(id_associated))
+				{
+					Element element_associated = dict_element[id_associated];
+					if( element_associated.Type_.Equals("Requirement") ||
+						element_associated.Type_.Equals("BusinessFunction") ||
+						element_associated.Type_.Equals("BusinessProcess"))
+					{
+#>
+	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
+<#
+					}
+				}
+			}
+		}
+
+		List<string> list_trigger;
+		if(mmap_relationship[id_element]["target"].TryGetValue("Triggering", out list_trigger))
+		{
+			foreach(var i in list_trigger)
+			{
+				Element element_associated = dict_element[i];
+				if (element_associated.Type_.Equals("ApplicationEvent"))
+				{								
+#>
+	[EventHandler("<#=element_associated.Class_name_#>")]
+<#
+				}
+			}
+		}
+	}
+
+	if( mmap_association.ContainsKey(id_element))
+	{
+		foreach(var id_associated in mmap_association[id_element])
+		{
+			if(dict_element.ContainsKey(id_associated))
+			{
+				Element element_associated = dict_element[id_associated];
+				if(element_associated.Equals("BusinessEvent"))
+				{
+#>
+	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
+<#
+				}
+			}
+		}
+	}
+				
+	if (!mmap_specialization.Keys.Contains(id_element))
+	{
+#>
+	partial class <#= UpperString(class_name) #> 
+	{
+<#	
+	}
+	else
+	{
+		List<string> list_parent_name = new List<string>();
+		foreach(var e in mmap_specialization[id_element])
+		{
+			if(e.Contains("id"))
+				list_parent_name.Add(dict_element[e].Class_name_);
+			else
+				list_parent_name.Add(e);
+		}
+		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
+						
+#>
+	partial class <#= UpperString(class_name) #> : <#= str_parents#>
+	{
+<#
+	}
+
+	// Generate reference of a class
+	if (mmap_relationship.ContainsKey(id_element))
+	{
+		List<string> list_associated;
+		if (mmap_relationship[id_element]["source"].TryGetValue("Access", out list_associated))
+		{
+			foreach(var id_associated in list_associated)
+			{
+				if(dict_element.ContainsKey(id_associated))
+				{
+					Element element_associated = dict_element[id_associated];
+					if( element_associated.Type_.Equals("BusinessOnject") || 
+						element_associated.Type_.Equals("Representation") || 
+						element_associated.Type_.Equals("DataObject"))
+					{
+						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
+						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
+#>
+		<#= UpperString(element_associated.Class_name_) #> <#= var_name #>_ ;
+
+<#
+					}
+				}
+			}
+		}
+
+		List<string> list_flow;
+		if (mmap_relationship[id_element]["source"].TryGetValue("Flow", out list_flow))
+		{
+			foreach(var id_associated in list_flow)
+			{
+				if(dict_element.ContainsKey(id_associated))
+				{
+					Element element_associated = dict_element[id_associated];
+					if( element_associated.Type_.Equals("ApplicationProcess") || 
+						element_associated.Type_.Equals("ApplicationFunction") )
+					{
+						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
+						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
+#>
+		<#= UpperString(element_associated.Class_name_) #> <#= var_name #>_ ;
+
+<#
+					}
+				}
+			}
+		}
+	}
+#>
+	}
+}
+<#+
+	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
+	{
+		foreach(var g in dict_group.Keys)
+		{
+			foreach(var sg in dict_group[g].Keys)
+				if(dict_group[g][sg].Contains(id))
+					return true;
+		}
+		return false;
+	}
+
+	private bool isInSelectedViews(string id, Dictionary<string, List<string>> dict_view)
+	{
+		foreach(var v in dict_view.Keys)
+		{
+			if(dict_view[v].Contains(id))
+				return true;
+		}
+		return false;
+	}
+
+	private void addImplementation(ref Dictionary<string, List<string>> mmap_specialization, string id_child, string parent)
+	{
+		if (!mmap_specialization.ContainsKey(id_child))
+		{
+			List<string> list_parent = new List<string>();
+			list_parent.Add(parent);
+			mmap_specialization.Add(id_child,list_parent);
+		}
+		else 
+		{
+			mmap_specialization[id_child].Add(parent);
+		}
+	}
+
+	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
+	public string UpperString(string name)
+	{
+		//name = Regex.Replace(name, @"\s\(.*\)", "");
+		name = name.Replace(".", " ");
+        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+        name = name.Replace(" ", "");
+		name = Regex.Replace(name, @"[^\w\.@_]", "");
+		return name[0].ToString().ToUpperInvariant() + name.Substring(1);
+	}
+
+	// Method for creating the object name, deleting the spaces, special characters and lowercasing the string
+	public string LowerString(string name)
+	{
+		//name = Regex.Replace(name, @"\s\(.*\)", "");
+		name = name.Replace(".", " ");
+        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+        name = name.Replace(" ", "");
+		name = Regex.Replace(name, @"[^\w\.@_]", "");
+		return name[0].ToString().ToLowerInvariant() + name.Substring(1);
+	}
+
+	// Method to delete line feed characters like \r, \n 
+	public string DocumentationTraitement(string document)
+	{
+		document = document.Replace("&#xD;","");
+		document = document.Replace("\r"," ");
+		document = document.Replace("\n"," ");
+		document = document.Replace("\t"," ");
+		document = Regex.Replace(document, "\\s{2,}", " ");
+		document = document.Replace("\"","\\\"");
+		return document;
+	}
+#>

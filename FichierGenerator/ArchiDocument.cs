@@ -121,7 +121,7 @@ namespace FichierGenerator
         public List<string> Types { get => types; set => types = value; }
         public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
 
-        public ArchiDocument(string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext")
+        public ArchiDocument(string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
             class_namespace = name_space;
             this.doc = XElement.Load(path);
