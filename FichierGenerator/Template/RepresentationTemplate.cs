@@ -33,25 +33,9 @@ namespace FichierGenerator.Template
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-");
             
-            #line 34 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
-	
+            #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InitializeVar.ttinclude"
+
 	string class_namespace = archiDocument.Class_namespace;
 
 	// Map id_element - all elements related
@@ -125,6 +109,29 @@ using System.Windows.Shapes;
 	Element ele = dict_element[id_element];
 	string class_name = UpperString(ele.Class_name_);
 
+
+            
+            #line default
+            #line hidden
+            this.Write(@"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+");
+            
+            #line 34 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+	
 	// Generate used namespaces
 	List<string> list_using;
 	if(mmap_group_access.TryGetValue(id_group, out list_using))
@@ -137,14 +144,14 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("using ");
             
-            #line 115 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 42 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id]));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 116 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 43 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 		}
 	}
@@ -154,14 +161,14 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\r\nnamespace ");
             
-            #line 121 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 48 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id_group]));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 123 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 50 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 	// Generate representation
 	if(ele.Type_.Equals("Representation"))
@@ -173,14 +180,14 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\tpublic interface I");
             
-            #line 129 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 56 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(class_name)));
             
             #line default
             #line hidden
             this.Write("{}\r\n\r\n");
             
-            #line 131 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 58 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 	if (mmap_relationship.ContainsKey(id_element))
 	{
@@ -200,21 +207,21 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\t[ReferenceModel(");
             
-            #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 72 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 72 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Name_));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 146 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 73 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 					}
 				}
@@ -238,21 +245,21 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\t[ReferenceModel(");
             
-            #line 164 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 91 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 164 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 91 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Name_));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 165 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 92 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 				}
 				if(element_associated.Type_.Equals("Artifact"))
@@ -263,14 +270,14 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\t[Reference(\"");
             
-            #line 170 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 97 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Name_));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 171 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 98 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 				}
 			}
@@ -286,28 +293,28 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\t[Model(");
             
-            #line 181 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 108 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 181 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 108 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(class_name));
             
             #line default
             #line hidden
             this.Write("\")]\r\n\tpartial class ");
             
-            #line 182 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 109 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(class_name)));
             
             #line default
             #line hidden
             this.Write(" : Window\r\n\t{\r\n");
             
-            #line 184 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 111 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 	
 	}
 	else
@@ -329,28 +336,28 @@ using System.Windows.Shapes;
             this.Write("\t/// <summary>\r\n    /// Logique d\'interaction pour MainWindow.xaml\r\n    /// </sum" +
                     "mary>\r\n\t[Model(");
             
-            #line 202 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 129 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 202 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 129 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(class_name));
             
             #line default
             #line hidden
             this.Write("\")]\r\n\tpartial class ");
             
-            #line 203 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 130 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(class_name)));
             
             #line default
             #line hidden
             this.Write(" : Window, ");
             
-            #line 203 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 130 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(str_parents));
             
             #line default
@@ -358,7 +365,7 @@ using System.Windows.Shapes;
             this.Write("\r\n\t{\r\n\t\tpublic MainWindow()\r\n        {\r\n            InitializeComponent();\r\n     " +
                     "   }\r\n");
             
-            #line 209 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 136 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 		}
 
@@ -373,21 +380,21 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\t\r\n\t\t");
             
-            #line 218 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 218 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(p));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 219 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 146 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 			}
 		}
@@ -414,21 +421,21 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\t\t");
             
-            #line 240 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 167 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 240 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 167 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n\r\n");
             
-            #line 242 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 169 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 					}
 				}
@@ -455,21 +462,21 @@ using System.Windows.Shapes;
             #line hidden
             this.Write("\t\t");
             
-            #line 263 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 190 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 263 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 190 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n\r\n");
             
-            #line 265 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+            #line 192 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 						}
 					}
@@ -485,7 +492,7 @@ using System.Windows.Shapes;
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 275 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
+        #line 202 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
 
 	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
 	{

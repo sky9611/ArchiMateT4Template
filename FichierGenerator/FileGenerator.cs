@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
+using Tools;
 
 namespace FichierGenerator
 {
@@ -18,6 +19,9 @@ namespace FichierGenerator
         XNamespace NP;
         XNamespace xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
+        // Dictionary project - directory
+        Dictionary<string, string> dict_project_directory = new Dictionary<string, string>();
+
         public FileGenerator(string file_path)
         {
             this.File_path = file_path;
@@ -28,21 +32,20 @@ namespace FichierGenerator
         }
 
         public static readonly string[] all_types = {
-            "Product",
-            "BusinessObject",
-            "Contract",
-            "Representation",
-            "DataObject",
-            "ApplicationInterface",
-            "ApplicationService",
-            "ApplicationFunction",
-            "ApplicationComponent",
-            "ApplicationEvent",
-            "ApplicationProcess"};
+            ElementConstants.Product,
+            ElementConstants.BusinessObject,
+            ElementConstants.Contract,
+            ElementConstants.Representation,
+            ElementConstants.DataObject,
+            ElementConstants.ApplicationInterface,
+            ElementConstants.ApplicationService,
+            ElementConstants.ApplicationFunction,
+            ElementConstants.ApplicationComponent,
+            ElementConstants.ApplicationEvent,
+            ElementConstants.ApplicationProcess };
 
         public string File_path { get; set; }
 
-        [STAThread]
         /// <summary>
         ///     Method to run the t4 template
         /// </summary>
@@ -66,37 +69,37 @@ namespace FichierGenerator
             archiDocumentTemp.Update(my_types, my_groups, my_views, name_space);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocumentTemp);
 
-            //GenerateSolution(destinationFolder, archiDocumentTemp.Mmap_solution);
+            GenerateSolution(destinationFolder, archiDocumentTemp.Mmap_solution);
 
             foreach (var id_element in archiDocumentSerialized.List_element)
             {
                 Element ele = dict_element[id_element];
-                if (ele.Type_.Equals("ApplicationEvent") && ele.Properties_.ContainsKey("Implementation"))
+                if (ele.Type_.Equals(ElementConstants.ApplicationEvent) && ele.Properties_.ContainsKey("Implementation"))
                     GenerateApplicationEvent(archiDocumentSerialized, id_element);
 
                 //Directory.CreateDirectory("..\\..\\Generated\\Contract");
 
                 switch (ele.Type_)
                 {
-                    case "Contract":
+                    case ElementConstants.Contract:
                         GenerateContract(archiDocumentSerialized, id_element);
                         break;
-                    case "BusinessObject":
+                    case ElementConstants.BusinessObject:
                         GenerateBusinessObject(archiDocumentSerialized, id_element);
                         break;
-                    case "ApplicationService":
+                    case ElementConstants.ApplicationService:
                         GenerateApplicationService(archiDocumentSerialized, id_element);
                         break;
-                    case "ApplicationProcess":
+                    case ElementConstants.ApplicationProcess:
                         GenerateApplicationProcess(archiDocumentSerialized, id_element);
                         break;
-                    case "ApplicationInterface":
+                    case ElementConstants.ApplicationInterface:
                         GenerateInterface(archiDocumentSerialized, id_element);
                         break;
-                    case "Representation":
+                    case ElementConstants.Representation:
                         GenerateRepresentation(archiDocumentSerialized, id_element);
                         break;
-                    case "DataObject":
+                    case ElementConstants.DataObject:
                         GenerateRepresentation(archiDocumentSerialized, id_element);
                         break;
                 }
@@ -113,13 +116,13 @@ namespace FichierGenerator
             List<string> list_view = new List<string>();
             if (archiDocument.Mmap_relationship.ContainsKey(id_solution))
             {
-                if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Triggering", out list_FT))
+                if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue(RelaionshipConstants.Triggering, out list_FT))
                     foreach (var i in list_FT)
-                        if (dict_element[i].Type_.Equals("Representation"))
+                        if (dict_element[i].Type_.Equals(ElementConstants.Representation))
                             list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_) + ".xaml");
-                if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_FT))
+                if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue(RelaionshipConstants.Flow, out list_FT))
                     foreach (var i in list_FT)
-                        if (dict_element[i].Type_.Equals("Representation"))
+                        if (dict_element[i].Type_.Equals(ElementConstants.Representation))
                             list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_) + ".xaml");
             }
 
@@ -145,15 +148,15 @@ namespace FichierGenerator
             File.WriteAllText(solution_path + "\\App.xaml.cs", generatedText);
         }
 
-        [STAThread]
         private void GenerateSolution(string destinationFolder, Dictionary<string, List<string>> dict)
         {
             System.Type type = Type.GetTypeFromProgID("VisualStudio.DTE.15.0");
-            Object obj = System.Activator.CreateInstance(type, true);
-            EnvDTE.DTE dte = (EnvDTE.DTE)obj;
+            
 
             foreach (var id_solution in dict.Keys)
             {
+                Object obj = System.Activator.CreateInstance(type, true);
+                EnvDTE.DTE dte = (EnvDTE.DTE)obj;
                 List<string> list_projet = dict[id_solution];
                 string solution_name = StringHelper.UpperString(dict_element[id_solution].Class_name_);
 
@@ -166,8 +169,8 @@ namespace FichierGenerator
                 if (archiDocument.Mmap_relationship.ContainsKey(id_solution) &&
                      archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_temp))
                     foreach (var i in list_temp)
-                        if (dict_element[i].Type_.Equals("ApplicationFunction") ||
-                             dict_element[i].Type_.Equals("ApplicationProcess"))
+                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationFunction) ||
+                             dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
                             list_launcher.Add(StringHelper.UpperString(dict_element[i].Class_name_));
                 string launcher = string.Join(",", list_launcher);
 
@@ -195,12 +198,15 @@ namespace FichierGenerator
                     solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
                         Path.Combine(Path.GetFullPath(solution_path), projet_name), projet_name);
 
+                    dict_project_directory.Add(id_projet, Path.Combine(Path.GetFullPath(solution_path), projet_name));
+
                     Thread.Sleep(1000);
                 }
 
-
                 dte.ExecuteCommand("File.SaveAll");
-                
+                dte.Quit();
+
+
 
                 //// create a C# class library
                 //solution.AddFromTemplate(@"C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\ProjectTemplatesCache\CSharp\Windows\1033\ClassLibrary\csClassLibrary.vstemplate",
@@ -209,8 +215,6 @@ namespace FichierGenerator
                 // save and quit
 
             }
-
-            dte.Quit();
         }
         
         private string Transform(ArchiDocumentSerialized archiDocumentSerialized, string templateFilePath = "..\\..\\Template\\Generator2.t4")
@@ -269,22 +273,6 @@ namespace FichierGenerator
             return list_view.ToArray();
         }
 
-        [STAThread]
-        static void Main(string[] args)
-        {
-            FileGenerator fileGenerator = new FileGenerator(@"..\..\lib\MODELE_VNEXT.xml");
-
-            List<string> list = new List<string>();
-            //string[] types = { "BusinessObject" };
-            string[] types = list.ToArray();
-            //string[] groups = { "Web" };
-            string[] groups = list.ToArray();
-            //string[] views = { "g¨¦n¨¦ration couches client" };
-            //string[] views = { "g¨¦n¨¦ration couches serveur" };
-            string[] views = list.ToArray();
-            fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, "Maidis.VNext.");
-        }
-
         private void GenerateContract(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
             string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
@@ -294,7 +282,8 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\"+ name + ".cs", generatedText);
+            //File.WriteAllText("..\\..\\Generated" + "\\"+ name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
         }
 
         private void GenerateBusinessObject(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -306,7 +295,7 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
         }
 
         private void GenerateApplicationService(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -318,7 +307,7 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
         }
 
         private void GenerateApplicationEvent(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -330,7 +319,7 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
         }
 
         private void GenerateApplicationProcess(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -342,7 +331,7 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
         }
 
         private void GenerateInterface(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -354,7 +343,7 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
         }
 
         private void GenerateRepresentation(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -366,7 +355,7 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
 
             var viewTemplate = new ViewTemplate();
             viewTemplate.Session = new TextTemplatingSession();
@@ -377,7 +366,7 @@ namespace FichierGenerator
             viewTemplate.Session["viewName"] = StringHelper.UpperString(name);
             viewTemplate.Initialize();
             generatedText = viewTemplate.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".xaml", generatedText);
+            WriteToFile(id_element, generatedText, ".xaml", "..\\..\\Generated");
         }
 
         private void GenerateDataObject(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -389,7 +378,7 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".cs", "..\\..\\Generated");
 
             var sqlTemplate = new SQLTemplate();
             sqlTemplate.Session = new TextTemplatingSession();
@@ -397,8 +386,35 @@ namespace FichierGenerator
             sqlTemplate.Session["id_element"] = id_element;
             sqlTemplate.Initialize();
             generatedText = sqlTemplate.TransformText();
-            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+            WriteToFile(id_element, generatedText, ".sql", "..\\..\\Generated");
         }
+
+        private void WriteToFile(string id_element, string generatedText, string type, string destinationFolder)
+        {
+            string id_project;
+            string file_name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            if (archiDocument.Dict_element_project.TryGetValue(id_element, out id_project))
+                File.WriteAllText(dict_project_directory[id_project] + "\\" + file_name + type, generatedText);
+            else
+                // TO be changed after
+                File.WriteAllText(destinationFolder + "\\" + file_name + type, generatedText);
+        }
+
+        static void Main(string[] args)
+        {
+            FileGenerator fileGenerator = new FileGenerator(@"..\..\lib\MODELE_VNEXT.xml");
+
+            List<string> list = new List<string>();
+            //string[] types = { ElementConstants.BusinessObject };
+            string[] types = list.ToArray();
+            //string[] groups = { "Web" };
+            string[] groups = list.ToArray();
+            //string[] views = { "g¨¦n¨¦ration couches client" };
+            string[] views = { "g¨¦n¨¦ration couches application" };
+            //string[] views = list.ToArray();
+            fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, "Maidis.VNext.");
+        }
+
 
     }
 }

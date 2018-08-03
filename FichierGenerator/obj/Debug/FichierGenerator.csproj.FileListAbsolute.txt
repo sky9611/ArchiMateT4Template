@@ -83,3 +83,4 @@ D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\F
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\CWDev.SLNTools.Core.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\CWDev.SLNTools.Core.pdb
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\CWDev.SLNTools.Core.xml
+D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Tools.dll

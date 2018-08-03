@@ -16,81 +16,9 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
+<#@ include file="InitializeVar.ttinclude" #>
 using System.Collections.Generic;
 <#	
-	string class_namespace = archiDocument.Class_namespace;
-
-	// Map id_element - all elements related
-	Dictionary<string, List<string>> dict_related_element = archiDocument.Dict_related_element;
-
-	// list of group
-	List<string> list_group = archiDocument.List_group;
-
-	// list of elements
-	List<string> list_element = archiDocument.List_element;
-
-	// Map idProperty - PropertyName
-	Dictionary<string, string> property_definition_map = archiDocument.Property_definition_map;
-
-	// Map group_id - list_id_elements + list_id_interface
-	Dictionary<string, Dictionary<string,List<string>>> dict_group = archiDocument.Dict_group;
-
-	// Map group_id - namespace
-	Dictionary<string, string> dict_group_name = archiDocument.Dict_group_name;
-
-	// Map id_element - namespace
-	Dictionary<string, string> dict_namespace = archiDocument.Dict_namespace;
-
-	// Map id_element - group
-	Dictionary<string, string> dict_element_group = archiDocument.Dict_element_group;
-
-	// Map view_id - list_id_elements
-	Dictionary<string, List<string>> dict_view = archiDocument.Dict_view;
-	
-	// Map identifier - element
-	Dictionary<string, Element> dict_element = archiDocument.Dict_element;
-
-	// Map identifier - relationship name
-	Dictionary<Tuple<string, string>, string> dict_relationship = archiDocument.Dict_relationship;
-
-	// MultiMap of id_element - [source|target] - [type de relation] - list_id_element
-	Dictionary<string, Dictionary<string, Dictionary<string, List<string>>>> mmap_relationship = archiDocument.Mmap_relationship;
-
-	// Map of specialization of class
-	Dictionary<string, List<string>> mmap_specialization = archiDocument.Mmap_specialization;
-
-	// MultiMap of association
-	Dictionary<string, List<string>> mmap_association = archiDocument.Mmap_association;
-
-	// MultiMap of group access (to generate using ...)
-	Dictionary<string, List<string>> mmap_group_access = archiDocument.Mmap_group_access;
-
-	// MultiMap of element access (a kind of relationship between elements)
-	Dictionary<string, List<string>> mmap_element_access = archiDocument.Mmap_element_access;
-
-	// List of representation
-	List<string> list_representation = new List<string>();
-	
-	// List of data object
-	List<string> list_data_object = new List<string>();
-
-	// List of errors
-	List<string> errors = archiDocument.Errors;
-
-	// List of class created
-	List<string> classes = archiDocument.Classes;
-
-	List<string> list_group_new = archiDocument.List_group_new;
-
-	string id_group;
-	if (!dict_element_group.ContainsKey(id_element))
-		id_group = "id-GroupeUnConnu";
-	else
-		id_group = dict_element_group[id_element];
-
-	Element ele = dict_element[id_element];
-	string class_name = UpperString(ele.Class_name_);
-
 	// Generate used namespaces
 	List<string> list_using;
 	if(mmap_group_access.TryGetValue(id_group, out list_using))
