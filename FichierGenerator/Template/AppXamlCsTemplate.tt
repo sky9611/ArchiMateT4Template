@@ -5,6 +5,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 
 <#@ parameter name="solutionName" type="System.String" #>
+<#@ parameter name="launcher" type="System.String" #>
 
 using System.Windows;
  
@@ -20,7 +21,7 @@ namespace <#= solutionName #>
         public  App()
         {
             CBootstrapApplicationWindows application = new CBootstrapApplicationWindows(this);
-            application.Start();
+            application.Start(launcher);
         }
     }
 }

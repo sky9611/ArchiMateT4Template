@@ -38,6 +38,7 @@ namespace FichierGenerator
             classes = archiDocument.Classes;
             list_group_new = new List<string>(archiDocument.List_group_new);
             mmap_solution = archiDocument.Mmap_solution;
+            dict_element_project = archiDocument.Dict_element_project;
         }
 
         public void Update(ArchiDocument archiDocument)
@@ -65,6 +66,7 @@ namespace FichierGenerator
             errors = archiDocument.Errors;
             classes = archiDocument.Classes;
             list_group_new = new List<string>(archiDocument.List_group_new);
+            dict_element_project = archiDocument.Dict_element_project;
         }
 
         // Get the nampespaces 
@@ -77,6 +79,9 @@ namespace FichierGenerator
 
         // list of elements
         List<string> list_element = new List<string>();
+
+        // Map id_element - projet(componant applicative) associé
+        Dictionary<string, string> dict_element_project = new Dictionary<string, string>();
 
         // Map idProperty - PropertyName
         Dictionary<string, string> property_definition_map = new Dictionary<string, string>();
@@ -159,5 +164,6 @@ namespace FichierGenerator
         public List<string> Types { get => types; set => types = value; }
         public List<string> List_group_new { get => list_group_new; set => list_group_new = value; }
         public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
+        public Dictionary<string, string> Dict_element_project { get => dict_element_project; set => dict_element_project = value; }
     }
 }

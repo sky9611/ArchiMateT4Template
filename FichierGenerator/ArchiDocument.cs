@@ -21,6 +21,12 @@ namespace FichierGenerator
         // Map id_element - all elements related
         Dictionary<string, List<string>> dict_related_element = new Dictionary<string, List<string>>();
 
+        // Map id_element - projet(componant applicative) associé
+        Dictionary<string, string> dict_element_project = new Dictionary<string, string>();
+
+        // list of all project(application component)
+        List<string> list_project = new List<string>();
+
         // list of group
         List<string> list_group = new List<string>();
 
@@ -120,6 +126,8 @@ namespace FichierGenerator
         public IEnumerable<string> List_group_new { get => list_group_new; set => list_group_new = value; }
         public List<string> Types { get => types; set => types = value; }
         public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
+        public Dictionary<string, string> Dict_element_project { get => dict_element_project; set => dict_element_project = value; }
+        public List<string> List_project { get => list_project; set => list_project = value; }
 
         public ArchiDocument(string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
@@ -161,6 +169,7 @@ namespace FichierGenerator
                     element.Class_name_ = properties["Implementation"];
                 else
                     element.Class_name_ = element.Name_;
+                if (element.Type_.Equals("ApplicationComponent")) list_project.Add(element.Identifier_);
                 dict_element.Add(element.Identifier_, element);
             }
 
@@ -301,8 +310,33 @@ namespace FichierGenerator
                 }
             }
 
+            // Make the dict id_element - project
+            foreach (var id_project in list_project)
+            {
+                List<string> list_element = new List<string>();
+                if (mmap_relationship.ContainsKey(id_project))
+                {
+                    if (mmap_relationship[id_project]["source"].TryGetValue("Association", out list_element))
+                        foreach (var i in list_element)
+                            if (dict_element[i].Type_.Equals("BusinessObject"))
+                                dict_element_project.Add(i, id_project);
+                    if (mmap_relationship[id_project]["source"].TryGetValue("Aggregation", out list_element))
+                        foreach (var i in list_element)
+                            if (dict_element[i].Type_.Equals("ApplicationInterface"))
+                                dict_element_project.Add(i, id_project);
+                    if (mmap_relationship[id_project]["target"].TryGetValue("Assignment", out list_element))
+                        foreach (var i in list_element)
+                            if (dict_element[i].Type_.Equals("ApplicationService"))
+                                dict_element_project.Add(i, id_project);
+                    if (mmap_relationship[id_project]["target"].TryGetValue("Access", out list_element))
+                        foreach (var i in list_element)
+                            if (dict_element[i].Type_.Equals("DataObject"))
+                                dict_element_project.Add(i, id_project);
+                }
+            }
+
             // Make the mmap of solution - projects
-            foreach(var id in dict_element.Keys)
+            foreach (var id in dict_element.Keys)
             {
                 if (dict_element[id].Type_.Equals("Product"))
                 {

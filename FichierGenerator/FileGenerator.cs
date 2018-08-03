@@ -57,10 +57,7 @@ namespace FichierGenerator
             string[] types,
             string[] groups,
             string[] views,
-            string name_space,
-            string CSTemplateFilePath = "..\\..\\Template\\Generator2.t4",
-            string SQLTemplateFilePath = "..\\..\\Template\\SQLScriptTemplate.t4",
-            string XamlTemplateFilePath = "..\\..\\Template\\ViewTemplate.t4")
+            string name_space)
         {
             var my_types = (types != null) && (types.Length > 0) ? types : all_types;
             var my_groups = (groups != null) && (groups.Length > 0) ? groups : null;
@@ -71,73 +68,38 @@ namespace FichierGenerator
 
             //GenerateSolution(destinationFolder, archiDocumentTemp.Mmap_solution);
 
-            if (CSTemplateFilePath.Length > 0)
+            foreach (var id_element in archiDocumentSerialized.List_element)
             {
-                foreach (var id_element in archiDocumentSerialized.List_element)
+                Element ele = dict_element[id_element];
+                if (ele.Type_.Equals("ApplicationEvent") && ele.Properties_.ContainsKey("Implementation"))
+                    GenerateApplicationEvent(archiDocumentSerialized, id_element);
+
+                //Directory.CreateDirectory("..\\..\\Generated\\Contract");
+
+                switch (ele.Type_)
                 {
-                    Element ele = dict_element[id_element];
-                    if (ele.Type_.Equals("ApplicationEvent") && ele.Properties_.ContainsKey("Implementation"))
-                        GenerateApplicationEvent(archiDocumentSerialized, id_element);
-                    switch (ele.Type_)
-                    {
-                        case "Contract":
-                            GenerateContract(archiDocumentSerialized, id_element);
-                            break;
-                        case "BusinessObject":
-                            GenerateBusinessObject(archiDocumentSerialized, id_element);
-                            break;
-                        case "ApplicationService":
-                            GenerateApplicationService(archiDocumentSerialized, id_element);
-                            break;
-                        case "ApplicationProcess":
-                            GenerateApplicationProcess(archiDocumentSerialized, id_element);
-                            break;
-                        case "ApplicationInterface":
-                            GenerateInterface(archiDocumentSerialized, id_element);
-                            break;
-                        case "Representation":
-                            GenerateRepresentation(archiDocumentSerialized, id_element);
-                            break;
-                        case "DataObject":
-                            GenerateRepresentation(archiDocumentSerialized, id_element);
-                            break;
-                    }
+                    case "Contract":
+                        GenerateContract(archiDocumentSerialized, id_element);
+                        break;
+                    case "BusinessObject":
+                        GenerateBusinessObject(archiDocumentSerialized, id_element);
+                        break;
+                    case "ApplicationService":
+                        GenerateApplicationService(archiDocumentSerialized, id_element);
+                        break;
+                    case "ApplicationProcess":
+                        GenerateApplicationProcess(archiDocumentSerialized, id_element);
+                        break;
+                    case "ApplicationInterface":
+                        GenerateInterface(archiDocumentSerialized, id_element);
+                        break;
+                    case "Representation":
+                        GenerateRepresentation(archiDocumentSerialized, id_element);
+                        break;
+                    case "DataObject":
+                        GenerateRepresentation(archiDocumentSerialized, id_element);
+                        break;
                 }
-            }
-
-            if (SQLTemplateFilePath.Length > 0)
-            {
-                var output = Transform(archiDocumentSerialized, SQLTemplateFilePath);
-                output = output.Replace("<T>","");
-                XElement xml = XElement.Parse(output);
-
-                //var generator = new SQLScriptTemplate();
-                //generator.Session = new Microsoft.VisualStudio.TextTemplating.TextTemplatingSession();
-                //generator.Session["archiDocument"] = archiDocumentSerialized;
-                //generator.Initialize();
-                //var generatedCode = generator.TransformText();
-                //XElement xml = XElement.Parse(generatedCode);
-
-                foreach (var node in xml.Descendants("script"))
-                    System.IO.File.WriteAllText(Path.Combine(destinationFolder, node.Attribute("name").Value + ".sql"), node.Value);
-            }
-
-            if (XamlTemplateFilePath.Length > 0)
-            {
-                foreach(var view in archiDocument.List_representation)
-                {
-                    var viewTemplate = new ViewTemplate();
-                    viewTemplate.Session = new TextTemplatingSession();
-                    if (archiDocument.Dict_element_group.ContainsKey(view.Identifier_))
-                        viewTemplate.Session["groupName"] = StringHelper.UpperString(archiDocument.Dict_element[archiDocument.Dict_element_group[view.Identifier_]].Class_name_);
-                    else
-                        viewTemplate.Session["groupName"] = "UnknownGroup";
-                    viewTemplate.Session["viewName"] = StringHelper.UpperString(view.Class_name_);
-                    viewTemplate.Initialize();
-                    var generatedText = viewTemplate.TransformText();
-                    File.WriteAllText(destinationFolder + "\\" +StringHelper.UpperString(view.Class_name_) + ".xaml", generatedText);
-                }
-                
             }
         }
 
@@ -172,11 +134,12 @@ namespace FichierGenerator
             File.WriteAllText(solution_path + "\\App.xaml", generatedText);
         }
 
-        private void GenerateSolutionXamlCs(string solution_path, string solution_name)
+        private void GenerateSolutionXamlCs(string solution_path, string solution_name, string launcher)
         {
             var appXamlCsTemplate = new AppXamlCsTemplate();
             appXamlCsTemplate.Session = new TextTemplatingSession();
             appXamlCsTemplate.Session["solutionName"] = solution_name;
+            appXamlCsTemplate.Session["launcher"] = launcher;
             appXamlCsTemplate.Initialize();
             var generatedText = appXamlCsTemplate.TransformText();
             File.WriteAllText(solution_path + "\\App.xaml.cs", generatedText);
@@ -197,7 +160,17 @@ namespace FichierGenerator
                 //dte.MainWindow.Visible = true; // optional if you want to See VS doing its thing*
                 string path = destinationFolder;
                 string solution_path = System.IO.Path.Combine(path, solution_name);
-                
+
+                List<string> list_launcher = new List<string>();
+                List<string> list_temp;
+                if (archiDocument.Mmap_relationship.ContainsKey(id_solution) &&
+                     archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_temp))
+                    foreach (var i in list_temp)
+                        if (dict_element[i].Type_.Equals("ApplicationFunction") ||
+                             dict_element[i].Type_.Equals("ApplicationProcess"))
+                            list_launcher.Add(StringHelper.UpperString(dict_element[i].Class_name_));
+                string launcher = string.Join(",", list_launcher);
+
                 // create the folder for the solution
                 System.IO.Directory.CreateDirectory(solution_path);
 
@@ -205,7 +178,7 @@ namespace FichierGenerator
                 GenerateSolutionXaml(solution_path, solution_name, id_solution);
 
                 // Generate App.xaml.cs
-                GenerateSolutionXamlCs(solution_path, solution_name);
+                GenerateSolutionXamlCs(solution_path, solution_name, launcher);
 
                 // create a new solution
                 dte.Solution.Create(solution_path, solution_name);
@@ -394,6 +367,17 @@ namespace FichierGenerator
             template.Initialize();
             var generatedText = template.TransformText();
             File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+
+            var viewTemplate = new ViewTemplate();
+            viewTemplate.Session = new TextTemplatingSession();
+            if (archiDocument.Dict_element_group.ContainsKey(id_element))
+                viewTemplate.Session["groupName"] = StringHelper.UpperString(archiDocument.Dict_element[archiDocument.Dict_element_group[id_element]].Class_name_);
+            else
+                viewTemplate.Session["groupName"] = "UnknownGroup";
+            viewTemplate.Session["viewName"] = StringHelper.UpperString(name);
+            viewTemplate.Initialize();
+            generatedText = viewTemplate.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".xaml", generatedText);
         }
 
         private void GenerateDataObject(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -405,6 +389,14 @@ namespace FichierGenerator
             template.Session["id_element"] = id_element;
             template.Initialize();
             var generatedText = template.TransformText();
+            File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
+
+            var sqlTemplate = new SQLTemplate();
+            sqlTemplate.Session = new TextTemplatingSession();
+            sqlTemplate.Session["archiDocument"] = archiDocumentSerialized;
+            sqlTemplate.Session["id_element"] = id_element;
+            sqlTemplate.Initialize();
+            generatedText = sqlTemplate.TransformText();
             File.WriteAllText("..\\..\\Generated" + "\\" + name + ".cs", generatedText);
         }
 

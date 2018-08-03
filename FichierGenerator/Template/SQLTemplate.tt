@@ -1,0 +1,44 @@
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ assembly name="mscorlib" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="Microsoft.VisualStudio.TextTemplating.Interfaces" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Globalization" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="FichierGenerator" #>
+<#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
+<#@ parameter name="id_element" type="System.String" #>
+<#
+	Element ele = archiDocument.Dict_element[id_element];
+#>
+CREATE TABLE <#= ele.Class_name_ #>
+(
+<#	
+	foreach(var p in ele.Properties_.Keys)
+	{
+		int i=0;
+		if (i!=ele.Properties_.Keys.Count()-1)
+		{
+#>
+	<#= p #> <#= ele.Properties_[p] #>, 
+
+<#
+		}
+		else
+		{
+#>
+	<#= p #> <#= ele.Properties_[p] #> 
+<#
+		}
+		i++;
+	}
+#>
+)
