@@ -5,6 +5,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using Tools;
@@ -27,9 +28,24 @@ namespace FichierGenerator
             this.File_path = file_path;
             doc = XElement.Load(file_path);
             NP = doc.GetDefaultNamespace();
-            archiDocument = new ArchiDocument(file_path);
+            archiDocument = new ArchiDocument(dict_implementation_defaut, file_path);
             dict_element = archiDocument.Dict_element;
         }
+
+        public string[] getAllElements()
+        {
+            return dict_element.Keys.ToArray();
+        }
+
+        public static readonly Dictionary<string, string> dict_implementation_defaut = new Dictionary<string, string>{
+            {ElementConstants.BusinessObject,"IBusinessObject"},
+            {ElementConstants.Contract, "CContract"},
+            {ElementConstants.ApplicationEvent, "EventArgs"},
+            {ElementConstants.ApplicationComponent, "Component"},
+            {ElementConstants.DataObject, "DAO"},
+            {ElementConstants.ApplicationProcess, "UseCaseWorkflow"},
+            {ElementConstants.ApplicationService, "UseCaseWorkflow"},
+        };
 
         public static readonly string[] all_types = {
             ElementConstants.Product,
@@ -60,16 +76,17 @@ namespace FichierGenerator
             string[] types,
             string[] groups,
             string[] views,
+            string[] elements,
             string name_space)
         {
             var my_types = (types != null) && (types.Length > 0) ? types : all_types;
             var my_groups = (groups != null) && (groups.Length > 0) ? groups : null;
             var my_views = (views != null) && (views.Length > 0) ? views : null;
             ArchiDocument archiDocumentTemp = archiDocument;
-            archiDocumentTemp.Update(my_types, my_groups, my_views, name_space);
+            archiDocumentTemp.Update(my_types, my_groups, my_views, elements, name_space);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocumentTemp);
 
-            GenerateSolution(destinationFolder, archiDocumentTemp.Mmap_solution);
+            //GenerateSolution(destinationFolder, archiDocumentTemp.Mmap_solution);
 
             foreach (var id_element in archiDocumentSerialized.List_element)
             {
@@ -148,73 +165,79 @@ namespace FichierGenerator
             File.WriteAllText(solution_path + "\\App.xaml.cs", generatedText);
         }
 
-        private void GenerateSolution(string destinationFolder, Dictionary<string, List<string>> dict)
+        public void GenerateSolution(string destinationFolder, string solution_name)
         {
             System.Type type = Type.GetTypeFromProgID("VisualStudio.DTE.15.0");
-            
+            Dictionary<string, List<string>> dict = archiDocument.Mmap_solution;
 
-            foreach (var id_solution in dict.Keys)
+            var id_solution = dict.FirstOrDefault(x => dict_element[x.Key].Name_ == solution_name).Key;
+
+            Object obj = System.Activator.CreateInstance(type, true);
+            EnvDTE.DTE dte = (EnvDTE.DTE)obj;
+            List<string> list_projet = dict[id_solution];
+            solution_name = StringHelper.UpperString(solution_name);
+
+            //dte.MainWindow.Visible = true; // optional if you want to See VS doing its thing*
+            string path = destinationFolder;
+            string solution_path = System.IO.Path.Combine(path, solution_name);
+
+            List<string> list_launcher = new List<string>();
+            List<string> list_temp;
+            if (archiDocument.Mmap_relationship.ContainsKey(id_solution) &&
+                    archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_temp))
+                foreach (var i in list_temp)
+                    if (dict_element[i].Type_.Equals(ElementConstants.ApplicationFunction) ||
+                            dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
+                        list_launcher.Add(StringHelper.UpperString(dict_element[i].Class_name_));
+            string launcher = string.Join(",", list_launcher);
+
+            // create the folder for the solution
+            System.IO.Directory.CreateDirectory(solution_path);
+
+            // Generate App.xaml
+            GenerateSolutionXaml(solution_path, solution_name, id_solution);
+
+            // Generate App.xaml.cs
+            GenerateSolutionXamlCs(solution_path, solution_name, launcher);
+
+            // create a new solution
+            dte.Solution.Create(solution_path, solution_name);
+            var solution = dte.Solution;
+            solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ConsoleApplication\csConsoleApplication.vstemplate"),
+                    Path.Combine(Path.GetFullPath(solution_path), solution_name), solution_name);
+            Thread.Sleep(1000);
+            // create a C# ConsoleApp app
+            foreach (var id_projet in list_projet)
             {
-                Object obj = System.Activator.CreateInstance(type, true);
-                EnvDTE.DTE dte = (EnvDTE.DTE)obj;
-                List<string> list_projet = dict[id_solution];
-                string solution_name = StringHelper.UpperString(dict_element[id_solution].Class_name_);
+                string projet_name = StringHelper.UpperString(dict_element[id_projet].Class_name_);
+                //Console.WriteLine(Directory.GetCurrentDirectory());
 
-                //dte.MainWindow.Visible = true; // optional if you want to See VS doing its thing*
-                string path = destinationFolder;
-                string solution_path = System.IO.Path.Combine(path, solution_name);
+                string project_path = Path.Combine(Path.GetFullPath(solution_path), projet_name);
 
-                List<string> list_launcher = new List<string>();
-                List<string> list_temp;
-                if (archiDocument.Mmap_relationship.ContainsKey(id_solution) &&
-                     archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_temp))
-                    foreach (var i in list_temp)
-                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationFunction) ||
-                             dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
-                            list_launcher.Add(StringHelper.UpperString(dict_element[i].Class_name_));
-                string launcher = string.Join(",", list_launcher);
+                solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
+                    project_path, projet_name);
 
-                // create the folder for the solution
-                System.IO.Directory.CreateDirectory(solution_path);
+                string text = File.ReadAllText(project_path + "\\Properties\\AssemblyInfo.cs");
+                Regex regex = new Regex(@""+ projet_name);
+                text = regex.Replace(text, solution_name, 1, text.IndexOf(projet_name) + projet_name.Length);
+                File.WriteAllText(project_path + "\\Properties\\AssemblyInfo.cs", text);
 
-                // Generate App.xaml
-                GenerateSolutionXaml(solution_path, solution_name, id_solution);
+                dict_project_directory.Add(id_projet, Path.Combine(Path.GetFullPath(solution_path), projet_name));
 
-                // Generate App.xaml.cs
-                GenerateSolutionXamlCs(solution_path, solution_name, launcher);
-
-                // create a new solution
-                dte.Solution.Create(solution_path, solution_name);
-                var solution = dte.Solution;
-                solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ConsoleApplication\csConsoleApplication.vstemplate"),
-                        Path.Combine(Path.GetFullPath(solution_path), solution_name), solution_name);
                 Thread.Sleep(1000);
-                // create a C# ConsoleApp app
-                foreach (var id_projet in list_projet)
-                {
-                    string projet_name = StringHelper.UpperString(dict_element[id_projet].Class_name_);
-                    //Console.WriteLine(Directory.GetCurrentDirectory());
-
-                    solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
-                        Path.Combine(Path.GetFullPath(solution_path), projet_name), projet_name);
-
-                    dict_project_directory.Add(id_projet, Path.Combine(Path.GetFullPath(solution_path), projet_name));
-
-                    Thread.Sleep(1000);
-                }
-
-                dte.ExecuteCommand("File.SaveAll");
-                dte.Quit();
-
-
-
-                //// create a C# class library
-                //solution.AddFromTemplate(@"C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\ProjectTemplatesCache\CSharp\Windows\1033\ClassLibrary\csClassLibrary.vstemplate",
-                //    @"C:\NewSolution\ClassLibrary", "ClassLibrary");
-
-                // save and quit
-
             }
+
+            dte.ExecuteCommand("File.SaveAll");
+            dte.Quit();
+
+
+
+            //// create a C# class library
+            //solution.AddFromTemplate(@"C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\ProjectTemplatesCache\CSharp\Windows\1033\ClassLibrary\csClassLibrary.vstemplate",
+            //    @"C:\NewSolution\ClassLibrary", "ClassLibrary");
+
+            // save and quit
+
         }
         
         private string Transform(ArchiDocumentSerialized archiDocumentSerialized, string templateFilePath = "..\\..\\Template\\Generator2.t4")
@@ -394,7 +417,15 @@ namespace FichierGenerator
             string id_project;
             string file_name = StringHelper.UpperString(dict_element[id_element].Class_name_);
             if (archiDocument.Dict_element_project.TryGetValue(id_element, out id_project))
-                File.WriteAllText(dict_project_directory[id_project] + "\\" + file_name + type, generatedText);
+                try
+                {
+                    File.WriteAllText(dict_project_directory[id_project] + "\\" + file_name + type, generatedText);
+                }
+                catch
+                {
+                    // TO be changed after
+                    File.WriteAllText(destinationFolder + "\\" + file_name + type, generatedText);
+                }
             else
                 // TO be changed after
                 File.WriteAllText(destinationFolder + "\\" + file_name + type, generatedText);
@@ -411,10 +442,11 @@ namespace FichierGenerator
             string[] groups = list.ToArray();
             //string[] views = { "g¨¦n¨¦ration couches client" };
             string[] views = { "g¨¦n¨¦ration couches application" };
+            string[] elements = { "GererAccueilPatient" };
+            //string[] elements = list.ToArray();
             //string[] views = list.ToArray();
-            fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, "Maidis.VNext.");
+            fileGenerator.GenerateSolution("..\\..\\Generated", "Amies VNext");
+            fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, elements, "Maidis.VNext.");
         }
-
-
     }
 }

@@ -11,7 +11,10 @@ namespace FichierGenerator
     public class ArchiDocument
     {
         string class_namespace;
-        
+
+        // User settings for the implenmentation of different class
+        Dictionary<string, string> dict_implementation = new Dictionary<string, string>();
+
         // Open the prototype document.
         XElement doc;
 
@@ -129,8 +132,9 @@ namespace FichierGenerator
         public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
         public Dictionary<string, string> Dict_element_project { get => dict_element_project; set => dict_element_project = value; }
         public List<string> List_project { get => list_project; set => list_project = value; }
+        public Dictionary<string, string> Dict_implementation { get => dict_implementation; set => dict_implementation = value; }
 
-        public ArchiDocument(string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
+        public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
             class_namespace = name_space;
             this.doc = XElement.Load(path);
@@ -403,15 +407,13 @@ namespace FichierGenerator
             }
         }
 
-        public void Update(string[] types, string[] groups, string[] views, string name_space)
+        public void Update(string[] types, string[] groups, string[] views, string[] elements, string name_space)
         {
             this.class_namespace = name_space;
             this.types = types.ToList();
             // Make the map of views
             IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
-                                               where views == null ||
-                                                     views.Contains(e.Element(NP + "name").Value) ||
-                                                     views.Count() == 0
+                                               where views.Contains(e.Element(NP + "name").Value)
                                                select e;
             foreach (var ele in xeles_view)
             {
@@ -422,6 +424,7 @@ namespace FichierGenerator
                 list_group.AddRange(list_group_child);
                 list_element.AddRange(list_ele_child);
             }
+
             // Make the list of related group and elements
             if (groups != null)
             {
@@ -455,8 +458,12 @@ namespace FichierGenerator
             }
             list_element = list_element.Distinct().ToList();
 
-
+            // Consider the types
+            if (elements.Count()>0)
+                list_element.RemoveAll(x => !elements.Contains(dict_element[x].Name_));
+            list_element.RemoveAll(x => !types.Contains(dict_element[x].Type_));
             list_element.RemoveAll(x => !dict_element.ContainsKey(x));
+
             foreach (var e in list_element)
             {
                 if (!dict_element_group.ContainsKey(e))
@@ -639,14 +646,14 @@ namespace FichierGenerator
             {
                 switch (dict_element[id].Type_)
                 {
-                    case ElementConstants.BusinessObject: addImplementation(ref mmap_specialization, id, "IBusinessObject"); break;
+                    case ElementConstants.BusinessObject: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.BusinessObject]); break;
                     case ElementConstants.Representation: addImplementation(ref mmap_specialization, id, "I" + UpperString(dict_element[id].Class_name_)); break;
-                    case ElementConstants.Contract: addImplementation(ref mmap_specialization, id, "CContract"); break;
-                    case ElementConstants.ApplicationEvent: addImplementation(ref mmap_specialization, id, "EventArgs"); break;
-                    case ElementConstants.ApplicationComponent: addImplementation(ref mmap_specialization, id, "Component"); break;
-                    case ElementConstants.DataObject: addImplementation(ref mmap_specialization, id, "DAO"); break;
-                    case ElementConstants.ApplicationProcess: addImplementation(ref mmap_specialization, id, "UseCaseWorkflow"); break;
-                    case ElementConstants.ApplicationService: addImplementation(ref mmap_specialization, id, "UseCaseWorkflow"); break;
+                    case ElementConstants.Contract: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.Contract]); break;
+                    case ElementConstants.ApplicationEvent: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.ApplicationEvent]); break;
+                    case ElementConstants.ApplicationComponent: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.ApplicationComponent]); break;
+                    case ElementConstants.DataObject: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.DataObject]); break;
+                    case ElementConstants.ApplicationProcess: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.ApplicationProcess]); break;
+                    case ElementConstants.ApplicationService: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.ApplicationService]); break;
                 }
             }
 
