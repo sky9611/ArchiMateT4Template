@@ -23,9 +23,9 @@ namespace FichierGenerator.Template
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
+    #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class ApplicationProcessTemplate : ApplicationProcessTemplateBase
+    public partial class DeploymentFileTemplate : DeploymentFileTemplateBase
     {
 #line hidden
         /// <summary>
@@ -113,474 +113,176 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\r\nusing System.Collections.Generic;\r\n");
+            this.Write("\r\n<Product>\r\n");
             
-            #line 21 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-	
-	// Generate used namespaces
-	List<string> list_using;
-	if(mmap_group_access.TryGetValue(id_group, out list_using))
-	{
-		foreach(var id in list_using)
-		{
+            #line 21 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-            
-            #line default
-            #line hidden
-            this.Write("using ");
-            
-            #line 29 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id]));
-            
-            #line default
-            #line hidden
-            this.Write(";\r\n");
-            
-            #line 30 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-		}
-	}
-
-            
-            #line default
-            #line hidden
-            this.Write("\r\nnamespace ");
-            
-            #line 35 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id_group]));
-            
-            #line default
-            #line hidden
-            this.Write("\r\n{\r\n\r\n\t[Model(");
-            
-            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Type_));
-            
-            #line default
-            #line hidden
-            this.Write("Archimate, \"");
-            
-            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(class_name));
-            
-            #line default
-            #line hidden
-            this.Write("\")]\r\n");
-            
-            #line 39 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-	// Generate attributes
-	if( mmap_relationship.ContainsKey(id_element) )
-	{ 
-		List<string> list_associated;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_associated))
-		{
-			foreach(var id_associated in list_associated)
-			{
-				if(dict_element.ContainsKey(id_associated))
-				{
-					Element element_associated = dict_element[id_associated];
-					if( element_associated.Type_.Equals("Requirement") ||
-						element_associated.Type_.Equals("BusinessFunction") ||
-						element_associated.Type_.Equals("BusinessProcess"))
-					{
-
-            
-            #line default
-            #line hidden
-            this.Write("\t[ReferenceModel(");
-            
-            #line 56 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Type_));
-            
-            #line default
-            #line hidden
-            this.Write("Archimate, \"");
-            
-            #line 56 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Name_));
-            
-            #line default
-            #line hidden
-            this.Write("\")]\r\n");
-            
-            #line 57 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-					}
-				}
-			}
-		}
-
-		List<string> list_trigger;
-		if(mmap_relationship[id_element]["target"].TryGetValue("Triggering", out list_trigger))
-		{
-			foreach(var i in list_trigger)
-			{
-				Element element_associated = dict_element[i];
-				if (element_associated.Type_.Equals("ApplicationEvent"))
-				{								
-
-            
-            #line default
-            #line hidden
-            this.Write("\t[EventHandler(\"");
-            
-            #line 72 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Class_name_));
-            
-            #line default
-            #line hidden
-            this.Write("\")]\r\n");
-            
-            #line 73 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-				}
-			}
-		}
-	}
-
-	if( mmap_association.ContainsKey(id_element))
-	{
-		foreach(var id_associated in mmap_association[id_element])
-		{
-			if(dict_element.ContainsKey(id_associated))
-			{
-				Element element_associated = dict_element[id_associated];
-				if(element_associated.Equals("BusinessEvent"))
-				{
-
-            
-            #line default
-            #line hidden
-            this.Write("\t[ReferenceModel(");
-            
-            #line 89 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Type_));
-            
-            #line default
-            #line hidden
-            this.Write("Archimate, \"");
-            
-            #line 89 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Name_));
-            
-            #line default
-            #line hidden
-            this.Write("\")]\r\n");
-            
-            #line 90 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-				}
-			}
-		}
-	}
-				
-	if (!mmap_specialization.Keys.Contains(id_element))
-	{
-
-            
-            #line default
-            #line hidden
-            this.Write("\tpartial class ");
-            
-            #line 99 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(class_name)));
-            
-            #line default
-            #line hidden
-            this.Write(" \r\n\t{\r\n");
-            
-            #line 101 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-	
-	}
-	else
-	{
-		List<string> list_parent_name = new List<string>();
-		foreach(var e in mmap_specialization[id_element])
-		{
-			if(e.Contains("id"))
-				list_parent_name.Add(dict_element[e].Class_name_);
-			else
-				list_parent_name.Add(e);
-		}
-		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
-						
-
-            
-            #line default
-            #line hidden
-            this.Write("\tpartial class ");
-            
-            #line 116 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(class_name)));
-            
-            #line default
-            #line hidden
-            this.Write(" : ");
-            
-            #line 116 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(str_parents));
-            
-            #line default
-            #line hidden
-            this.Write("\r\n\t{\r\n");
-            
-            #line 118 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-	}
-
-	// Generate functions
 	Dictionary<string, Dictionary<string, List<string>>> dict;
 	if (mmap_relationship.TryGetValue(id_element, out dict))
 	{
 		List<string> list;
-		if (dict["source"].TryGetValue("Function", out list))
+		if (dict["source"].TryGetValue("Aggregation", out list))
 		{
+			List<Element> list_product = new List<Element>();
+			List<Element> list_view = new List<Element>();
+			List<Element> list_process = new List<Element>();
+
 			foreach(var i in list)
 			{
-				Element function = dict_element[i];
-				string function_name = UpperString(function.Name_);
-
-            
-            #line default
-            #line hidden
-            this.Write("\t\t[Model(");
-            
-            #line 133 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Type_));
-            
-            #line default
-            #line hidden
-            this.Write("Archimate, \"");
-            
-            #line 133 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(function_name));
-            
-            #line default
-            #line hidden
-            this.Write("\")]\r\n");
-            
-            #line 134 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-				// Add reference
-				Dictionary<string, Dictionary<string, List<string>>> dict_function;
-				if (mmap_relationship.TryGetValue(function.Identifier_, out dict_function))
+				Element e = dict_element[i];
+				switch(e.Type_)
 				{
-					List<string> list_reference;
-					if (dict_function["source"].TryGetValue("Realization", out list_reference))
-					{
-						foreach(var id_ref in list_reference)
-						{
-							Element element_ref = dict_element[id_ref];
-							if( element_ref.Type_.Equals("BusinessFunction") ||
-								element_ref.Type_.Equals("BusinessProcess") ||
-								element_ref.Type_.Equals("Requirement") ||
-								(element_ref.Properties_.ContainsKey("$Type") && element_ref.Properties_["$Type"].Equals("Macro")))
-							{
-
-            
-            #line default
-            #line hidden
-            this.Write("\t\t[ReferenceModel(");
-            
-            #line 151 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_ref.Type_));
-            
-            #line default
-            #line hidden
-            this.Write("Archimate, \"");
-            
-            #line 151 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_ref.Name_));
-            
-            #line default
-            #line hidden
-            this.Write("\")]\r\n");
-            
-            #line 152 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-							}
-						}
-					}
+					case "Product":
+						list_product.Add(e);
+						break;
+					case "Representation":
+						list_view.Add(e);
+						break;
+					case "ApplicationProcess":
+						list_process.Add(e);
+						break;
 				}
-
-				// Add Eventhandler
-				if (mmap_relationship.TryGetValue(function.Identifier_, out dict_function))
-				{
-					List<string> list_reference;
-					if (dict_function["target"].TryGetValue("Triggering", out list_reference))
-					{
-						foreach(var id_ref in list_reference)
-						{
-							Element element_ref = dict_element[id_ref];
-							if( element_ref.Type_.Equals("ApplicationEvent") )
-							{
-
-            
-            #line default
-            #line hidden
-            this.Write("\t\t[EventHandler(\"");
-            
-            #line 170 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(element_ref.Name_));
-            
-            #line default
-            #line hidden
-            this.Write("\")]\r\n");
-            
-            #line 171 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-							}
-						}
-					}
-				}
-
-            
-            #line default
-            #line hidden
-            this.Write("\t\tpublic void ");
-            
-            #line 177 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(function_name));
-            
-            #line default
-            #line hidden
-            this.Write("(){}\r\n\r\n");
-            
-            #line 179 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
 			}
-		}
-	}
 
-	// Generate reference of a class
-	if (mmap_relationship.ContainsKey(id_element))
-	{
-		List<string> list_associated;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Access", out list_associated))
-		{
-			foreach(var id_associated in list_associated)
+            
+            #line default
+            #line hidden
+            this.Write("\t<RelatedProducts>\r\n");
+            
+            #line 50 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+			foreach(var i in list_product)
 			{
-				if(dict_element.ContainsKey(id_associated))
-				{
-					Element element_associated = dict_element[id_associated];
-					if( element_associated.Type_.Equals("BusinessOnject") || 
-						element_associated.Type_.Equals("Representation") || 
-						element_associated.Type_.Equals("DataObject"))
-					{
-						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
-						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
+
 
             
             #line default
             #line hidden
-            this.Write("\t\t");
+            this.Write("\t\t<RelatedProduct name=\"");
             
-            #line 202 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
-            
-            #line default
-            #line hidden
-            this.Write(" ");
-            
-            #line 202 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
+            #line 55 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
-            this.Write("_ ;\r\n\r\n");
+            this.Write("/\">\r\n");
             
-            #line 204 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
+            #line 56 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-					}
-				}
 			}
+
+            
+            #line default
+            #line hidden
+            this.Write("\t</RelatedProducts>\r\n\t<Representations>\r\n");
+            
+            #line 61 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+			foreach(var i in list_view)
+			{
+
+            
+            #line default
+            #line hidden
+            this.Write("\t\t<Representation name=\"");
+            
+            #line 65 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
+            
+            #line default
+            #line hidden
+            this.Write("/\">\r\n");
+            
+            #line 66 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+			}
+
+            
+            #line default
+            #line hidden
+            this.Write("\t</Representations>\r\n\t<ApplicationServices>\r\n");
+            
+            #line 71 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+			foreach(var i in list_process)
+			{
+
+            
+            #line default
+            #line hidden
+            this.Write("\t\t<ApplicationService name=\"");
+            
+            #line 75 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
+            
+            #line default
+            #line hidden
+            this.Write("/\">\r\n");
+            
+            #line 76 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+			}
+
+            
+            #line default
+            #line hidden
+            this.Write("\t</ApplicationServices>\r\n");
+            
+            #line 80 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
 		}
 
-		List<string> list_flow;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Flow", out list_flow))
+		if (dict["source"].TryGetValue("Realization", out list))
 		{
-			foreach(var id_associated in list_flow)
+
+            
+            #line default
+            #line hidden
+            this.Write("\t<ApplicationComponenets>\r\n");
+            
+            #line 87 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+			foreach(var i in list)
 			{
-				if(dict_element.ContainsKey(id_associated))
+				Element element = dict_element[i];
+				if(	element.Type_.Equals("ApplicationComponenet"))
 				{
-					Element element_associated = dict_element[id_associated];
-					if( element_associated.Type_.Equals("ApplicationProcess") || 
-						element_associated.Type_.Equals("ApplicationFunction") )
-					{
-						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
-						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
 
             
             #line default
             #line hidden
-            this.Write("\t\t");
+            this.Write("\t\t<ApplicationComponenet name=\"");
             
-            #line 224 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
-            
-            #line default
-            #line hidden
-            this.Write(" ");
-            
-            #line 224 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
+            #line 94 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element.Class_name_)));
             
             #line default
             #line hidden
-            this.Write("_ ;\r\n\r\n");
+            this.Write("/\">\r\n");
             
-            #line 226 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
+            #line 95 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-					}
 				}
 			}
+
+            
+            #line default
+            #line hidden
+            this.Write("\t</ApplicationServices>\r\n");
+            
+            #line 100 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
 		}
 	}
 
             
             #line default
             #line hidden
-            this.Write("\t}\r\n}\r\n");
+            this.Write("</Product>\r\n\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 235 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
-	{
-		foreach(var g in dict_group.Keys)
-		{
-			foreach(var sg in dict_group[g].Keys)
-				if(dict_group[g][sg].Contains(id))
-					return true;
-		}
-		return false;
-	}
-
-	private bool isInSelectedViews(string id, Dictionary<string, List<string>> dict_view)
-	{
-		foreach(var v in dict_view.Keys)
-		{
-			if(dict_view[v].Contains(id))
-				return true;
-		}
-		return false;
-	}
-
-	private void addImplementation(ref Dictionary<string, List<string>> mmap_specialization, string id_child, string parent)
-	{
-		if (!mmap_specialization.ContainsKey(id_child))
-		{
-			List<string> list_parent = new List<string>();
-			list_parent.Add(parent);
-			mmap_specialization.Add(id_child,list_parent);
-		}
-		else 
-		{
-			mmap_specialization[id_child].Add(parent);
-		}
-	}
+        #line 106 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
 	public string UpperString(string name)
@@ -593,34 +295,11 @@ namespace FichierGenerator.Template
 		return name[0].ToString().ToUpperInvariant() + name.Substring(1);
 	}
 
-	// Method for creating the object name, deleting the spaces, special characters and lowercasing the string
-	public string LowerString(string name)
-	{
-		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
-        name = name.Replace(" ", "");
-		name = Regex.Replace(name, @"[^\w\.@_]", "");
-		return name[0].ToString().ToLowerInvariant() + name.Substring(1);
-	}
-
-	// Method to delete line feed characters like \r, \n 
-	public string DocumentationTraitement(string document)
-	{
-		document = document.Replace("&#xD;","");
-		document = document.Replace("\r"," ");
-		document = document.Replace("\n"," ");
-		document = document.Replace("\t"," ");
-		document = Regex.Replace(document, "\\s{2,}", " ");
-		document = document.Replace("\"","\\\"");
-		return document;
-	}
-
         
         #line default
         #line hidden
         
-        #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
+        #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 private global::FichierGenerator.ArchiDocumentSerialized _archiDocumentField;
 
@@ -702,7 +381,7 @@ if ((id_elementValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class ApplicationProcessTemplateBase
+    public class DeploymentFileTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

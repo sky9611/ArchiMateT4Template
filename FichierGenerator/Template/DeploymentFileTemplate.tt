@@ -1,0 +1,117 @@
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ assembly name="mscorlib" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="Microsoft.VisualStudio.TextTemplating.Interfaces" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Globalization" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="FichierGenerator" #>
+<#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
+<#@ parameter name="id_element" type="System.String" #>
+<#@ include file="InitializeVar.ttinclude" #>
+<Product>
+<#
+	Dictionary<string, Dictionary<string, List<string>>> dict;
+	if (mmap_relationship.TryGetValue(id_element, out dict))
+	{
+		List<string> list;
+		if (dict["source"].TryGetValue("Aggregation", out list))
+		{
+			List<Element> list_product = new List<Element>();
+			List<Element> list_view = new List<Element>();
+			List<Element> list_process = new List<Element>();
+
+			foreach(var i in list)
+			{
+				Element e = dict_element[i];
+				switch(e.Type_)
+				{
+					case "Product":
+						list_product.Add(e);
+						break;
+					case "Representation":
+						list_view.Add(e);
+						break;
+					case "ApplicationProcess":
+						list_process.Add(e);
+						break;
+				}
+			}
+#>
+	<RelatedProducts>
+<#
+			foreach(var i in list_product)
+			{
+
+#>
+		<RelatedProduct name="<#= UpperString(i.Class_name_) #>/">
+<#
+			}
+#>
+	</RelatedProducts>
+	<Representations>
+<#
+			foreach(var i in list_view)
+			{
+#>
+		<Representation name="<#= UpperString(i.Class_name_) #>/">
+<#
+			}
+#>
+	</Representations>
+	<ApplicationServices>
+<#
+			foreach(var i in list_process)
+			{
+#>
+		<ApplicationService name="<#= UpperString(i.Class_name_) #>/">
+<#
+			}
+#>
+	</ApplicationServices>
+<#
+		}
+
+		if (dict["source"].TryGetValue("Realization", out list))
+		{
+#>
+	<ApplicationComponenets>
+<#
+			foreach(var i in list)
+			{
+				Element element = dict_element[i];
+				if(	element.Type_.Equals("ApplicationComponenet"))
+				{
+#>
+		<ApplicationComponenet name="<#= UpperString(element.Class_name_) #>/">
+<#
+				}
+			}
+#>
+	</ApplicationServices>
+<#
+		}
+	}
+#>
+</Product>
+
+<#+
+	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
+	public string UpperString(string name)
+	{
+		//name = Regex.Replace(name, @"\s\(.*\)", "");
+		name = name.Replace(".", " ");
+        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+        name = name.Replace(" ", "");
+		name = Regex.Replace(name, @"[^\w\.@_]", "");
+		return name[0].ToString().ToUpperInvariant() + name.Substring(1);
+	}
+#>

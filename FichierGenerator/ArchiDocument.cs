@@ -136,6 +136,7 @@ namespace FichierGenerator
 
         public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
+            this.dict_implementation = dict_implementation;
             class_namespace = name_space;
             this.doc = XElement.Load(path);
             NP = doc.GetDefaultNamespace();
@@ -340,6 +341,25 @@ namespace FichierGenerator
                 }
             }
 
+            // Add the relationship of function
+            foreach(var id in dict_element.Keys)
+            {
+                if (dict_element[id].Type_.Equals(ElementConstants.ApplicationFunction))
+                {
+                    if (CallFunctionElement(id) == null)
+                    {
+                        string id_first_function = GetFirstFunction(id);
+                        string id_elementCalled = CallFunctionElement(id_first_function);
+                        if (id_elementCalled != null)
+                            AddFunctionToElement(id_first_function, id_elementCalled);
+                        else
+                        {
+                            // TODO: Function not called by any element
+                        }
+                    }
+                }
+            }
+
             // Make the mmap of solution - projects
             foreach (var id in dict_element.Keys)
             {
@@ -405,6 +425,88 @@ namespace FichierGenerator
                     dict_group.Add(ele.Attribute("identifier").Value, dict);
                 }
             }
+        }
+
+        private void AddFunctionToElement(string id_first_function, string id_elementCalled)
+        {
+            Dictionary<string, Dictionary<string, List<string>>> dict = new Dictionary<string, Dictionary<string, List<string>>>();
+            if (mmap_relationship.TryGetValue(id_elementCalled, out dict))
+            {
+                List<string> list_temp;
+                if (mmap_relationship[id_elementCalled]["source"].TryGetValue("Function", out list_temp))
+                {
+                    list_temp.Add(id_first_function);
+                }
+                else
+                {
+                    list_temp = new List<string>();
+                    list_temp.Add(id_first_function);
+                    mmap_relationship[id_elementCalled]["source"].Add("Function", list_temp);
+                }
+            }
+            else
+            {
+                List<string> list = new List<string>();
+                list.Add(id_first_function);
+                Dictionary<string, List<string>> dict2 = new Dictionary<string, List<string>>();
+                dict2.Add("Function", list);
+                dict.Add("source", dict2);
+                mmap_relationship.Add(id_elementCalled, dict);
+            }
+        }
+
+
+        private string CallFunctionElement(string id_function)
+        {
+            Dictionary<string, Dictionary<string, List<string>>> dict;
+            if (mmap_relationship.TryGetValue(id_function, out dict))
+            {
+                List<string> list;
+
+                if (dict["target"].TryGetValue(RelaionshipConstants.Composition, out list))
+                {
+                    foreach (var i in list)
+                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
+                            return i;
+                }
+
+                if (dict["target"].TryGetValue(RelaionshipConstants.Triggering, out list))
+                {
+                    foreach (var i in list)
+                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
+                            return i;
+                }
+
+                if (dict["target"].TryGetValue(RelaionshipConstants.Flow, out list))
+                {
+                    foreach (var i in list)
+                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
+                            return i;
+                }
+            }
+            return null;
+        }
+
+        private string GetFirstFunction(string id)
+        {
+            Dictionary<string, Dictionary<string, List<string>>> dict;
+            if (mmap_relationship.TryGetValue(id, out dict))
+            {
+                List<string> list_flow;
+                if (dict["target"].TryGetValue(RelaionshipConstants.Flow, out list_flow))
+                {
+                    foreach (var i in list_flow)
+                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationFunction))
+                            if (CallFunctionElement(i)==null)
+                                return GetFirstFunction(i);
+                            else
+                                return i;
+                }
+                else
+                    return id;
+            }
+
+            return id;
         }
 
         public void Update(string[] types, string[] groups, string[] views, string[] elements, string name_space)

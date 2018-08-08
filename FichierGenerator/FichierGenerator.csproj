@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{74D18F81-39B2-41F9-821A-F8B8C112DDDA}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>FichierGenerator</RootNamespace>
     <AssemblyName>FichierGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -188,6 +188,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataObjectTemplate.tt</DependentUpon>
     </Compile>
+    <Compile Include="Template\DeploymentFileTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DeploymentFileTemplate.tt</DependentUpon>
+    </Compile>
     <Compile Include="Template\Generator.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -259,6 +264,10 @@
     <Content Include="Template\DataObjectTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>DataObjectTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Template\DeploymentFileTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DeploymentFileTemplate.cs</LastGenOutput>
     </Content>
     <Content Include="Template\Generator.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>

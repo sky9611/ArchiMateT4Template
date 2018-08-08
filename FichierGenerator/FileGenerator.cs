@@ -34,7 +34,10 @@ namespace FichierGenerator
 
         public string[] getAllElements()
         {
-            return dict_element.Keys.ToArray();
+            List<string> list = new List<string>();
+            foreach (var x in dict_element.Keys)
+                list.Add(dict_element[x].Name_);
+            return list.ToArray();
         }
 
         public static readonly Dictionary<string, string> dict_implementation_defaut = new Dictionary<string, string>{
@@ -72,7 +75,6 @@ namespace FichierGenerator
         /// <param name="name_space"> The namespace of generated class </param>
         /// <param name="templateFilePath"> The path of using template, use Generator2 as defaut </param>
         public void Generate(string destinationFolder,
-            string targetFileName,
             string[] types,
             string[] groups,
             string[] views,
@@ -169,6 +171,7 @@ namespace FichierGenerator
         {
             System.Type type = Type.GetTypeFromProgID("VisualStudio.DTE.15.0");
             Dictionary<string, List<string>> dict = archiDocument.Mmap_solution;
+            ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocument);
 
             var id_solution = dict.FirstOrDefault(x => dict_element[x.Key].Name_ == solution_name).Key;
 
@@ -216,6 +219,16 @@ namespace FichierGenerator
 
                 solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
                     project_path, projet_name);
+
+                // Generate manifest
+                string name = StringHelper.UpperString(dict_element[id_projet].Class_name_);
+                var template = new DeploymentFileTemplate();
+                template.Session = new TextTemplatingSession();
+                template.Session["archiDocument"] = archiDocumentSerialized;
+                template.Session["id_element"] = id_projet;
+                template.Initialize();
+                var generatedText = template.TransformText();
+                File.WriteAllText(project_path + "\\" + name + ".manifest.xml", generatedText);
 
                 string text = File.ReadAllText(project_path + "\\Properties\\AssemblyInfo.cs");
                 Regex regex = new Regex(@""+ projet_name);
@@ -441,12 +454,12 @@ namespace FichierGenerator
             //string[] groups = { "Web" };
             string[] groups = list.ToArray();
             //string[] views = { "g¨¦n¨¦ration couches client" };
-            string[] views = { "g¨¦n¨¦ration couches application" };
-            string[] elements = { "GererAccueilPatient" };
+            string[] views = { "Comportement applicatif" };
+            string[] elements = fileGenerator.getAllElements();
             //string[] elements = list.ToArray();
             //string[] views = list.ToArray();
-            fileGenerator.GenerateSolution("..\\..\\Generated", "Amies VNext");
-            fileGenerator.Generate("..\\..\\Generated", "generated", fileGenerator.getAllType(), groups, views, elements, "Maidis.VNext.");
+            //fileGenerator.GenerateSolution("..\\..\\Generated", "Amies VNext");
+            fileGenerator.Generate("..\\..\\Generated", fileGenerator.getAllType(), groups, views, elements, "Maidis.VNext.");
         }
     }
 }
