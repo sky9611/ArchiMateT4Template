@@ -12,6 +12,9 @@ namespace FichierGenerator
     {
         string class_namespace;
 
+        // Dictionary element - solution
+        Dictionary<string, string> dict_element_solution = new Dictionary<string, string>();
+
         // User settings for the implenmentation of different class
         Dictionary<string, string> dict_implementation = new Dictionary<string, string>();
 
@@ -133,6 +136,7 @@ namespace FichierGenerator
         public Dictionary<string, string> Dict_element_project { get => dict_element_project; set => dict_element_project = value; }
         public List<string> List_project { get => list_project; set => list_project = value; }
         public Dictionary<string, string> Dict_implementation { get => dict_implementation; set => dict_implementation = value; }
+        public Dictionary<string, string> Dict_element_solution { get => dict_element_solution; set => dict_element_solution = value; }
 
         public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
@@ -340,26 +344,7 @@ namespace FichierGenerator
                                 dict_element_project.Add(i, id_project);
                 }
             }
-
-            // Add the relationship of function
-            foreach(var id in dict_element.Keys)
-            {
-                if (dict_element[id].Type_.Equals(ElementConstants.ApplicationFunction))
-                {
-                    if (CallFunctionElement(id) == null)
-                    {
-                        string id_first_function = GetFirstFunction(id);
-                        string id_elementCalled = CallFunctionElement(id_first_function);
-                        if (id_elementCalled != null)
-                            AddFunctionToElement(id_first_function, id_elementCalled);
-                        else
-                        {
-                            // TODO: Function not called by any element
-                        }
-                    }
-                }
-            }
-
+                                    
             // Make the mmap of solution - projects
             foreach (var id in dict_element.Keys)
             {
@@ -376,6 +361,44 @@ namespace FichierGenerator
                                 list_projet.Add(id_element);
                     }
                 }
+            }
+
+            // Make the dictionary id_element - solution
+            foreach (var id_element in dict_element.Keys)
+            {
+                Dictionary<string, Dictionary<string, List<string>>> dict;
+                if (mmap_relationship.TryGetValue(id_element, out dict))
+                {
+                    List<string> list;
+                    if (dict["target"].TryGetValue(RelaionshipConstants.Aggregation, out list))
+                        foreach (var i in list)
+                            if (dict_element[i].Type_.Equals(ElementConstants.Representation) ||
+                                dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
+                                dict_element_solution.Add(id_element, i);
+                    if (dict["target"].TryGetValue(RelaionshipConstants.Flow, out list))
+                        foreach (var i in list)
+                            if (dict_element[i].Type_.Equals(ElementConstants.Representation) ||
+                                dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
+                                dict_element_solution.Add(id_element, i);
+                }
+            }
+            foreach (var id_element in dict_element_project.Keys)
+            {
+                if (!dict_element_solution.ContainsKey(id_element))
+                {
+                    string solution = null;
+                    try
+                    {
+                        solution = mmap_solution.First(x => x.Value.Contains(dict_element_project[id_element])).Key;
+                    }
+                    catch
+                    {
+
+                    }
+                    if (solution!=null)
+                        dict_element_solution.Add(id_element, solution);
+                }
+
             }
 
             // Make the map of group name
@@ -459,6 +482,8 @@ namespace FichierGenerator
         private string CallFunctionElement(string id_function)
         {
             Dictionary<string, Dictionary<string, List<string>>> dict;
+            string result="";
+            int n = 0;
             if (mmap_relationship.TryGetValue(id_function, out dict))
             {
                 List<string> list;
@@ -467,24 +492,38 @@ namespace FichierGenerator
                 {
                     foreach (var i in list)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
-                            return i;
+                        {
+                            n++;
+                            result = i;
+                        }
                 }
 
                 if (dict["target"].TryGetValue(RelaionshipConstants.Triggering, out list))
                 {
                     foreach (var i in list)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
-                            return i;
+                        {
+                            n++;
+                            result = i;
+                        }
                 }
 
                 if (dict["target"].TryGetValue(RelaionshipConstants.Flow, out list))
                 {
                     foreach (var i in list)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
-                            return i;
+                        {
+                            n++;
+                            result = i;
+                        }
                 }
             }
-            return null;
+            if (n > 1)
+                errors.Add("Function \"" + dict_element[id_function] + "\" has been called by more than one process");
+            if (result != "")
+                return result;
+            else
+                return null;
         }
 
         private string GetFirstFunction(string id)

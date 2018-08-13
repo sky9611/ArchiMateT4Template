@@ -193,11 +193,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DeploymentFileTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Include="Template\Generator.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Generator.tt</DependentUpon>
-    </Compile>
     <Compile Include="Template\InterfaceTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -269,10 +264,6 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>DeploymentFileTemplate.cs</LastGenOutput>
     </Content>
-    <Content Include="Template\Generator.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>Generator.cs</LastGenOutput>
-    </Content>
     <Content Include="Template\InitializeVar.ttinclude">
       <LastGenOutput>InitializeVar1.cs</LastGenOutput>
       <LastOutputs>.\InitializeVar.cs</LastOutputs>
@@ -298,9 +289,6 @@
       <LastGenOutput>ViewXamlCsTemplate.cs</LastGenOutput>
     </Content>
     <None Include="Template\SQLScriptTemplate.t4" />
-    <None Include="Template\Generator2.t4">
-      <LastGenOutput>Generator2.txt</LastGenOutput>
-    </None>
     <None Include="Template\TextTemplateTest.t4" />
   </ItemGroup>
   <ItemGroup>

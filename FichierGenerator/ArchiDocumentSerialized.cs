@@ -40,6 +40,7 @@ namespace FichierGenerator
             mmap_solution = archiDocument.Mmap_solution;
             dict_element_project = archiDocument.Dict_element_project;
             dict_implementation = archiDocument.Dict_implementation;
+            dict_element_solution = archiDocument.Dict_element_solution;
         }
 
         public void Update(ArchiDocument archiDocument)
@@ -69,7 +70,10 @@ namespace FichierGenerator
             list_group_new = new List<string>(archiDocument.List_group_new);
             dict_element_project = archiDocument.Dict_element_project;
             dict_implementation = archiDocument.Dict_implementation;
+            dict_element_solution = archiDocument.Dict_element_solution;
         }
+
+        Dictionary<string, string> dict_element_solution = new Dictionary<string, string>();
 
         Dictionary<string, string> dict_implementation = new Dictionary<string, string>();
 
@@ -168,5 +172,6 @@ namespace FichierGenerator
         public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
         public Dictionary<string, string> Dict_element_project { get => dict_element_project; set => dict_element_project = value; }
         public Dictionary<string, string> Dict_implementation { get => dict_implementation; set => dict_implementation = value; }
+        public Dictionary<string, string> Dict_element_solution { get => dict_element_solution; set => dict_element_solution = value; }
     }
 }
