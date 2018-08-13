@@ -47,6 +47,39 @@ namespace FichierGenerator
             return list.ToArray();
         }
 
+        public string[] getElements(string[] types, string[] groups, string[] views)
+        {
+            archiDocument.Update(types, groups, views);
+            List<string> list = new List<string>();
+            foreach (var i in views)
+                try
+                {
+                    foreach (var id_view in archiDocument.Dict_view.Keys)
+                        list.AddRange(archiDocument.Dict_view[id_view]);
+                }
+                catch { }
+            foreach (var i in groups)
+                try
+                {
+                    foreach (var group_name in groups)
+                    {
+                        var id_group = archiDocument.Dict_namespace[group_name];
+                        list.AddRange(archiDocument.Dict_group[id_group]["interface"]);
+                        list.AddRange(archiDocument.Dict_group[id_group]["value"]);
+                    }
+                }
+                catch { }
+
+            list = list.Distinct().ToList();
+            list.RemoveAll(x => !types.Contains(dict_element[x].Type_));
+            list.RemoveAll(x => !dict_element.ContainsKey(x));
+
+            List<string> list_element_name = new List<string>();
+            list.ForEach(x => list_element_name.Add(dict_element[x].Name_));
+
+            return list_element_name.ToArray();
+        }
+
         public string[] getAllSolutions()
         {
             List<string> list = new List<string>();
@@ -472,7 +505,7 @@ namespace FichierGenerator
                 }
                 catch
                 {
-                    Log["warnings"].Add("The project which element \"" + dict_element[id_element].Name_ + "\" is related to has not been found");
+                    log["warnings"].Add("The project which element \"" + dict_element[id_element].Name_ + "\" is related to has not been found");
                     Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")));
                     File.WriteAllText(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")) + "\\" + file_name + type, generatedText);
                 }
@@ -480,7 +513,7 @@ namespace FichierGenerator
             {
                 // Les elements qui ne sont pas li¨¦s ¨¤ un projet(Composant Applicatif) quelconque sont mets dans 
                 // le r¨¦pertoire /<CurrentSolution>/Generated
-                Log["warnings"].Add("Element \"" + dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
+                log["warnings"].Add("Element \"" + dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
                 Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Current_solution_path,"Generated")));
                 File.WriteAllText(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")) + "\\" + file_name + type, generatedText);
             }
@@ -494,13 +527,14 @@ namespace FichierGenerator
             List<string> list = new List<string>();
             //string[] types = { ElementConstants.BusinessObject };
             string[] types = list.ToArray();
-            //string[] groups = { "Web" };
-            string[] groups = list.ToArray();
+            string[] groups = { "Accueil Patient" };
+            //string[] groups = list.ToArray();
             //string[] views = { "g¨¦n¨¦ration couches client" };
             string[] views = { "Comportement applicatif" };
             string[] elements = fileGenerator.getAllElements();
             //string[] elements = list.ToArray();
             //string[] views = list.ToArray();
+            string[] array_element = fileGenerator.getElements(fileGenerator.getAllType(), groups, views);
             //fileGenerator.GenerateSolution("..\\..\\Generated", "Accueil Patient Service");
             fileGenerator.Generate("..\\..\\Generated", fileGenerator.getAllType(), groups, views, elements, "Maidis.VNext.");
         }

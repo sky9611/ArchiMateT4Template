@@ -49,7 +49,7 @@ namespace FichierGenerator
         // Map group_id - namespace
         Dictionary<string, string> dict_group_name = new Dictionary<string, string>();
 
-        // Map id_element - namespace
+        // Map group_name - id_group
         Dictionary<string, string> dict_namespace = new Dictionary<string, string>();
 
         // Map id_element - group
@@ -548,6 +548,23 @@ namespace FichierGenerator
             return id;
         }
 
+        public void Update(string[] types, string[] groups, string[] views)
+        {
+            IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
+                                               where views.Contains(e.Element(NP + "name").Value)
+                                               select e;
+            foreach (var ele in xeles_view)
+            {
+                List<string> list_ele_child = new List<string>();
+                List<string> list_group_child = new List<string>();
+                findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
+                if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
+                    dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
+                list_group.AddRange(list_group_child);
+                list_element.AddRange(list_ele_child);
+            }
+        }
+
         public void Update(string[] types, string[] groups, string[] views, string[] elements, string name_space)
         {
             this.class_namespace = name_space;
@@ -561,7 +578,8 @@ namespace FichierGenerator
                 List<string> list_ele_child = new List<string>();
                 List<string> list_group_child = new List<string>();
                 findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
-                dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
+                if(!dict_view.ContainsKey(ele.Attribute("identifier").Value))
+                    dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
                 list_group.AddRange(list_group_child);
                 list_element.AddRange(list_ele_child);
             }
@@ -600,7 +618,7 @@ namespace FichierGenerator
             list_element = list_element.Distinct().ToList();
 
             // Consider the types
-            if (elements.Count()>0)
+            if (elements != null && elements.Count()>0)
                 list_element.RemoveAll(x => !elements.Contains(dict_element[x].Name_));
             list_element.RemoveAll(x => !types.Contains(dict_element[x].Type_));
             list_element.RemoveAll(x => !dict_element.ContainsKey(x));
