@@ -23,9 +23,9 @@ namespace FichierGenerator.Template
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+    #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class SQLTemplate : SQLTemplateBase
+    public partial class MappingTemplate : MappingTemplateBase
     {
 #line hidden
         /// <summary>
@@ -34,88 +34,156 @@ namespace FichierGenerator.Template
         public virtual string TransformText()
         {
             
-            #line 19 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InitializeVar.ttinclude"
 
-	Element ele = archiDocument.Dict_element[id_element];
+	string class_namespace = archiDocument.Class_namespace;
 
-            
-            #line default
-            #line hidden
-            this.Write("CREATE TABLE ");
-            
-            #line 22 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(ele.Class_name_)));
-            
-            #line default
-            #line hidden
-            this.Write("\r\n(\r\n");
-            
-            #line 24 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+	// Map id_element - all elements related
+	Dictionary<string, List<string>> dict_related_element = archiDocument.Dict_related_element;
+
+	// list of group
+	List<string> list_group = archiDocument.List_group;
+
+	// list of elements
+	List<string> list_element = archiDocument.List_element;
+
+	// Map idProperty - PropertyName
+	Dictionary<string, string> property_definition_map = archiDocument.Property_definition_map;
+
+	// Map group_id - list_id_elements + list_id_interface
+	Dictionary<string, Dictionary<string,List<string>>> dict_group = archiDocument.Dict_group;
+
+	// Map group_id - namespace
+	Dictionary<string, string> dict_group_name = archiDocument.Dict_group_name;
+
+	// Map id_element - namespace
+	Dictionary<string, string> dict_namespace = archiDocument.Dict_namespace;
+
+	// Map id_element - group
+	Dictionary<string, string> dict_element_group = archiDocument.Dict_element_group;
+
+	// Map view_id - list_id_elements
+	Dictionary<string, List<string>> dict_view = archiDocument.Dict_view;
 	
-	foreach(var p in ele.Properties_.Keys)
+	// Map identifier - element
+	Dictionary<string, Element> dict_element = archiDocument.Dict_element;
+
+	// Map identifier - relationship name
+	Dictionary<Tuple<string, string>, string> dict_relationship = archiDocument.Dict_relationship;
+
+	// MultiMap of id_element - [source|target] - [type de relation] - list_id_element
+	Dictionary<string, Dictionary<string, Dictionary<string, List<string>>>> mmap_relationship = archiDocument.Mmap_relationship;
+
+	// Map of specialization of class
+	Dictionary<string, List<string>> mmap_specialization = archiDocument.Mmap_specialization;
+
+	// MultiMap of association
+	Dictionary<string, List<string>> mmap_association = archiDocument.Mmap_association;
+
+	// MultiMap of group access (to generate using ...)
+	Dictionary<string, List<string>> mmap_group_access = archiDocument.Mmap_group_access;
+
+	// MultiMap of element access (a kind of relationship between elements)
+	Dictionary<string, List<string>> mmap_element_access = archiDocument.Mmap_element_access;
+
+	// List of representation
+	List<string> list_representation = new List<string>();
+	
+	// List of data object
+	List<string> list_data_object = new List<string>();
+
+	// List of errors
+	List<string> errors = archiDocument.Errors;
+
+	// List of class created
+	List<string> classes = archiDocument.Classes;
+
+	List<string> list_group_new = archiDocument.List_group_new;
+
+	string id_group;
+	if (!dict_element_group.ContainsKey(id_element))
+		id_group = "id-GroupeUnConnu";
+	else
+		id_group = dict_element_group[id_element];
+
+	Element ele = dict_element[id_element];
+	string class_name = UpperString(ele.Class_name_);
+
+
+            
+            #line default
+            #line hidden
+            this.Write("\r\n\r\n<?xml version = \"1.0\" encoding = \"utf-8\"?>\r\n\r\n<hibernate-mapping>\r\n");
+            
+            #line 25 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+
+	Element data_object = archiDocument.Dict_element[id_element];
+	Element business_object = archiDocument.Dict_element[id_business_object];
+
+            
+            #line default
+            #line hidden
+            this.Write("\t<class name = \"");
+            
+            #line 29 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(business_object.Class_name_));
+            
+            #line default
+            #line hidden
+            this.Write("\" table = \"");
+            
+            #line 29 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(data_object.Class_name_)));
+            
+            #line default
+            #line hidden
+            this.Write("\">\r\n");
+            
+            #line 30 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+
+	foreach(var i in business_object.Properties_.Keys)
 	{
-		int i=0;
-		if (i!=ele.Properties_.Keys.Count()-1)
-		{
+		string name = i;
+		string type = business_object.Properties_[i];
 
             
             #line default
             #line hidden
-            this.Write("\t");
+            this.Write("      \r\n      <property name = \"");
             
-            #line 31 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(p));
-            
-            #line default
-            #line hidden
-            this.Write(" ");
-            
-            #line 31 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
+            #line 36 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(name));
             
             #line default
             #line hidden
-            this.Write(", \r\n\r\n");
+            this.Write("\" column = \"");
             
-            #line 33 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 36 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(name));
+            
+            #line default
+            #line hidden
+            this.Write("\" type = \"");
+            
+            #line 36 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(type));
+            
+            #line default
+            #line hidden
+            this.Write("\"/>\r\n");
+            
+            #line 37 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
 
-		}
-		else
-		{
-
-            
-            #line default
-            #line hidden
-            this.Write("\t");
-            
-            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(p));
-            
-            #line default
-            #line hidden
-            this.Write(" ");
-            
-            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
-            
-            #line default
-            #line hidden
-            this.Write(" \r\n");
-            
-            #line 39 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
-
-		}
-		i++;
 	}
 
             
             #line default
             #line hidden
-            this.Write(")\r\n\r\n");
+            this.Write("          \r\n   </class>\r\n</hibernate-mapping>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 46 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+        #line 42 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
 
 	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
 	public string UpperString(string name)
@@ -132,7 +200,7 @@ namespace FichierGenerator.Template
         #line default
         #line hidden
         
-        #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+        #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
 
 private global::FichierGenerator.ArchiDocumentSerialized _archiDocumentField;
 
@@ -157,6 +225,19 @@ private string id_element
     get
     {
         return this._id_elementField;
+    }
+}
+
+private string _id_business_objectField;
+
+/// <summary>
+/// Access the id_business_object parameter of the template.
+/// </summary>
+private string id_business_object
+{
+    get
+    {
+        return this._id_business_objectField;
     }
 }
 
@@ -196,6 +277,20 @@ if ((id_elementValueAcquired == false))
         this._id_elementField = ((string)(data));
     }
 }
+bool id_business_objectValueAcquired = false;
+if (this.Session.ContainsKey("id_business_object"))
+{
+    this._id_business_objectField = ((string)(this.Session["id_business_object"]));
+    id_business_objectValueAcquired = true;
+}
+if ((id_business_objectValueAcquired == false))
+{
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("id_business_object");
+    if ((data != null))
+    {
+        this._id_business_objectField = ((string)(data));
+    }
+}
 
 
     }
@@ -214,7 +309,7 @@ if ((id_elementValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class SQLTemplateBase
+    public class MappingTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

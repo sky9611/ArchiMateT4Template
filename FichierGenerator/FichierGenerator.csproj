@@ -198,6 +198,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>InterfaceTemplate.tt</DependentUpon>
     </Compile>
+    <Compile Include="Template\MappingTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MappingTemplate.tt</DependentUpon>
+    </Compile>
     <Compile Include="Template\RepresentationTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -272,6 +277,10 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InterfaceTemplate.cs</LastGenOutput>
     </Content>
+    <Content Include="Template\MappingTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MappingTemplate.cs</LastGenOutput>
+    </Content>
     <Content Include="Template\RepresentationTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>RepresentationTemplate.cs</LastGenOutput>
@@ -288,7 +297,6 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ViewXamlCsTemplate.cs</LastGenOutput>
     </Content>
-    <None Include="Template\SQLScriptTemplate.t4" />
     <None Include="Template\TextTemplateTest.t4" />
   </ItemGroup>
   <ItemGroup>

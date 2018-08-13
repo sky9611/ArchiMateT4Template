@@ -425,6 +425,32 @@ namespace FichierGenerator
             sqlTemplate.Initialize();
             generatedText = sqlTemplate.TransformText();
             WriteToFile(id_element, generatedText, ".sql");
+
+            if (archiDocument.Mmap_relationship.ContainsKey(id_element))
+            {
+                List<string> list_associated;
+                if (archiDocument.Mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_associated))
+                {
+                    foreach (var id_associated in list_associated)
+                    {
+                        if (dict_element.ContainsKey(id_associated))
+                        {
+                            Element element_associated = dict_element[id_associated];
+                            if (element_associated.Type_.Equals(ElementConstants.BusinessObject))
+                            {
+                                var mappingTemplate = new MappingTemplate();
+                                mappingTemplate.Session = new TextTemplatingSession();
+                                mappingTemplate.Session["archiDocument"] = archiDocumentSerialized;
+                                mappingTemplate.Session["id_element"] = id_element;
+                                mappingTemplate.Session["id_business_object"] = id_associated;
+                                mappingTemplate.Initialize();
+                                generatedText = mappingTemplate.TransformText();
+                                WriteToFile(id_element, generatedText, ".xml");
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void WriteToFile(string id_element, string generatedText, string type)

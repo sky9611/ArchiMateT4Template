@@ -16,33 +16,29 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
+<#@ parameter name="id_business_object" type="System.String" #>
+<#@ include file="InitializeVar.ttinclude" #>
+
+<?xml version = "1.0" encoding = "utf-8"?>
+
+<hibernate-mapping>
 <#
-	Element ele = archiDocument.Dict_element[id_element];
+	Element data_object = archiDocument.Dict_element[id_element];
+	Element business_object = archiDocument.Dict_element[id_business_object];
 #>
-CREATE TABLE <#= UpperString(ele.Class_name_) #>
-(
-<#	
-	foreach(var p in ele.Properties_.Keys)
+	<class name = "<#= business_object.Class_name_ #>" table = "<#= UpperString(data_object.Class_name_) #>">
+<#
+	foreach(var i in business_object.Properties_.Keys)
 	{
-		int i=0;
-		if (i!=ele.Properties_.Keys.Count()-1)
-		{
-#>
-	<#= p #> <#= ele.Properties_[p] #>, 
-
+		string name = i;
+		string type = business_object.Properties_[i];
+#>      
+      <property name = "<#= name #>" column = "<#= name #>" type = "<#= type #>"/>
 <#
-		}
-		else
-		{
-#>
-	<#= p #> <#= ele.Properties_[p] #> 
-<#
-		}
-		i++;
 	}
-#>
-)
-
+#>          
+   </class>
+</hibernate-mapping>
 <#+
 	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
 	public string UpperString(string name)
