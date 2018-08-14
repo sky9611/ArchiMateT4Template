@@ -12,6 +12,15 @@ namespace FichierGenerator
     {
         string class_namespace;
 
+        // Dictionary view_id - view_name
+        Dictionary<string, string> dict_view_name = new Dictionary<string, string>();
+
+        // Dictionary group_id - element_types
+        Dictionary<string, HashSet<string>> dict_group_types = new Dictionary<string, HashSet<string>>();
+
+        // Dictionary view_id - element_types
+        Dictionary<string, HashSet<string>> dict_view_types = new Dictionary<string, HashSet<string>>();
+
         // Dictionary element - solution
         Dictionary<string, string> dict_element_solution = new Dictionary<string, string>();
 
@@ -137,6 +146,9 @@ namespace FichierGenerator
         public List<string> List_project { get => list_project; set => list_project = value; }
         public Dictionary<string, string> Dict_implementation { get => dict_implementation; set => dict_implementation = value; }
         public Dictionary<string, string> Dict_element_solution { get => dict_element_solution; set => dict_element_solution = value; }
+        public Dictionary<string, HashSet<string>> Dict_group_types { get => dict_group_types; set => dict_group_types = value; }
+        public Dictionary<string, HashSet<string>> Dict_view_types { get => dict_view_types; set => dict_view_types = value; }
+        public Dictionary<string, string> Dict_view_name { get => dict_view_name; set => dict_view_name = value; }
 
         public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
@@ -159,6 +171,12 @@ namespace FichierGenerator
                 if (rl.Element(NP + "name") != null && !dict_relationship.ContainsKey(tuple))
                     dict_relationship.Add(tuple, rl.Element(NP + "name").Value);
             }
+
+            // Make the dictionary id_view - view_name
+            IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
+                                               select e;
+            foreach (var ele in xeles_view)
+                dict_view_name.Add(ele.Attribute("identifier").Value, ele.Element(NP + "name").Value);
 
             // Make the map of id - element
             foreach (var ele in doc.Descendants(NP + "element"))
@@ -320,6 +338,30 @@ namespace FichierGenerator
                 }
             }
 
+            // Make the map of views
+            foreach (var ele in xeles_view)
+            {
+                string id = ele.Attribute("identifier").Value;
+                List<string> list_ele_child = new List<string>();
+                List<string> list_group_child = new List<string>();
+                findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
+                if (!dict_view.ContainsKey(id))
+                    dict_view.Add(id, list_ele_child);
+                HashSet<string> set_type;
+                if (dict_view_types.TryGetValue(id, out set_type))
+                {
+                    foreach (var i in list_ele_child)
+                        set_type.Add(dict_element[i].Type_);
+                }
+                else
+                {
+                    set_type = new HashSet<string>();
+                    foreach (var i in list_ele_child)
+                        set_type.Add(dict_element[i].Type_);
+                    dict_view_types.Add(id, set_type);
+                }
+            }
+
             // Make the dict id_element - project
             foreach (var id_project in list_project)
             {
@@ -446,6 +488,13 @@ namespace FichierGenerator
                     dict.Add("class", list_target);
                     dict.Add("interface", list_interface);
                     dict_group.Add(ele.Attribute("identifier").Value, dict);
+
+                    HashSet<string> set_type = new HashSet<string>();
+                    if (list_interface.Count() > 0)
+                        set_type.Add(ElementConstants.ApplicationInterface);
+                    foreach (var i in list_target)
+                        set_type.Add(dict_element[i].Type_);
+                    dict_group_types.Add(ele.Attribute("identifier").Value, set_type);
                 }
             }
         }
@@ -548,21 +597,25 @@ namespace FichierGenerator
             return id;
         }
 
-        public void Update(string[] types, string[] groups, string[] views)
+        public void Update(string[] views)
         {
-            IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
-                                               where views.Contains(e.Element(NP + "name").Value)
-                                               select e;
-            foreach (var ele in xeles_view)
-            {
-                List<string> list_ele_child = new List<string>();
-                List<string> list_group_child = new List<string>();
-                findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
-                if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
-                    dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
-                list_group.AddRange(list_group_child);
-                list_element.AddRange(list_ele_child);
-            }
+            //IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
+            //                                   where views.Contains(e.Element(NP + "name").Value)
+            //                                   select e;
+            //foreach (var ele in xeles_view)
+            //{
+            //    List<string> list_ele_child = new List<string>();
+            //    List<string> list_group_child = new List<string>();
+            //    findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
+            //    if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
+            //        dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
+            //    list_group.AddRange(list_group_child);
+            //    list_element.AddRange(list_ele_child);
+            //}
+            List<string> keys = dict_view.Keys.ToList();
+            foreach (var i in keys)
+                if (!views.Contains(dict_view_name[i]))
+                    dict_view.Remove(i);
         }
 
         public void Update(string[] types, string[] groups, string[] views, string[] elements, string name_space)
@@ -578,7 +631,7 @@ namespace FichierGenerator
                 List<string> list_ele_child = new List<string>();
                 List<string> list_group_child = new List<string>();
                 findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
-                if(!dict_view.ContainsKey(ele.Attribute("identifier").Value))
+                if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
                     dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
                 list_group.AddRange(list_group_child);
                 list_element.AddRange(list_ele_child);

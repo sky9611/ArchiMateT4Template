@@ -1,7 +1,6 @@
 using FichierGenerator.Template;
 using Microsoft.VisualStudio.TextTemplating;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,9 +13,6 @@ namespace FichierGenerator
 {
     public class FileGenerator
     {
-        string current_solution_path;
-        string current_solution_name;
-        Dictionary<string, List<string>> log = new Dictionary<string, List<string>>();
         ArchiDocument archiDocument;
         Dictionary<string, Element> dict_element;
         XElement doc;
@@ -34,7 +30,7 @@ namespace FichierGenerator
             doc = XElement.Load(@file_path);
             NP = doc.GetDefaultNamespace();
             archiDocument = new ArchiDocument(dict_implementation, file_path);
-            dict_element = archiDocument.Dict_element;
+            Dict_element = archiDocument.Dict_element;
             Log.Add("errors", archiDocument.Errors);
             Log.Add("warnings", new List<string>());
         }
@@ -42,14 +38,14 @@ namespace FichierGenerator
         public string[] getAllElements()
         {
             List<string> list = new List<string>();
-            foreach (var x in dict_element.Keys)
-                list.Add(dict_element[x].Name_);
+            foreach (var x in Dict_element.Keys)
+                list.Add(Dict_element[x].Name_);
             return list.ToArray();
         }
 
         public string[] getElements(string[] types, string[] groups, string[] views)
         {
-            archiDocument.Update(types, groups, views);
+            archiDocument.Update(views);
             List<string> list = new List<string>();
             foreach (var i in views)
                 try
@@ -71,11 +67,11 @@ namespace FichierGenerator
                 catch { }
 
             list = list.Distinct().ToList();
-            list.RemoveAll(x => !types.Contains(dict_element[x].Type_));
-            list.RemoveAll(x => !dict_element.ContainsKey(x));
+            list.RemoveAll(x => !types.Contains(Dict_element[x].Type_));
+            list.RemoveAll(x => !Dict_element.ContainsKey(x));
 
             List<string> list_element_name = new List<string>();
-            list.ForEach(x => list_element_name.Add(dict_element[x].Name_));
+            list.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
 
             return list_element_name.ToArray();
         }
@@ -83,11 +79,11 @@ namespace FichierGenerator
         public string[] getAllSolutions()
         {
             List<string> list = new List<string>();
-            foreach (var x in dict_element.Keys)
+            foreach (var x in Dict_element.Keys)
             {
-                Element element = dict_element[x];
+                Element element = Dict_element[x];
                 if (element.Type_.Equals(ElementConstants.Product))
-                    list.Add(dict_element[x].Name_);
+                    list.Add(Dict_element[x].Name_);
             }
             return list.ToArray();
         }
@@ -116,9 +112,10 @@ namespace FichierGenerator
             ElementConstants.ApplicationProcess };
 
         public string File_path { get; set; }
-        public string Current_solution_name { get => current_solution_name; set => current_solution_name = value; }
-        public string Current_solution_path { get => current_solution_path; set => current_solution_path = value; }
-        public Dictionary<string, List<string>> Log { get => log; set => log = value; }
+        public string Current_solution_name { get; set; }
+        public string Current_solution_path { get; set; }
+        public Dictionary<string, List<string>> Log { get; set; } = new Dictionary<string, List<string>>();
+        public Dictionary<string, Element> Dict_element { get => dict_element; set => dict_element = value; }
 
         /// <summary>
         ///     Method to run the t4 template
@@ -147,7 +144,7 @@ namespace FichierGenerator
 
             foreach (var id_element in archiDocumentSerialized.List_element)
             {
-                Element ele = dict_element[id_element];
+                Element ele = Dict_element[id_element];
                 if (ele.Type_.Equals(ElementConstants.ApplicationEvent) && ele.Properties_.ContainsKey("Implementation"))
                     GenerateApplicationEvent(archiDocumentSerialized, id_element);
 
@@ -155,8 +152,8 @@ namespace FichierGenerator
 
                 if (archiDocument.Dict_element_solution.ContainsKey(id_element))
                 {
-                    var related_solution_name = StringHelper.UpperString(dict_element[archiDocument.Dict_element_solution[id_element]].Name_);
-                    if (!related_solution_name.Equals(current_solution_name))
+                    var related_solution_name = StringHelper.UpperString(Dict_element[archiDocument.Dict_element_solution[id_element]].Name_);
+                    if (!related_solution_name.Equals(Current_solution_name))
                         Log["errors"].Add("Element \"" + ele.Name_ + "\" is not supposed to be generated here, it's related to solution(ArchimateModel.Produit) \"" + related_solution_name);
                 }
 
@@ -199,12 +196,12 @@ namespace FichierGenerator
             {
                 if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue(RelaionshipConstants.Triggering, out list_FT))
                     foreach (var i in list_FT)
-                        if (dict_element[i].Type_.Equals(ElementConstants.Representation))
-                            list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_) + ".xaml");
+                        if (Dict_element[i].Type_.Equals(ElementConstants.Representation))
+                            list_view.Add(StringHelper.UpperString(Dict_element[i].Class_name_) + ".xaml");
                 if (archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue(RelaionshipConstants.Flow, out list_FT))
                     foreach (var i in list_FT)
-                        if (dict_element[i].Type_.Equals(ElementConstants.Representation))
-                            list_view.Add(StringHelper.UpperString(dict_element[i].Class_name_) + ".xaml");
+                        if (Dict_element[i].Type_.Equals(ElementConstants.Representation))
+                            list_view.Add(StringHelper.UpperString(Dict_element[i].Class_name_) + ".xaml");
             }
 
             string views;
@@ -235,7 +232,7 @@ namespace FichierGenerator
             Dictionary<string, List<string>> dict = archiDocument.Mmap_solution;
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocument);
 
-            var id_solution = dict.FirstOrDefault(x => dict_element[x.Key].Name_ == solution_name).Key;
+            var id_solution = dict.FirstOrDefault(x => Dict_element[x.Key].Name_ == solution_name).Key;
 
             Object obj = System.Activator.CreateInstance(type, true);
             EnvDTE.DTE dte = (EnvDTE.DTE)obj;
@@ -251,9 +248,9 @@ namespace FichierGenerator
             if (archiDocument.Mmap_relationship.ContainsKey(id_solution) &&
                     archiDocument.Mmap_relationship[id_solution]["source"].TryGetValue("Flow", out list_temp))
                 foreach (var i in list_temp)
-                    if (dict_element[i].Type_.Equals(ElementConstants.ApplicationFunction) ||
-                            dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
-                        list_launcher.Add(StringHelper.UpperString(dict_element[i].Class_name_));
+                    if (Dict_element[i].Type_.Equals(ElementConstants.ApplicationFunction) ||
+                            Dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
+                        list_launcher.Add(StringHelper.UpperString(Dict_element[i].Class_name_));
             string launcher = string.Join(",", list_launcher);
 
             // create the folder for the solution
@@ -277,7 +274,7 @@ namespace FichierGenerator
             // create a C# ConsoleApp app
             foreach (var id_projet in list_projet)
             {
-                string projet_name = StringHelper.UpperString(dict_element[id_projet].Class_name_);
+                string projet_name = StringHelper.UpperString(Dict_element[id_projet].Class_name_);
                 //Console.WriteLine(Directory.GetCurrentDirectory());
 
                 string project_path = Path.Combine(Path.GetFullPath(solution_path), projet_name);
@@ -286,7 +283,7 @@ namespace FichierGenerator
                     project_path, projet_name);
 
                 // Generate manifest
-                string name = StringHelper.UpperString(dict_element[id_projet].Class_name_);
+                string name = StringHelper.UpperString(Dict_element[id_projet].Class_name_);
                 var template = new DeploymentFileTemplate();
                 template.Session = new TextTemplatingSession();
                 template.Session["archiDocument"] = archiDocumentSerialized;
@@ -332,6 +329,17 @@ namespace FichierGenerator
             return list_group.ToArray();
         }
 
+        public string[] getGroups(string[] types)
+        {
+            List<string> list_group = new List<string>();
+            foreach (var i in archiDocument.Dict_group_types.Keys)
+            {
+                if (archiDocument.Dict_group_types[i].Intersect(types).Count() > 0)
+                    list_group.Add(Dict_element[i].Name_);
+            }
+            return list_group.ToArray();
+        }
+
         public string[] getAllView()
         {
             IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
@@ -344,9 +352,20 @@ namespace FichierGenerator
             return list_view.ToArray();
         }
 
+        public string[] getViews(string[] types)
+        {
+            List<string> list_view = new List<string>();
+            foreach (var i in archiDocument.Dict_view_types.Keys)
+            {
+                if (archiDocument.Dict_view_types[i].Intersect(types).Count() > 0)
+                    list_view.Add(archiDocument.Dict_view_name[i]);
+            }
+            return list_view.ToArray();
+        }
+
         private void GenerateContract(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new ContractTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -359,7 +378,7 @@ namespace FichierGenerator
 
         private void GenerateBusinessObject(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new BusinessObjectTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -371,7 +390,7 @@ namespace FichierGenerator
 
         private void GenerateApplicationService(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new ApplicationServiceTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -383,7 +402,7 @@ namespace FichierGenerator
 
         private void GenerateApplicationEvent(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new ApplicationEventTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -395,7 +414,7 @@ namespace FichierGenerator
 
         private void GenerateApplicationProcess(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new ApplicationProcessTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -407,7 +426,7 @@ namespace FichierGenerator
 
         private void GenerateInterface(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new InterfaceTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -419,7 +438,7 @@ namespace FichierGenerator
 
         private void GenerateRepresentation(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new RepresentationTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -442,7 +461,7 @@ namespace FichierGenerator
 
         private void GenerateDataObject(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
         {
-            string name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             var template = new DataObjectTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -466,9 +485,9 @@ namespace FichierGenerator
                 {
                     foreach (var id_associated in list_associated)
                     {
-                        if (dict_element.ContainsKey(id_associated))
+                        if (Dict_element.ContainsKey(id_associated))
                         {
-                            Element element_associated = dict_element[id_associated];
+                            Element element_associated = Dict_element[id_associated];
                             if (element_associated.Type_.Equals(ElementConstants.BusinessObject))
                             {
                                 var mappingTemplate = new MappingTemplate();
@@ -489,15 +508,15 @@ namespace FichierGenerator
         private void WriteToFile(string id_element, string generatedText, string type)
         {
             string id_project;
-            string file_name = StringHelper.UpperString(dict_element[id_element].Class_name_);
+            string file_name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             if (archiDocument.Dict_element_project.TryGetValue(id_element, out id_project))
                 try
                 {
-                    if (!dict_element[id_element].Properties_.ContainsKey("$Localisation"))
+                    if (!Dict_element[id_element].Properties_.ContainsKey("$Localisation"))
                         File.WriteAllText(dict_project_directory[id_project] + "\\" + file_name + type, generatedText);
                     else
                     {
-                        string localisation = dict_element[id_element].Properties_["$Localisation"].Replace("./", "");
+                        string localisation = Dict_element[id_element].Properties_["$Localisation"].Replace("./", "");
                         Directory.CreateDirectory(dict_project_directory[id_project] + "\\" + localisation);
                         File.WriteAllText(dict_project_directory[id_project] + "\\" + localisation + "\\" + file_name + type, generatedText);
                     }
@@ -505,7 +524,7 @@ namespace FichierGenerator
                 }
                 catch
                 {
-                    log["warnings"].Add("The project which element \"" + dict_element[id_element].Name_ + "\" is related to has not been found");
+                    Log["warnings"].Add("The project which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
                     Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")));
                     File.WriteAllText(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")) + "\\" + file_name + type, generatedText);
                 }
@@ -513,7 +532,7 @@ namespace FichierGenerator
             {
                 // Les elements qui ne sont pas li¨¦s ¨¤ un projet(Composant Applicatif) quelconque sont mets dans 
                 // le r¨¦pertoire /<CurrentSolution>/Generated
-                log["warnings"].Add("Element \"" + dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
+                Log["warnings"].Add("Element \"" + Dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
                 Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Current_solution_path,"Generated")));
                 File.WriteAllText(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")) + "\\" + file_name + type, generatedText);
             }
@@ -535,6 +554,7 @@ namespace FichierGenerator
             //string[] elements = list.ToArray();
             //string[] views = list.ToArray();
             string[] array_element = fileGenerator.getElements(fileGenerator.getAllType(), groups, views);
+            string[] array_views = fileGenerator.getViews(fileGenerator.getAllType());
             //fileGenerator.GenerateSolution("..\\..\\Generated", "Accueil Patient Service");
             fileGenerator.Generate("..\\..\\Generated", fileGenerator.getAllType(), groups, views, elements, "Maidis.VNext.");
         }
