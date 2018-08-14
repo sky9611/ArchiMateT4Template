@@ -82,3 +82,4 @@ D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\T
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\FichierGenerator.dll.config
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\FichierGenerator.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.dll
+D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.csprojAssemblyReference.cache
