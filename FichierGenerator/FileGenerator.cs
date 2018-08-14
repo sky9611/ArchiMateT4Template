@@ -577,16 +577,16 @@ namespace FichierGenerator
                 catch
                 {
                     Log["warnings"].Add("The project which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
-                    Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")));
-                    File.WriteAllText(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")) + "\\" + file_name + type, generatedText);
+                    Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
+                    File.WriteAllText(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type, generatedText);
                 }
             else
             {
                 // Les elements qui ne sont pas li¨¦s ¨¤ un projet(Composant Applicatif) quelconque sont mets dans 
                 // le r¨¦pertoire /<CurrentSolution>/Generated
                 Log["warnings"].Add("Element \"" + Dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
-                Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Current_solution_path,"Generated")));
-                File.WriteAllText(Path.GetFullPath(Path.Combine(Current_solution_path, "Generated")) + "\\" + file_name + type, generatedText);
+                Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
+                File.WriteAllText(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type, generatedText);
             }
                 
         }
@@ -608,7 +608,7 @@ namespace FichierGenerator
             string[] array_element = fileGenerator.getElements(fileGenerator.getAllType(), groups, views);
             //string[] array_views = fileGenerator.getViews(fileGenerator.getAllType());
             //fileGenerator.GenerateSolution("..\\..\\Generated", "Accueil Patient Service");
-            fileGenerator.Generate("..\\..\\Generated", fileGenerator.getAllType(), groups, views, elements, "Maidis.VNext.");
+            fileGenerator.Generate("..\\..\\Generated", fileGenerator.getAllType(), groups, views, array_element, "Maidis.VNext.");
         }
     }
 }
