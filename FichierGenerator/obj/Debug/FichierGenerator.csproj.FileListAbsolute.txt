@@ -30,7 +30,6 @@ D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\M
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.VSHelp.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.OLE.Interop.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.ComponentModelHost.dll
-D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\VSLangProj.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\VsWebSite.Interop.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\VsWebSite.Interop90.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.Shell.Interop.8.0.dll

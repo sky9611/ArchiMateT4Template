@@ -12,6 +12,12 @@ namespace FichierGenerator
     {
         string class_namespace;
 
+        // Dictionary of heritage
+        Dictionary<string, string> dict_heritage = new Dictionary<string, string>();
+
+        // Dictionary project(Application Composition) - project(Application Composition)
+        Dictionary<string, HashSet<string>> dict_project_reference = new Dictionary<string, HashSet<string>>();
+
         // Dictionary view_id - view_name
         Dictionary<string, string> dict_view_name = new Dictionary<string, string>();
 
@@ -41,7 +47,7 @@ namespace FichierGenerator
         Dictionary<string, string> dict_element_project = new Dictionary<string, string>();
 
         // list of all project(application component)
-        List<string> list_project = new List<string>();
+        HashSet<string> hashset_project = new HashSet<string>();
 
         // list of group
         List<string> list_group = new List<string>();
@@ -143,12 +149,14 @@ namespace FichierGenerator
         public List<string> Types { get => types; set => types = value; }
         public Dictionary<string, List<string>> Mmap_solution { get => mmap_solution; set => mmap_solution = value; }
         public Dictionary<string, string> Dict_element_project { get => dict_element_project; set => dict_element_project = value; }
-        public List<string> List_project { get => list_project; set => list_project = value; }
+        public HashSet<string> Hashset_project { get => hashset_project; set => hashset_project = value; }
         public Dictionary<string, string> Dict_implementation { get => dict_implementation; set => dict_implementation = value; }
         public Dictionary<string, string> Dict_element_solution { get => dict_element_solution; set => dict_element_solution = value; }
         public Dictionary<string, HashSet<string>> Dict_group_types { get => dict_group_types; set => dict_group_types = value; }
         public Dictionary<string, HashSet<string>> Dict_view_types { get => dict_view_types; set => dict_view_types = value; }
         public Dictionary<string, string> Dict_view_name { get => dict_view_name; set => dict_view_name = value; }
+        public Dictionary<string, HashSet<string>> Dict_project_reference { get => dict_project_reference; set => dict_project_reference = value; }
+        public Dictionary<string, string> Dict_heritage { get => dict_heritage; set => dict_heritage = value; }
 
         public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
@@ -197,7 +205,7 @@ namespace FichierGenerator
                     element.Class_name_ = properties["Implementation"];
                 else
                     element.Class_name_ = element.Name_;
-                if (element.Type_.Equals(ElementConstants.ApplicationComponent)) list_project.Add(element.Identifier_);
+                if (element.Type_.Equals(ElementConstants.ApplicationComponent)) hashset_project.Add(element.Identifier_);
                 dict_element.Add(element.Identifier_, element);
             }
 
@@ -338,6 +346,42 @@ namespace FichierGenerator
                 }
             }
 
+            
+            foreach(var id in dict_element.Keys)
+            {
+                // Add function relations
+                if (dict_element[id].Type_.Equals(ElementConstants.ApplicationFunction))
+                {
+                    string id_first_function = GetFirstFunction(id);
+                    string id_element = CallFunctionElement(id_first_function);
+                    AddFunctionToElement(id_first_function, id_element);
+                }
+
+                // Make the dict id_element - project
+                string id_project = FindProjectByElement(id);
+                dict_element_project.Add(id, id_project);
+
+                // Make the heritage dictionary 
+                string id_parent = GetParentElement(id);
+                if (id_parent != null)
+                    dict_heritage.Add(id, id_parent);
+            }
+            // Add properties depends on heritage relationship
+            foreach(var i in dict_heritage.Keys)
+            {
+                Element child = dict_element[i];
+                string id_root = GetRootElement(i);
+                if (id_root!=i)
+                {
+                    Element root = dict_element[id_root];
+                    foreach (var p in root.Properties_.Keys)
+                    {
+                        if (!child.Properties_.ContainsKey(p))
+                            child.Properties_.Add(p, root.Properties_[p]);
+                    }
+                }
+            }
+
             // Make the map of views
             foreach (var ele in xeles_view)
             {
@@ -363,30 +407,78 @@ namespace FichierGenerator
             }
 
             // Make the dict id_element - project
-            foreach (var id_project in list_project)
+            //foreach (var id_project in hashset_project)
+            //{
+            //    List<string> list_element = new List<string>();
+            //    if (mmap_relationship.ContainsKey(id_project))
+            //    {
+            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Association, out list_element))
+            //        //    foreach (var i in list_element)
+            //        //        if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject))
+            //        //            dict_element_project.Add(i, id_project);
+            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Aggregation, out list_element))
+            //        //    foreach (var i in list_element)
+            //        //        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
+            //        //            dict_element_project.Add(i, id_project);
+            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Assignment, out list_element))
+            //        //    foreach (var i in list_element)
+            //        //        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
+            //        //            dict_element_project.Add(i, id_project);
+            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Access, out list_element))
+            //        //    foreach (var i in list_element)
+            //        //        if (dict_element[i].Type_.Equals(ElementConstants.DataObject))
+            //        //            dict_element_project.Add(i, id_project);
+            //        if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Composition, out list_element))
+            //            foreach (var i in list_element)
+            //                if (!dict_element_project.ContainsKey(i))
+            //                    dict_element_project.Add(i, id_project);
+            //    }
+            //}
+            
+
+            // Make the dictionary of project references
+            foreach (var id_project in hashset_project)
             {
                 List<string> list_element = new List<string>();
                 if (mmap_relationship.ContainsKey(id_project))
                 {
-                    if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Association, out list_element))
-                        foreach (var i in list_element)
-                            if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject))
-                                dict_element_project.Add(i, id_project);
                     if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Aggregation, out list_element))
                         foreach (var i in list_element)
-                            if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
-                                dict_element_project.Add(i, id_project);
-                    if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Assignment, out list_element))
+                            if (dict_element[i].Type_.Equals(ElementConstants.ApplicationComponent))
+                            {
+                                // HashSet to store the references of the project
+                                HashSet<string> set;
+                                if (dict_project_reference.TryGetValue(id_project, out set))
+                                    set.Add(i);
+                                else
+                                {
+                                    set = new HashSet<string>();
+                                    set.Add(i);
+                                    dict_project_reference.Add(id_project, set);
+                                }
+                            }
+
+                    if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Serving, out list_element))
                         foreach (var i in list_element)
-                            if (dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
-                                dict_element_project.Add(i, id_project);
-                    if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Access, out list_element))
-                        foreach (var i in list_element)
-                            if (dict_element[i].Type_.Equals(ElementConstants.DataObject))
-                                dict_element_project.Add(i, id_project);
+                            if (dict_element[i].Type_.Equals(ElementConstants.ApplicationComponent))
+                            {
+                                // HashSet to store the references of the project
+                                HashSet<string> set;
+                                if (dict_project_reference.TryGetValue(id_project, out set))
+                                    set.Add(i);
+                                else
+                                {
+                                    set = new HashSet<string>();
+                                    set.Add(i);
+                                    dict_project_reference.Add(id_project, set);
+                                }
+                            }
                 }
             }
-                                    
+
+            
+
+            
             // Make the mmap of solution - projects
             foreach (var id in dict_element.Keys)
             {
@@ -401,6 +493,98 @@ namespace FichierGenerator
                         foreach (var id_element in list)
                             if (dict_element[id_element].Type_.Equals(ElementConstants.ApplicationComponent))
                                 list_projet.Add(id_element);
+                    }
+                }
+            }
+
+            // Handle the "$interface" property
+            foreach(var id in dict_element.Keys)
+            {
+                Element element = dict_element[id];
+                if (element.Properties_.ContainsKey("$Interface"))
+                {
+                    // The project name which element belongs to
+                    string project_id;
+                    if (dict_element_project.TryGetValue(id, out project_id))
+                    {
+                        string project_name = dict_element[project_id].Class_name_;
+
+                        //Create new application component element and add it to dict_element
+                        Element new_project = new Element();
+                        new_project.Name_ = project_name + ".Interface";
+                        new_project.Class_name_ = project_name + ".Interface"; 
+                        new_project.Identifier_ = project_name + ".Interface";
+                        new_project.Type_ = ElementConstants.ApplicationComponent;
+                        dict_element.Add(new_project.Identifier_, new_project);
+                        hashset_project.Add(new_project.Identifier_);
+
+                        // Add new project to the references of implementation project 
+                        HashSet<string> set; // Hashset to store the references
+                        if (dict_project_reference.TryGetValue(project_id, out set))
+                        {
+                            set.Add(new_project.Identifier_);
+                        }
+                        else
+                        {
+                            set = new HashSet<string>();
+                            set.Add(new_project.Identifier_);
+                            dict_project_reference.Add(project_id, set);
+                        }
+
+                        // Add new project to the solution
+                        try
+                        {
+                            string solution_id = mmap_solution.First(x => x.Value.Contains(project_id)).Key;
+                            mmap_solution[solution_id].Add(new_project.Identifier_);
+                        }
+                        catch { }
+
+                        // Remove ancient project references and add the news
+                        List<string> keys = dict_project_reference.Keys.ToList();
+                        foreach (var i in keys)
+                        {
+                            if (dict_project_reference[i].Contains(project_id))
+                            {
+                                dict_project_reference[i].Remove(project_id);
+                                dict_project_reference[i].Add(new_project.Identifier_);
+                            }
+
+                        }
+
+                        //Create new interface element and add it to dict_element
+                        Element new_interface = new Element();
+                        new_interface.Name_ = "I"+ element.Class_name_;
+                        new_interface.Class_name_ = new_project.Name_;
+                        new_interface.Identifier_ = new_project.Name_;
+                        new_interface.Type_ = ElementConstants.ApplicationInterface;
+                        dict_element.Add(new_interface.Identifier_, new_interface);
+
+                        // Move functions into interface
+                        if (element.Type_.Equals(ElementConstants.ApplicationProcess))
+                        {
+                            Dictionary<string, Dictionary<string, List<string>>> dict;
+                            if (mmap_relationship.TryGetValue(id, out dict))
+                            {
+                                List<string> list;
+                                if (dict["source"].TryGetValue("Function", out list))
+                                {
+                                    foreach (var i in list)
+                                        if (mmap_relationship.ContainsKey(new_interface.Identifier_))
+                                            AddFunctionToElement(i, new_interface.Identifier_);
+                                        else
+                                        {
+                                            Dictionary<string, Dictionary<string, List<string>>> dict2 = new Dictionary<string, Dictionary<string, List<string>>>();
+                                            Dictionary<string, List<string>> dict_source = new Dictionary<string, List<string>>();
+                                            dict_source.Add("Function", new List<string>(list));
+                                            dict2.Add("source", dict_source);
+                                            dict2.Add("target", new Dictionary<string, List<string>>());
+                                            mmap_relationship.Add(new_interface.Identifier_, dict2);
+                                        }
+
+                                    dict.Remove("Function");
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -497,6 +681,37 @@ namespace FichierGenerator
                     dict_group_types.Add(ele.Attribute("identifier").Value, set_type);
                 }
             }
+        }
+
+        private string GetRootElement(string i)
+        {
+            string id_parent;
+            if (dict_heritage.TryGetValue(i, out id_parent))
+            {
+                while (dict_heritage.ContainsKey(id_parent))
+                {
+                    id_parent = dict_heritage[id_parent];
+                }
+                return id_parent;
+            }                
+            else
+                return i;
+        }
+
+        private string GetParentElement(string id)
+        {
+            Dictionary<string, Dictionary<string, List<string>>> dict;
+            if (mmap_relationship.TryGetValue(id, out dict))
+            {
+                List<string> list_temp;
+                if (mmap_relationship[id]["source"].TryGetValue(RelaionshipConstants.Specialization, out list_temp))
+                {
+                    foreach (var i in list_temp)
+                        if (dict_element.ContainsKey(i) && dict_element[i].Type_.Equals(dict_element[id].Type_))
+                            return i;
+                }
+            }
+            return null;
         }
 
         private void AddFunctionToElement(string id_first_function, string id_elementCalled)
@@ -970,6 +1185,29 @@ namespace FichierGenerator
             name = name.Replace(" ", "");
             name = Regex.Replace(name, @"[^\w\.@_]", "");
             return name[0].ToString().ToUpperInvariant() + name.Substring(1);
+        }
+
+        /// <summary>
+        ///  Find the project which the element belongs to
+        /// </summary>
+        /// <param name="id">id of element</param>
+        private string FindProjectByElement(string id)
+        {
+            List<string> list_element = new List<string>();
+            if (mmap_relationship.ContainsKey(id))
+            {
+                if (mmap_relationship[id]["target"].TryGetValue(RelaionshipConstants.Composition, out list_element))
+                {
+                    foreach (var i in list_element)
+                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationComponent))
+                            return i;
+                    foreach (var i in list_element)
+                        return FindProjectByElement(i);
+                }
+                    
+            }
+            return null;
+
         }
     }
 }
