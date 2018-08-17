@@ -36,7 +36,6 @@ D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\M
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.Shell.Framework.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.Designer.Interfaces.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.TextManager.Interop.dll
-D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\EnvDTE80.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.Utilities.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.Imaging.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Microsoft.VisualStudio.Threading.dll

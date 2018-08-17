@@ -354,7 +354,8 @@ namespace FichierGenerator
                 {
                     string id_first_function = GetFirstFunction(id);
                     string id_element = CallFunctionElement(id_first_function);
-                    AddFunctionToElement(id_first_function, id_element);
+                    if (id_element!=null)
+                        AddFunctionToElement(id_first_function, id_element);
                 }
 
                 // Make the dict id_element - project
@@ -690,7 +691,10 @@ namespace FichierGenerator
             {
                 while (dict_heritage.ContainsKey(id_parent))
                 {
+                    string temp = id_parent;
                     id_parent = dict_heritage[id_parent];
+                    if (id_parent.Equals(temp))
+                        break;
                 }
                 return id_parent;
             }                
