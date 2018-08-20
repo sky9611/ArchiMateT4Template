@@ -32,7 +32,7 @@ namespace FichierGenerator.Template
             this.Write("\r\nusing System.Windows;\r\n \r\nusing Maidis.Fwk.Bootstrap.Implementation;\r\n \r\nnamesp" +
                     "ace ");
             
-            #line 14 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\AppXamlCsTemplate.tt"
+            #line 13 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\AppXamlCsTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(solutionName));
             
             #line default
@@ -44,10 +44,10 @@ namespace FichierGenerator.Template
     /// </summary>
     public partial class App : Application
     {
-        public  App()
+        public App()
         {
             CBootstrapApplicationWindows application = new CBootstrapApplicationWindows(this);
-            application.Start(launcher);
+            application.Start();
         }
     }
 }");
@@ -66,19 +66,6 @@ private string solutionName
     get
     {
         return this._solutionNameField;
-    }
-}
-
-private string _launcherField;
-
-/// <summary>
-/// Access the launcher parameter of the template.
-/// </summary>
-private string launcher
-{
-    get
-    {
-        return this._launcherField;
     }
 }
 
@@ -102,20 +89,6 @@ if ((solutionNameValueAcquired == false))
     if ((data != null))
     {
         this._solutionNameField = ((string)(data));
-    }
-}
-bool launcherValueAcquired = false;
-if (this.Session.ContainsKey("launcher"))
-{
-    this._launcherField = ((string)(this.Session["launcher"]));
-    launcherValueAcquired = true;
-}
-if ((launcherValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("launcher");
-    if ((data != null))
-    {
-        this._launcherField = ((string)(data));
     }
 }
 

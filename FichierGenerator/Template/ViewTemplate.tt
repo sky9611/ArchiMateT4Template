@@ -14,7 +14,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:<#= groupName #>"
         mc:Ignorable="d"
-        Title="<nom vue>" Height="868" Width="1563" ResizeMode="NoResize">
+        Title="<#= viewName #>" Height="868" Width="1563" ResizeMode="NoResize">
     <Grid>       
     </Grid>
 </Window>

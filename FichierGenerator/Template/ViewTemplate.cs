@@ -55,8 +55,15 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\"\r\n        mc:Ignorable=\"d\"\r\n        Title=\"<nom vue>\" Height=\"868\" Width=\"1563\" " +
-                    "ResizeMode=\"NoResize\">\r\n    <Grid>       \r\n    </Grid>\r\n</Window>");
+            this.Write("\"\r\n        mc:Ignorable=\"d\"\r\n        Title=\"");
+            
+            #line 17 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(viewName));
+            
+            #line default
+            #line hidden
+            this.Write("\" Height=\"868\" Width=\"1563\" ResizeMode=\"NoResize\">\r\n    <Grid>       \r\n    </Grid" +
+                    ">\r\n</Window>");
             return this.GenerationEnvironment.ToString();
         }
         

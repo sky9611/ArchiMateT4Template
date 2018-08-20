@@ -12,6 +12,9 @@ namespace FichierGenerator
     {
         string class_namespace;
 
+        // Dictionary project - elements
+        Dictionary<string, HashSet<string>> dict_project_elements = new Dictionary<string, HashSet<string>>();
+
         // Dictionary of heritage
         Dictionary<string, string> dict_heritage = new Dictionary<string, string>();
 
@@ -157,6 +160,7 @@ namespace FichierGenerator
         public Dictionary<string, string> Dict_view_name { get => dict_view_name; set => dict_view_name = value; }
         public Dictionary<string, HashSet<string>> Dict_project_reference { get => dict_project_reference; set => dict_project_reference = value; }
         public Dictionary<string, string> Dict_heritage { get => dict_heritage; set => dict_heritage = value; }
+        public Dictionary<string, HashSet<string>> Dict_project_elements { get => dict_project_elements; set => dict_project_elements = value; }
 
         public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
@@ -223,7 +227,7 @@ namespace FichierGenerator
                     if (dict_source_relationship["source"].TryGetValue(relationship_type, out list))
                     {
                         list.Add(id_target);
-                        if (relationship_type.Equals(RelaionshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
+                        if (relationship_type.Equals(RelationshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
                         {
                             List<string> list2;
                             if (dict_source_relationship["target"].TryGetValue(relationship_type, out list2))
@@ -244,7 +248,7 @@ namespace FichierGenerator
                     {
                         list = new List<string>();
                         list.Add(id_target);
-                        if (relationship_type.Equals(RelaionshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
+                        if (relationship_type.Equals(RelationshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
                         {
                             List<string> list2;
                             if (dict_source_relationship["target"].TryGetValue(relationship_type, out list2))
@@ -272,7 +276,7 @@ namespace FichierGenerator
                     dict2.Add(relationship_type, list);
                     dict_source_relationship.Add("source", dict2);
                     dict_source_relationship.Add("target", new Dictionary<string, List<string>>());
-                    if (relationship_type.Equals(RelaionshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
+                    if (relationship_type.Equals(RelationshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
                     {
                         List<string> list2 = new List<string>();
                         list2.Add(id_target);
@@ -287,7 +291,7 @@ namespace FichierGenerator
                     if (dict_target_relationship["target"].TryGetValue(relationship_type, out list))
                     {
                         list.Add(id_source);
-                        if (relationship_type.Equals(RelaionshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
+                        if (relationship_type.Equals(RelationshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
                         {
                             List<string> list2;
                             if (dict_target_relationship["source"].TryGetValue(relationship_type, out list2))
@@ -308,7 +312,7 @@ namespace FichierGenerator
                     {
                         list = new List<string>();
                         list.Add(id_source);
-                        if (relationship_type.Equals(RelaionshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
+                        if (relationship_type.Equals(RelationshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
                         {
                             List<string> list2;
                             if (dict_target_relationship["source"].TryGetValue(relationship_type, out list2))
@@ -336,7 +340,7 @@ namespace FichierGenerator
                     dict2.Add(relationship_type, list);
                     dict_target_relationship.Add("target", dict2);
                     dict_target_relationship.Add("source", new Dictionary<string, List<string>>());
-                    if (relationship_type.Equals(RelaionshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
+                    if (relationship_type.Equals(RelationshipConstants.Access) && ele.Attribute("accessType").Equals("ReadWrite"))
                     {
                         List<string> list2 = new List<string>();
                         list2.Add(id_source);
@@ -360,8 +364,22 @@ namespace FichierGenerator
 
                 // Make the dict id_element - project
                 string id_project = FindProjectByElement(id);
-                dict_element_project.Add(id, id_project);
-
+                if (id_project !=null)
+                {
+                    dict_element_project.Add(id, id_project);
+                    HashSet<string> set_elements;
+                    if (dict_project_elements.TryGetValue(id_project, out set_elements))
+                    {
+                        set_elements.Add(id);
+                    }
+                    else
+                    {
+                        set_elements = new HashSet<string>();
+                        set_elements.Add(id);
+                        dict_project_elements.Add(id_project, set_elements);
+                    }
+                }
+                
                 // Make the heritage dictionary 
                 string id_parent = GetParentElement(id);
                 if (id_parent != null)
@@ -413,23 +431,23 @@ namespace FichierGenerator
             //    List<string> list_element = new List<string>();
             //    if (mmap_relationship.ContainsKey(id_project))
             //    {
-            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Association, out list_element))
+            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelationshipConstants.Association, out list_element))
             //        //    foreach (var i in list_element)
             //        //        if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject))
             //        //            dict_element_project.Add(i, id_project);
-            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Aggregation, out list_element))
+            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelationshipConstants.Aggregation, out list_element))
             //        //    foreach (var i in list_element)
             //        //        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
             //        //            dict_element_project.Add(i, id_project);
-            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Assignment, out list_element))
+            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelationshipConstants.Assignment, out list_element))
             //        //    foreach (var i in list_element)
             //        //        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
             //        //            dict_element_project.Add(i, id_project);
-            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Access, out list_element))
+            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelationshipConstants.Access, out list_element))
             //        //    foreach (var i in list_element)
             //        //        if (dict_element[i].Type_.Equals(ElementConstants.DataObject))
             //        //            dict_element_project.Add(i, id_project);
-            //        if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Composition, out list_element))
+            //        if (mmap_relationship[id_project]["source"].TryGetValue(RelationshipConstants.Composition, out list_element))
             //            foreach (var i in list_element)
             //                if (!dict_element_project.ContainsKey(i))
             //                    dict_element_project.Add(i, id_project);
@@ -443,7 +461,7 @@ namespace FichierGenerator
                 List<string> list_element = new List<string>();
                 if (mmap_relationship.ContainsKey(id_project))
                 {
-                    if (mmap_relationship[id_project]["source"].TryGetValue(RelaionshipConstants.Aggregation, out list_element))
+                    if (mmap_relationship[id_project]["source"].TryGetValue(RelationshipConstants.Aggregation, out list_element))
                         foreach (var i in list_element)
                             if (dict_element[i].Type_.Equals(ElementConstants.ApplicationComponent))
                             {
@@ -459,7 +477,7 @@ namespace FichierGenerator
                                 }
                             }
 
-                    if (mmap_relationship[id_project]["target"].TryGetValue(RelaionshipConstants.Serving, out list_element))
+                    if (mmap_relationship[id_project]["target"].TryGetValue(RelationshipConstants.Serving, out list_element))
                         foreach (var i in list_element)
                             if (dict_element[i].Type_.Equals(ElementConstants.ApplicationComponent))
                             {
@@ -477,9 +495,6 @@ namespace FichierGenerator
                 }
             }
 
-            
-
-            
             // Make the mmap of solution - projects
             foreach (var id in dict_element.Keys)
             {
@@ -489,7 +504,7 @@ namespace FichierGenerator
                     List<string> list_projet = new List<string>();
                     mmap_solution.Add(id, list_projet);
                     if ( mmap_relationship.ContainsKey(id) &&
-                         mmap_relationship[id]["source"].TryGetValue(RelaionshipConstants.Association, out list))
+                         mmap_relationship[id]["source"].TryGetValue(RelationshipConstants.Association, out list))
                     {
                         foreach (var id_element in list)
                             if (dict_element[id_element].Type_.Equals(ElementConstants.ApplicationComponent))
@@ -597,35 +612,30 @@ namespace FichierGenerator
                 if (mmap_relationship.TryGetValue(id_element, out dict))
                 {
                     List<string> list;
-                    if (dict["target"].TryGetValue(RelaionshipConstants.Aggregation, out list))
+                    if (dict["target"].TryGetValue(RelationshipConstants.Aggregation, out list))
                         foreach (var i in list)
                             if (dict_element[i].Type_.Equals(ElementConstants.Representation) ||
                                 dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
                                 dict_element_solution.Add(id_element, i);
-                    if (dict["target"].TryGetValue(RelaionshipConstants.Flow, out list))
+                    if (dict["target"].TryGetValue(RelationshipConstants.Flow, out list))
                         foreach (var i in list)
                             if (dict_element[i].Type_.Equals(ElementConstants.Representation) ||
                                 dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
                                 dict_element_solution.Add(id_element, i);
                 }
             }
-            foreach (var id_element in dict_element_project.Keys)
+            foreach (var id_solution in mmap_solution.Keys)
             {
-                if (!dict_element_solution.ContainsKey(id_element))
+                foreach (var id_project in mmap_solution[id_solution])
                 {
-                    string solution = null;
-                    try
+                    HashSet<string> set_elements;
+                    if (dict_project_elements.TryGetValue(id_project, out set_elements))
                     {
-                        solution = mmap_solution.First(x => x.Value.Contains(dict_element_project[id_element])).Key;
+                        foreach (var id_element in set_elements)
+                            if (!dict_element_solution.ContainsKey(id_element))
+                                dict_element_solution.Add(id_element, id_solution);
                     }
-                    catch
-                    {
-
-                    }
-                    if (solution!=null)
-                        dict_element_solution.Add(id_element, solution);
                 }
-
             }
 
             // Make the map of group name
@@ -657,7 +667,7 @@ namespace FichierGenerator
                 List<string> list_target = new List<string>();
                 List<string> list_interface = new List<string>();
                 IEnumerable<XElement> xeles_target = from e in doc.Descendants(NP + "relationship")
-                                                     where e.Attribute("source").Value == ele.Attribute("identifier").Value && e.Attribute(xmlns_xsi + "type").Value == RelaionshipConstants.Composition
+                                                     where e.Attribute("source").Value == ele.Attribute("identifier").Value && e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Composition
                                                      select e;
                 if (xeles_target != null && xeles_target.Count() != 0)
                 {
@@ -708,7 +718,7 @@ namespace FichierGenerator
             if (mmap_relationship.TryGetValue(id, out dict))
             {
                 List<string> list_temp;
-                if (mmap_relationship[id]["source"].TryGetValue(RelaionshipConstants.Specialization, out list_temp))
+                if (mmap_relationship[id]["source"].TryGetValue(RelationshipConstants.Specialization, out list_temp))
                 {
                     foreach (var i in list_temp)
                         if (dict_element.ContainsKey(i) && dict_element[i].Type_.Equals(dict_element[id].Type_))
@@ -756,7 +766,7 @@ namespace FichierGenerator
             {
                 List<string> list;
 
-                if (dict["target"].TryGetValue(RelaionshipConstants.Composition, out list))
+                if (dict["target"].TryGetValue(RelationshipConstants.Composition, out list))
                 {
                     foreach (var i in list)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
@@ -766,7 +776,7 @@ namespace FichierGenerator
                         }
                 }
 
-                if (dict["target"].TryGetValue(RelaionshipConstants.Triggering, out list))
+                if (dict["target"].TryGetValue(RelationshipConstants.Triggering, out list))
                 {
                     foreach (var i in list)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
@@ -776,7 +786,7 @@ namespace FichierGenerator
                         }
                 }
 
-                if (dict["target"].TryGetValue(RelaionshipConstants.Flow, out list))
+                if (dict["target"].TryGetValue(RelationshipConstants.Flow, out list))
                 {
                     foreach (var i in list)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
@@ -800,7 +810,7 @@ namespace FichierGenerator
             if (mmap_relationship.TryGetValue(id, out dict))
             {
                 List<string> list_flow;
-                if (dict["target"].TryGetValue(RelaionshipConstants.Flow, out list_flow))
+                if (dict["target"].TryGetValue(RelationshipConstants.Flow, out list_flow))
                 {
                     foreach (var i in list_flow)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationFunction))
@@ -837,63 +847,62 @@ namespace FichierGenerator
                     dict_view.Remove(i);
         }
 
-        public void Update(string[] types, string[] groups, string[] views, string[] elements, string name_space)
+        public void Update(string[] elements, string name_space)
         {
             this.class_namespace = name_space;
-            this.types = types.ToList();
-            // Make the map of views
-            IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
-                                               where views.Contains(e.Element(NP + "name").Value)
-                                               select e;
-            foreach (var ele in xeles_view)
-            {
-                List<string> list_ele_child = new List<string>();
-                List<string> list_group_child = new List<string>();
-                findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
-                if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
-                    dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
-                list_group.AddRange(list_group_child);
-                list_element.AddRange(list_ele_child);
-            }
+            //this.types = types.ToList();
+            //// Make the map of views
+            //IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
+            //                                   where views.Contains(e.Element(NP + "name").Value)
+            //                                   select e;
+            //foreach (var ele in xeles_view)
+            //{
+            //    List<string> list_ele_child = new List<string>();
+            //    List<string> list_group_child = new List<string>();
+            //    findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
+            //    if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
+            //        dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
+            //    list_group.AddRange(list_group_child);
+            //    list_element.AddRange(list_ele_child);
+            //}
 
-            // Make the list of related group and elements
-            if (groups != null)
-            {
-                foreach (var g in groups)
-                {
-                    var key = dict_namespace[g];
-                    if (dict_group.ContainsKey(key))
-                        list_group.Add(key);
-                }
-            }
-            foreach (var ele in dict_view.Keys)
-            {
-                foreach (var i in dict_view[ele])
-                {
-                    var id_group = dict_group.FirstOrDefault(x => x.Value["class"].Contains(i) || x.Value["interface"].Contains(i)).Key;
-                    if (id_group != null)
-                        list_group.Add(id_group);
-                }
-            }
-            list_group = list_group.Distinct().ToList();
+            //// Make the list of related group and elements
+            //if (groups != null)
+            //{
+            //    foreach (var g in groups)
+            //    {
+            //        var key = dict_namespace[g];
+            //        if (dict_group.ContainsKey(key))
+            //            list_group.Add(key);
+            //    }
+            //}
+            //foreach (var ele in dict_view.Keys)
+            //{
+            //    foreach (var i in dict_view[ele])
+            //    {
+            //        var id_group = dict_group.FirstOrDefault(x => x.Value["class"].Contains(i) || x.Value["interface"].Contains(i)).Key;
+            //        if (id_group != null)
+            //            list_group.Add(id_group);
+            //    }
+            //}
+            //list_group = list_group.Distinct().ToList();
 
-            List_group_new = list_group.Intersect(dict_group.Keys);
-            foreach (var g in List_group_new)
-            {
-                if (dict_group.ContainsKey(g))
-                {
-                    list_element.AddRange(dict_group[g]["class"]);
-                    list_element.AddRange(dict_group[g]["interface"]);
-                }
+            //List_group_new = list_group.Intersect(dict_group.Keys);
+            //foreach (var g in List_group_new)
+            //{
+            //    if (dict_group.ContainsKey(g))
+            //    {
+            //        list_element.AddRange(dict_group[g]["class"]);
+            //        list_element.AddRange(dict_group[g]["interface"]);
+            //    }
 
+            //}
+            foreach(var element_name in elements)
+            {
+                string id_element = dict_element.FirstOrDefault(x => x.Value.Class_name_.Equals(element_name)).Key;
+                list_element.Add(id_element);
             }
             list_element = list_element.Distinct().ToList();
-
-            // Consider the types
-            if (elements != null && elements.Count()>0)
-                list_element.RemoveAll(x => !elements.Contains(dict_element[x].Name_));
-            list_element.RemoveAll(x => !types.Contains(dict_element[x].Type_));
-            list_element.RemoveAll(x => !dict_element.ContainsKey(x));
 
             foreach (var e in list_element)
             {
@@ -970,7 +979,7 @@ namespace FichierGenerator
                 {
                     IEnumerable<XElement> xeles_access = from e in doc.Descendants(NP + "relationship")
                                                          where e.Attribute("source").Value == g &&
-                                                               e.Attribute(xmlns_xsi + "type").Value == RelaionshipConstants.Access
+                                                               e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Access
                                                          select e;
                     List<string> list_lib = new List<string>();
                     if (xeles_access != null && xeles_access.Count() != 0)
@@ -989,7 +998,7 @@ namespace FichierGenerator
 
             // Make the mmap of element access
             IEnumerable<XElement> xeles_element_access = from e in doc.Descendants(NP + "relationship")
-                                                         where (!List_group_new.Contains(e.Attribute("source").Value)) && e.Attribute(xmlns_xsi + "type").Value == RelaionshipConstants.Access
+                                                         where (!List_group_new.Contains(e.Attribute("source").Value)) && e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Access
                                                          select e;
             foreach (var ele in xeles_element_access)
             {
@@ -1008,7 +1017,7 @@ namespace FichierGenerator
 
             // Make the map of specialzation-relationship
             IEnumerable<XElement> xeles_specialization = from e in doc.Descendants(NP + "relationship")
-                                                         where e.Attribute(xmlns_xsi + "type").Value == RelaionshipConstants.Specialization
+                                                         where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Specialization
                                                          select e;
             foreach (var ele in xeles_specialization)
             {
@@ -1032,7 +1041,7 @@ namespace FichierGenerator
             }
 
             IEnumerable<XElement> xeles_implementation = from e in doc.Descendants(NP + "relationship")
-                                                         where e.Attribute(xmlns_xsi + "type").Value == RelaionshipConstants.Association
+                                                         where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Association
                                                          select e;
             foreach (var ele in xeles_implementation)
             {
@@ -1090,7 +1099,7 @@ namespace FichierGenerator
 
             // Make the multimap of association-relationship
             IEnumerable<XElement> xeles_association = from e in doc.Descendants(NP + "relationship")
-                                                      where e.Attribute(xmlns_xsi + "type").Value == RelaionshipConstants.Association
+                                                      where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Association
                                                       select e;
             foreach (var ele in xeles_association)
             {
@@ -1200,7 +1209,7 @@ namespace FichierGenerator
             List<string> list_element = new List<string>();
             if (mmap_relationship.ContainsKey(id))
             {
-                if (mmap_relationship[id]["target"].TryGetValue(RelaionshipConstants.Composition, out list_element))
+                if (mmap_relationship[id]["target"].TryGetValue(RelationshipConstants.Composition, out list_element))
                 {
                     foreach (var i in list_element)
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationComponent))
