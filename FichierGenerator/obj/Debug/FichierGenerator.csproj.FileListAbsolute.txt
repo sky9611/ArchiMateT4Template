@@ -1,3 +1,4 @@
+D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.csproj.CoreCompileInputs.cache
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\FichierGenerator.dll.config
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\FichierGenerator.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\FichierGenerator.pdb
@@ -93,7 +94,6 @@ D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\z
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\zh-Hans\Microsoft.VisualStudio.GraphModel.resources.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\zh-Hans\StreamJsonRpc.resources.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.csprojAssemblyReference.cache
-D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.csproj.CoreCompileInputs.cache
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.csproj.CopyComplete
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.pdb

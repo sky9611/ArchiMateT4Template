@@ -41,6 +41,8 @@ namespace FichierGenerator
             dict_element_project = archiDocument.Dict_element_project;
             dict_implementation = archiDocument.Dict_implementation;
             dict_element_solution = archiDocument.Dict_element_solution;
+
+            dict_using = archiDocument.Dict_using;
         }
 
         public void Update(ArchiDocument archiDocument)
@@ -72,6 +74,8 @@ namespace FichierGenerator
             dict_implementation = archiDocument.Dict_implementation;
             dict_element_solution = archiDocument.Dict_element_solution;
         }
+
+        Dictionary<string, List<string>> dict_using = new Dictionary<string, List<string>>();
 
         Dictionary<string, string> dict_element_solution = new Dictionary<string, string>();
 
@@ -173,5 +177,6 @@ namespace FichierGenerator
         public Dictionary<string, string> Dict_element_project { get => dict_element_project; set => dict_element_project = value; }
         public Dictionary<string, string> Dict_implementation { get => dict_implementation; set => dict_implementation = value; }
         public Dictionary<string, string> Dict_element_solution { get => dict_element_solution; set => dict_element_solution = value; }
+        public Dictionary<string, List<string>> Dict_using { get => dict_using; set => dict_using = value; }
     }
 }

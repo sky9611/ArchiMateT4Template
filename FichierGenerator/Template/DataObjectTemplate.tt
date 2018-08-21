@@ -16,7 +16,7 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
-<#@ include file="InitializeVar.ttinclude" #>
+<#@ include file="InitialiseVar.ttinclude" #>
 using System.Collections.Generic;
 <#	
 	// Generate used namespaces

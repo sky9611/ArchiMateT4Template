@@ -188,7 +188,7 @@ namespace FichierGenerator
             {
                 Element element = Dict_element[x];
                 if (element.Type_.Equals(ElementConstants.Product))
-                    if (element.Properties_.ContainsKey("principal"))
+                    if (element.Properties_.ContainsKey("$principal"))
                     {
                         list2.Add(element.Name_);
                         break;
@@ -232,7 +232,7 @@ namespace FichierGenerator
                         Log["errors"].Add("Element \"" + ele.Name_ + "\" is not supposed to be generated here, it's related to solution(ArchimateModel.Produit) \"" + related_solution_name);
                     else
                     {
-                        if (ele.Type_.Equals(ElementConstants.ApplicationEvent) && ele.Properties_.ContainsKey("Implementation"))
+                        if (ele.Type_.Equals(ElementConstants.ApplicationEvent) && ele.Properties_.ContainsKey("$implementation"))
                             GenerateApplicationEvent(archiDocumentSerialized, id_element);
                         switch (ele.Type_)
                         {
@@ -321,16 +321,6 @@ namespace FichierGenerator
             solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
                 project_path, projet_name);
 
-            // Generate manifest
-            string name = StringHelper.UpperString(Dict_element[id_project].Class_name_);
-            var template = new DeploymentFileTemplate();
-            template.Session = new TextTemplatingSession();
-            template.Session["archiDocument"] = archiDocumentSerialized;
-            template.Session["id_element"] = id_project;
-            template.Initialize();
-            var generatedText = template.TransformText();
-            File.WriteAllText(project_path + "\\" + name + ".manifest.xml", generatedText);
-
             // Modify AssemblyInfo
             string text = File.ReadAllText(project_path + "\\Properties\\AssemblyInfo.cs");
             Regex regex = new Regex(@"" + projet_name);
@@ -402,6 +392,17 @@ namespace FichierGenerator
             project = solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\WPFApplication\csWPFApplication.vstemplate"),
                 Path.Combine(Path.GetFullPath(solution_path), solution_name), solution_name);
 
+            // Generate manifest
+            var template = new DeploymentFileTemplate();
+            template.Session = new TextTemplatingSession();
+            template.Session["archiDocument"] = archiDocumentSerialized;
+            template.Session["id_element"] = id_solution;
+            template.Initialize();
+            var generatedText = template.TransformText();
+            File.WriteAllText(Path.Combine(Path.GetFullPath(solution_path), solution_name)+ "\\" + solution_name + ".manifest.xml", generatedText);
+            project = GetProjectByName(solution, solution_name);
+            project.ProjectItems.AddFromFile(Path.Combine(Path.GetFullPath(solution_path), solution_name) + "\\" + solution_name + ".manifest.xml");
+
             // Modify App.xaml
             string text = File.ReadAllText(Path.Combine(solution_path, solution_name) + "\\App.xaml");
             string startUpUri = GetStartUpUri(id_solution);
@@ -416,7 +417,6 @@ namespace FichierGenerator
             System.Threading.Thread.Sleep(1000);
             
             dte.Quit();
-            
         }
        
         private void GenerateContract(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
@@ -590,7 +590,7 @@ namespace FichierGenerator
                 Project project = GetProjectByName(solution, StringHelper.UpperString(dict_element[id_project].Class_name_));
                 if (project != null)
                 {
-                    if (!Dict_element[id_element].Properties_.ContainsKey("$Localisation"))
+                    if (!Dict_element[id_element].Properties_.ContainsKey("$localisation"))
                     {
                         //fullname = Dict_project_directory[id_project] + "\\" + file_name + type;
                         fullname = Path.GetDirectoryName(project.FullName) + "\\" + file_name + type;
@@ -598,7 +598,7 @@ namespace FichierGenerator
                     }
                     else
                     {
-                        string localisation = Dict_element[id_element].Properties_["$Localisation"].Replace("./", "");
+                        string localisation = Dict_element[id_element].Properties_["$localisation"].Replace("./", "");
                         Directory.CreateDirectory(Path.GetDirectoryName(project.FullName) + "\\" + localisation);
                         fullname = Path.GetDirectoryName(project.FullName) + "\\" + localisation + "\\" + file_name + type;
                         File.WriteAllText(fullname, generatedText);
@@ -624,7 +624,7 @@ namespace FichierGenerator
             return fullname;
         }
 
-        private Project GetProjectByName(Solution solution, string name)
+        public Project GetProjectByName(Solution solution, string name)
         {
             foreach (Project p in solution.Projects)
                 if (Path.GetFileNameWithoutExtension(p.FileName).Equals(name))

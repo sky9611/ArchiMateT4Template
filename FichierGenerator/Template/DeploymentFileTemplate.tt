@@ -16,14 +16,14 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
-<#@ include file="InitializeVar.ttinclude" #>
+<#@ include file="InitialiseVar.ttinclude" #>
 <Product>
 <#
 	Dictionary<string, Dictionary<string, List<string>>> dict;
 	List<Element> list_product = new List<Element>();
 	List<Element> list_view = new List<Element>();
 	List<Element> list_service = new List<Element>();
-	List<Element> list_conponent = new List<Element>();
+	List<Element> list_component = new List<Element>();
 	if (mmap_relationship.TryGetValue(id_element, out dict))
 	{
 		List<string> list;
@@ -40,8 +40,8 @@
 					case "Representation":
 						list_view.Add(e);
 						break;
-					case "ApplicationService":
-						list_service.Add(e);
+					case "ApplicationComponent":
+						list_component.Add(e);
 						break;
 				}
 			}
@@ -52,7 +52,39 @@
 			foreach(var i in list)
 			{
 				if (dict_element[i].Type_.Equals("ApplicationComponent"))
-					list_conponent.Add(dict_element[i]);
+					list_component.Add(dict_element[i]);
+			}
+		}
+
+		if (dict["source"].TryGetValue("Access", out list))
+		{
+			foreach(var i in list)
+			{
+				if (dict_element[i].Type_.Equals("ApplicationComponent"))
+					list_component.Add(dict_element[i]);
+			}
+		}
+
+		if (dict["source"].TryGetValue("Composition", out list))
+		{
+			foreach(var i in list)
+			{
+				Element e = dict_element[i];
+				switch(e.Type_)
+				{
+					case "Product":
+						list_product.Add(e);
+						break;
+					case "Representation":
+						list_view.Add(e);
+						break;
+					case "ApplicationService":
+						list_service.Add(e);
+						break;
+					case "ApplicationComponent":
+						list_component.Add(e);
+						break;
+				}
 			}
 		}
 	}
@@ -106,12 +138,12 @@
 <#
 	}
 
-	if (list_conponent.Count()>0)
+	if (list_component.Count()>0)
 	{
 #>
 	<ApplicationComponenets>
 <#
-		foreach(var i in list_conponent)
+		foreach(var i in list_component)
 		{
 #>
 		<ApplicationComponenet name="<#= UpperString(i.Class_name_) #>/">

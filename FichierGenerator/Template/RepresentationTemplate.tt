@@ -16,7 +16,7 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
-<#@ include file="InitializeVar.ttinclude" #>
+<#@ include file="InitialiseVar.ttinclude" #>
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +43,18 @@ using <#= dict_group_name[id] #>;
 <#
 		}
 	}
+
+	if(dict_using.TryGetValue(id_element, out list_using))
+	{
+		list_using = list_using.Distinct().ToList();
+		foreach(var id in list_using)
+		{
+#>
+using <#= dict_group_name[id] #>;
+<#
+		}
+	}
+
 #>
 
 namespace <#= dict_group_name[id_group] #>

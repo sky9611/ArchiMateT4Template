@@ -16,13 +16,24 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
-<#@ include file="InitializeVar.ttinclude" #>
+<#@ include file="InitialiseVar.ttinclude" #>
 using System.Collections.Generic;
 <#	
 	// Generate used namespaces
 	List<string> list_using;
 	if(mmap_group_access.TryGetValue(id_group, out list_using))
 	{
+		foreach(var id in list_using)
+		{
+#>
+using <#= dict_group_name[id] #>;
+<#
+		}
+	}
+
+	if(dict_using.TryGetValue(id_element, out list_using))
+	{
+		list_using = list_using.Distinct().ToList();
 		foreach(var id in list_using)
 		{
 #>
@@ -145,7 +156,7 @@ namespace <#= dict_group_name[id_group] #>
 							if( element_ref.Type_.Equals("BusinessFunction") ||
 								element_ref.Type_.Equals("BusinessProcess") ||
 								element_ref.Type_.Equals("Requirement") ||
-								(element_ref.Properties_.ContainsKey("$Type") && element_ref.Properties_["$Type"].Equals("Macro")))
+								(element_ref.Properties_.ContainsKey("$type") && element_ref.Properties_["$type"].Equals("Macro")))
 							{
 #>
 		[ReferenceModel(<#= element_ref.Type_ #>Archimate, "<#= element_ref.Name_ #>")]

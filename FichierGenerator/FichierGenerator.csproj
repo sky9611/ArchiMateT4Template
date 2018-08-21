@@ -286,10 +286,6 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>DeploymentFileTemplate.cs</LastGenOutput>
     </Content>
-    <Content Include="Template\InitializeVar.ttinclude">
-      <LastGenOutput>InitializeVar1.cs</LastGenOutput>
-      <LastOutputs>.\InitializeVar.cs</LastOutputs>
-    </Content>
     <Content Include="Template\InterfaceTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InterfaceTemplate.cs</LastGenOutput>
@@ -302,6 +298,9 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>RepresentationTemplate.cs</LastGenOutput>
     </Content>
+    <None Include="Template\InitialiseVar.ttinclude">
+      <LastOutputs>.\Script1.cs</LastOutputs>
+    </None>
     <Content Include="Template\SQLTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>SQLTemplate.cs</LastGenOutput>
