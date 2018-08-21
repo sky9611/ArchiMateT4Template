@@ -357,7 +357,7 @@ namespace FichierGenerator
             }
         }
 
-        public void GenerateSolution(string destinationFolder, string solution_name)
+        public DTE GenerateSolution(string destinationFolder, string solution_name)
         {
             System.Type type = Type.GetTypeFromProgID("VisualStudio.DTE.15.0");
             Dictionary<string, List<string>> dict = archiDocument.Mmap_solution;
@@ -375,7 +375,7 @@ namespace FichierGenerator
             string solution_path = System.IO.Path.Combine(path, solution_name);
 
             if (Directory.Exists(solution_path))
-                Directory.Delete(solution_path, true);
+                Directory.Delete(solution_path,true);
 
             // create the folder for the solution
             System.IO.Directory.CreateDirectory(solution_path);
@@ -415,8 +415,9 @@ namespace FichierGenerator
             File.WriteAllText(Path.Combine(solution_path, solution_name) + "\\App.xaml.cs", text);
 
             System.Threading.Thread.Sleep(1000);
-            
-            dte.Quit();
+
+            //dte.Quit();
+            return dte;
         }
        
         private void GenerateContract(ArchiDocumentSerialized archiDocumentSerialized, string id_element)
