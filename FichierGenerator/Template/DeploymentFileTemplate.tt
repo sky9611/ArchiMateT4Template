@@ -20,15 +20,15 @@
 <Product>
 <#
 	Dictionary<string, Dictionary<string, List<string>>> dict;
+	List<Element> list_product = new List<Element>();
+	List<Element> list_view = new List<Element>();
+	List<Element> list_service = new List<Element>();
+	List<Element> list_conponent = new List<Element>();
 	if (mmap_relationship.TryGetValue(id_element, out dict))
 	{
 		List<string> list;
 		if (dict["source"].TryGetValue("Aggregation", out list))
 		{
-			List<Element> list_product = new List<Element>();
-			List<Element> list_view = new List<Element>();
-			List<Element> list_process = new List<Element>();
-
 			foreach(var i in list)
 			{
 				Element e = dict_element[i];
@@ -40,65 +40,86 @@
 					case "Representation":
 						list_view.Add(e);
 						break;
-					case "ApplicationProcess":
-						list_process.Add(e);
+					case "ApplicationService":
+						list_service.Add(e);
 						break;
 				}
 			}
-#>
-	<RelatedProducts>
-<#
-			foreach(var i in list_product)
-			{
-
-#>
-		<RelatedProduct name="<#= UpperString(i.Class_name_) #>/">
-<#
-			}
-#>
-	</RelatedProducts>
-	<Representations>
-<#
-			foreach(var i in list_view)
-			{
-#>
-		<Representation name="<#= UpperString(i.Class_name_) #>/">
-<#
-			}
-#>
-	</Representations>
-	<ApplicationServices>
-<#
-			foreach(var i in list_process)
-			{
-#>
-		<ApplicationService name="<#= UpperString(i.Class_name_) #>/">
-<#
-			}
-#>
-	</ApplicationServices>
-<#
 		}
 
 		if (dict["source"].TryGetValue("Realization", out list))
 		{
-#>
-	<ApplicationComponenets>
-<#
 			foreach(var i in list)
 			{
-				Element element = dict_element[i];
-				if(	element.Type_.Equals("ApplicationComponenet"))
-				{
-#>
-		<ApplicationComponenet name="<#= UpperString(element.Class_name_) #>/">
-<#
-				}
+				if (dict_element[i].Type_.Equals("ApplicationComponent"))
+					list_conponent.Add(dict_element[i]);
 			}
+		}
+	}
+
+	if (list_product.Count()>0)
+	{
+#>
+	<RelatedProducts>
+<#
+		foreach(var i in list_product)
+		{
+
+#>
+		<RelatedProduct name="<#= UpperString(i.Class_name_) #>/">
+<#
+		}
+#>
+	</RelatedProducts>
+<#
+	}
+
+	if (list_view.Count()>0)
+	{
+#>
+	<Representations>
+<#
+		foreach(var i in list_view)
+		{
+#>
+		<Representation name="<#= UpperString(i.Class_name_) #>/">
+<#
+		}
+#>
+	</Representations>
+<#
+	}
+
+	if (list_service.Count()>0)
+	{
+#>
+	<ApplicationServices>
+<#
+		foreach(var i in list_service)
+		{
+#>
+		<ApplicationService name="<#= UpperString(i.Class_name_) #>/">
+<#
+		}
 #>
 	</ApplicationServices>
 <#
+	}
+
+	if (list_conponent.Count()>0)
+	{
+#>
+	<ApplicationComponenets>
+<#
+		foreach(var i in list_conponent)
+		{
+#>
+		<ApplicationComponenet name="<#= UpperString(i.Class_name_) #>/">
+<#
 		}
+#>
+	</ApplicationServices>
+<#
 	}
 #>
 </Product>

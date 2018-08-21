@@ -118,15 +118,15 @@ namespace FichierGenerator.Template
             #line 21 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	Dictionary<string, Dictionary<string, List<string>>> dict;
+	List<Element> list_product = new List<Element>();
+	List<Element> list_view = new List<Element>();
+	List<Element> list_service = new List<Element>();
+	List<Element> list_conponent = new List<Element>();
 	if (mmap_relationship.TryGetValue(id_element, out dict))
 	{
 		List<string> list;
 		if (dict["source"].TryGetValue("Aggregation", out list))
 		{
-			List<Element> list_product = new List<Element>();
-			List<Element> list_view = new List<Element>();
-			List<Element> list_process = new List<Element>();
-
 			foreach(var i in list)
 			{
 				Element e = dict_element[i];
@@ -138,21 +138,35 @@ namespace FichierGenerator.Template
 					case "Representation":
 						list_view.Add(e);
 						break;
-					case "ApplicationProcess":
-						list_process.Add(e);
+					case "ApplicationService":
+						list_service.Add(e);
 						break;
 				}
 			}
+		}
+
+		if (dict["source"].TryGetValue("Realization", out list))
+		{
+			foreach(var i in list)
+			{
+				if (dict_element[i].Type_.Equals("ApplicationComponent"))
+					list_conponent.Add(dict_element[i]);
+			}
+		}
+	}
+
+	if (list_product.Count()>0)
+	{
 
             
             #line default
             #line hidden
             this.Write("\t<RelatedProducts>\r\n");
             
-            #line 50 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 64 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-			foreach(var i in list_product)
-			{
+		foreach(var i in list_product)
+		{
 
 
             
@@ -160,119 +174,138 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t<RelatedProduct name=\"");
             
-            #line 55 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 69 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("/\">\r\n");
             
-            #line 56 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 70 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-			}
+		}
 
             
             #line default
             #line hidden
-            this.Write("\t</RelatedProducts>\r\n\t<Representations>\r\n");
+            this.Write("\t</RelatedProducts>\r\n");
             
-            #line 61 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 74 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-			foreach(var i in list_view)
-			{
+	}
+
+	if (list_view.Count()>0)
+	{
+
+            
+            #line default
+            #line hidden
+            this.Write("\t<Representations>\r\n");
+            
+            #line 81 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+		foreach(var i in list_view)
+		{
 
             
             #line default
             #line hidden
             this.Write("\t\t<Representation name=\"");
             
-            #line 65 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 85 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("/\">\r\n");
             
-            #line 66 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 86 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-			}
+		}
 
             
             #line default
             #line hidden
-            this.Write("\t</Representations>\r\n\t<ApplicationServices>\r\n");
+            this.Write("\t</Representations>\r\n");
             
-            #line 71 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 90 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-			foreach(var i in list_process)
-			{
+	}
+
+	if (list_service.Count()>0)
+	{
+
+            
+            #line default
+            #line hidden
+            this.Write("\t<ApplicationServices>\r\n");
+            
+            #line 97 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+
+		foreach(var i in list_service)
+		{
 
             
             #line default
             #line hidden
             this.Write("\t\t<ApplicationService name=\"");
             
-            #line 75 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 101 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("/\">\r\n");
             
-            #line 76 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 102 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-			}
+		}
 
             
             #line default
             #line hidden
             this.Write("\t</ApplicationServices>\r\n");
             
-            #line 80 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 106 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-		}
+	}
 
-		if (dict["source"].TryGetValue("Realization", out list))
-		{
+	if (list_conponent.Count()>0)
+	{
 
             
             #line default
             #line hidden
             this.Write("\t<ApplicationComponenets>\r\n");
             
-            #line 87 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 113 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-			foreach(var i in list)
-			{
-				Element element = dict_element[i];
-				if(	element.Type_.Equals("ApplicationComponenet"))
-				{
+		foreach(var i in list_conponent)
+		{
 
             
             #line default
             #line hidden
             this.Write("\t\t<ApplicationComponenet name=\"");
             
-            #line 94 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element.Class_name_)));
+            #line 117 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("/\">\r\n");
             
-            #line 95 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 118 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-				}
-			}
+		}
 
             
             #line default
             #line hidden
             this.Write("\t</ApplicationServices>\r\n");
             
-            #line 100 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 122 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
-		}
 	}
 
             
@@ -282,7 +315,7 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 106 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+        #line 127 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
 	public string UpperString(string name)

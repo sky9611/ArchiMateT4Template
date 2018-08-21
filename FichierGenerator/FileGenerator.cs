@@ -6,11 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Xml.Linq;
 using Tools;
-using VSLangProj;
-using VSLangProj2;
 using VSLangProj80;
 
 namespace FichierGenerator
@@ -50,7 +47,12 @@ namespace FichierGenerator
             ElementConstants.ApplicationEvent,
             ElementConstants.ApplicationProcess };
 
-        public FileGenerator(string file_path, Dictionary<string, string> dict_implementation, string current_solution_name, string current_solution_path, Solution solution)
+        public FileGenerator(
+            string file_path, 
+            Dictionary<string, string> dict_implementation, 
+            string current_solution_name, 
+            string current_solution_path, 
+            Solution solution)
         {
             this.solution = solution;
             Current_solution_name = current_solution_name;
@@ -74,39 +76,25 @@ namespace FichierGenerator
 
         public string[] getElements(string[] types, string[] groups, string[] views, string[] projects)
         {
-            //archiDocument.Update(views);
             List<string> list = new List<string>();
+
+            // Get all elements in selected views
             foreach (var i in views)
             {
-                //try
-                //{
-                //    foreach (var id_view in archiDocument.Dict_view.Keys)
-                //        if (views.Contains(archiDocument.Dict_view_name[id_view]))
-                //            list.AddRange(archiDocument.Dict_view[id_view]);
-                //}
-                //catch { }
                 string id_view = archiDocument.Dict_view_name.First(x => x.Value.Equals(i)).Key;
                 if (id_view!=null)
                     list.AddRange(archiDocument.Dict_view[id_view]);
             }
-                
+
+            // Get all elements in selected groups
             foreach (var i in groups)
             {
-                //try
-                //{
-                //    foreach (var group_name in groups)
-                //    {
-                //        var id_group = archiDocument.Dict_namespace[group_name];
-                //        list.AddRange(archiDocument.Dict_group[id_group]["interface"]);
-                //        list.AddRange(archiDocument.Dict_group[id_group]["class"]);
-                //    }
-                //}
-                //catch { }
                 string id_group = archiDocument.Dict_namespace[i];
                 list.AddRange(archiDocument.Dict_group[id_group]["interface"]);
                 list.AddRange(archiDocument.Dict_group[id_group]["class"]);
             }
 
+            // Get all elements in selected components
             List<string> list_idProject = new List<string>();
             foreach (var i in projects)
             {
@@ -117,17 +105,22 @@ namespace FichierGenerator
                     list_idProject.Add(id_project);
                 }
             }
-            
+
+            // Remove dublication
             list = list.Distinct().ToList();
+            // Remove elements with unselected type
             list.RemoveAll(x => !types.Contains(Dict_element[x].Type_));
+            // Remove elements don't exist
             list.RemoveAll(x => !Dict_element.ContainsKey(x));
-            
+
+            // Remove elements not belong to selected components
             if (list_idProject.Count() > 0)
-                list.RemoveAll(x => !archiDocument.Dict_element_project.Keys.Contains(x) || !list_idProject.Contains(archiDocument.Dict_element_project[x]));
+                list.RemoveAll(x => archiDocument.Dict_element_project.Keys.Contains(x) && !list_idProject.Contains(archiDocument.Dict_element_project[x]));
 
             List<string> list_element_name = new List<string>();
             list.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
 
+            // If only choose the Application Component as type, ze generate projects instead of classes
             if (types.Count() == 1 && types[0].Equals(ElementConstants.ApplicationComponent))
             {
                 list.AddRange(GetProjects(solution));
@@ -211,29 +204,18 @@ namespace FichierGenerator
         public string Current_solution_path { get; set; }
         public Dictionary<string, List<string>> Log { get; set; } = new Dictionary<string, List<string>>();
         public Dictionary<string, Element> Dict_element { get => dict_element; set => dict_element = value; }
+        public Dictionary<string, string> Dict_project_directory { get => dict_project_directory; set => dict_project_directory = value; }
 
         /// <summary>
-        ///     Method to run the t4 template to generate files
+        ///     Method to run the t4 template to generate files with selected elements
         /// </summary>
         /// <param name="destinationFolder"> The destination folder</param>
-        /// <param name="types"> The selected types </param>
-        /// <param name="groups"> The selected groups </param>
-        /// <param name="views"> The selected views </param>
         /// <param name="elements"> The selected elements </param>
         /// <param name="name_space"> The namespace of generated class </param>
         /// <param name="solution"> The current solution </param>
-        public void Generate(string destinationFolder,
-            string[] types,
-            string[] groups,
-            string[] views,
-            string[] elements,
-            string name_space,
-            Solution solution)
+        public void Generate(string destinationFolder, string[] elements, string name_space, Solution solution)
         {
-            this.solution = solution; 
-            var my_types = (types != null) && (types.Length > 0) ? types : all_types;
-            var my_groups = (groups != null) && (groups.Length > 0) ? groups : null;
-            var my_views = (views != null) && (views.Length > 0) ? views : null;
+            this.solution = solution;
             ArchiDocument archiDocumentTemp = archiDocument;
             archiDocumentTemp.Update(elements, name_space);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocumentTemp);
@@ -241,15 +223,17 @@ namespace FichierGenerator
             foreach (var id_element in archiDocumentSerialized.List_element)
             {
                 Element ele = Dict_element[id_element];
-                if (ele.Type_.Equals(ElementConstants.ApplicationEvent) && ele.Properties_.ContainsKey("Implementation"))
-                    GenerateApplicationEvent(archiDocumentSerialized, id_element);
 
+                // Only the elements who are related to the current solution will be generated
                 if (archiDocument.Dict_element_solution.ContainsKey(id_element))
                 {
                     var related_solution_name = StringHelper.UpperString(Dict_element[archiDocument.Dict_element_solution[id_element]].Name_);
                     if (!related_solution_name.Equals(Path.GetFileNameWithoutExtension(Current_solution_name)))
                         Log["errors"].Add("Element \"" + ele.Name_ + "\" is not supposed to be generated here, it's related to solution(ArchimateModel.Produit) \"" + related_solution_name);
                     else
+                    {
+                        if (ele.Type_.Equals(ElementConstants.ApplicationEvent) && ele.Properties_.ContainsKey("Implementation"))
+                            GenerateApplicationEvent(archiDocumentSerialized, id_element);
                         switch (ele.Type_)
                         {
                             case ElementConstants.Contract:
@@ -274,6 +258,7 @@ namespace FichierGenerator
                                 GenerateRepresentation(archiDocumentSerialized, id_element);
                                 break;
                         }
+                    }
                 }
             }
         }
@@ -331,8 +316,6 @@ namespace FichierGenerator
             string solution_name = Path.GetFileName(solution.FullName);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocument);
             string projet_name = StringHelper.UpperString(Dict_element[id_project].Class_name_);
-            //Console.WriteLine(Directory.GetCurrentDirectory());
-
             string project_path = Path.Combine(Path.GetFullPath(solution_path), projet_name);
 
             solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
@@ -348,17 +331,18 @@ namespace FichierGenerator
             var generatedText = template.TransformText();
             File.WriteAllText(project_path + "\\" + name + ".manifest.xml", generatedText);
 
+            // Modify AssemblyInfo
             string text = File.ReadAllText(project_path + "\\Properties\\AssemblyInfo.cs");
             Regex regex = new Regex(@"" + projet_name);
             text = regex.Replace(text, solution_name, 1, text.IndexOf(projet_name) + projet_name.Length);
             File.WriteAllText(project_path + "\\Properties\\AssemblyInfo.cs", text);
 
-            dict_project_directory.Add(id_project, Path.Combine(Path.GetFullPath(solution_path), projet_name));
+            // Store the project directory
+            Dict_project_directory.Add(id_project, Path.Combine(Path.GetFullPath(solution_path), projet_name));
 
             // Remove unused cs class
             // TODO
             
-
             System.Threading.Thread.Sleep(1000);
         }
 
@@ -374,14 +358,10 @@ namespace FichierGenerator
                 if (id_project!=null && archiDocument.Dict_project_reference.TryGetValue(id_project, out set_references))
                     foreach (var id_reference in set_references)
                     {
-                        try
-                        {
-                            vsproj.References.Add(Path.Combine(dict_project_directory[id_reference], dict_element[id_reference].Class_name_+".csproj"));
-                        }
-                        catch
-                        {
+                        if (Dict_project_directory.ContainsKey(id_reference))
+                            vsproj.References.Add(Path.Combine(Dict_project_directory[id_reference], dict_element[id_reference].Class_name_ + ".csproj"));
+                        else
                             Log["error"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) +"\" has not been found in this solution");
-                        } 
                     }
                         
             }
@@ -404,6 +384,9 @@ namespace FichierGenerator
             string path = destinationFolder;
             string solution_path = System.IO.Path.Combine(path, solution_name);
 
+            if (Directory.Exists(solution_path))
+                Directory.Delete(solution_path, true);
+
             // create the folder for the solution
             System.IO.Directory.CreateDirectory(solution_path);
 
@@ -411,10 +394,11 @@ namespace FichierGenerator
             dte.Solution.Create(solution_path, solution_name);
             var solution = dte.Solution;
 
+            // Save the sln file
             solution.SaveAs(Path.GetFullPath(Path.Combine(solution_path, solution_name) + ".sln"));
 
+            // Generate the project with the same name of solution
             Project project;
-
             project = solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\WPFApplication\csWPFApplication.vstemplate"),
                 Path.Combine(Path.GetFullPath(solution_path), solution_name), solution_name);
 
@@ -602,28 +586,32 @@ namespace FichierGenerator
             string id_project;
             string file_name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
             if (archiDocument.Dict_element_project.TryGetValue(id_element, out id_project))
-                try
+            {
+                Project project = GetProjectByName(solution, StringHelper.UpperString(dict_element[id_project].Class_name_));
+                if (project != null)
                 {
                     if (!Dict_element[id_element].Properties_.ContainsKey("$Localisation"))
                     {
-                        fullname = dict_project_directory[id_project] + "\\" + file_name + type;
+                        //fullname = Dict_project_directory[id_project] + "\\" + file_name + type;
+                        fullname = Path.GetDirectoryName(project.FullName) + "\\" + file_name + type;
                         File.WriteAllText(fullname, generatedText);
                     }
                     else
                     {
                         string localisation = Dict_element[id_element].Properties_["$Localisation"].Replace("./", "");
-                        Directory.CreateDirectory(dict_project_directory[id_project] + "\\" + localisation);
-                        fullname = dict_project_directory[id_project] + "\\" + localisation + "\\" + file_name + type;
+                        Directory.CreateDirectory(Path.GetDirectoryName(project.FullName) + "\\" + localisation);
+                        fullname = Path.GetDirectoryName(project.FullName) + "\\" + localisation + "\\" + file_name + type;
                         File.WriteAllText(fullname, generatedText);
                     }
                 }
-                catch
+                else
                 {
-                    Log["warnings"].Add("The project which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
+                    Log["warnings"].Add("The project \"" + StringHelper.UpperString(dict_element[id_project].Class_name_) + "which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
                     Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
                     fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type;
                     File.WriteAllText(fullname, generatedText);
                 }
+            }
             else
             {
                 // Les elements qui ne sont pas li¨¦s ¨¤ un projet(Composant Applicatif) quelconque sont mets dans 
@@ -653,7 +641,7 @@ namespace FichierGenerator
                 if (archiDocument.Dict_element_project.TryGetValue(id_element, out id_project))
                 {
                     project_name = dict_element[id_project].Class_name_;
-                    Project project = GetProjectByName(solution, project_name);
+                    Project project = GetProjectByName(solution, StringHelper.UpperString(project_name));
                     if (project != null)
                         project.ProjectItems.AddFromFile(filename);
                 }

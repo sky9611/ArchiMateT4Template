@@ -168,6 +168,7 @@ namespace FichierGenerator
             class_namespace = name_space;
             this.doc = XElement.Load(path);
             NP = doc.GetDefaultNamespace();
+
             // Make the map of property definition
             IEnumerable<XElement> prop_defs = from element in doc.Descendants(NP + "propertyDefinition")
                                               select element;
@@ -385,6 +386,7 @@ namespace FichierGenerator
                 if (id_parent != null)
                     dict_heritage.Add(id, id_parent);
             }
+
             // Add properties depends on heritage relationship
             foreach(var i in dict_heritage.Keys)
             {
@@ -401,7 +403,7 @@ namespace FichierGenerator
                 }
             }
 
-            // Make the map of views
+            // Make the map of views - elements
             foreach (var ele in xeles_view)
             {
                 string id = ele.Attribute("identifier").Value;
@@ -424,36 +426,6 @@ namespace FichierGenerator
                     dict_view_types.Add(id, set_type);
                 }
             }
-
-            // Make the dict id_element - project
-            //foreach (var id_project in hashset_project)
-            //{
-            //    List<string> list_element = new List<string>();
-            //    if (mmap_relationship.ContainsKey(id_project))
-            //    {
-            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelationshipConstants.Association, out list_element))
-            //        //    foreach (var i in list_element)
-            //        //        if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject))
-            //        //            dict_element_project.Add(i, id_project);
-            //        //if (mmap_relationship[id_project]["source"].TryGetValue(RelationshipConstants.Aggregation, out list_element))
-            //        //    foreach (var i in list_element)
-            //        //        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
-            //        //            dict_element_project.Add(i, id_project);
-            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelationshipConstants.Assignment, out list_element))
-            //        //    foreach (var i in list_element)
-            //        //        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
-            //        //            dict_element_project.Add(i, id_project);
-            //        //if (mmap_relationship[id_project]["target"].TryGetValue(RelationshipConstants.Access, out list_element))
-            //        //    foreach (var i in list_element)
-            //        //        if (dict_element[i].Type_.Equals(ElementConstants.DataObject))
-            //        //            dict_element_project.Add(i, id_project);
-            //        if (mmap_relationship[id_project]["source"].TryGetValue(RelationshipConstants.Composition, out list_element))
-            //            foreach (var i in list_element)
-            //                if (!dict_element_project.ContainsKey(i))
-            //                    dict_element_project.Add(i, id_project);
-            //    }
-            //}
-            
 
             // Make the dictionary of project references
             foreach (var id_project in hashset_project)
@@ -694,6 +666,11 @@ namespace FichierGenerator
             }
         }
 
+        /// <summary>
+        ///     Get base element id of given element, considering specilisation relationship
+        /// </summary>
+        /// <param name="i"> given element id </param>
+        /// <returns> base element id </returns>
         private string GetRootElement(string i)
         {
             string id_parent;
@@ -711,7 +688,7 @@ namespace FichierGenerator
             else
                 return i;
         }
-
+        
         private string GetParentElement(string id)
         {
             Dictionary<string, Dictionary<string, List<string>>> dict;
@@ -756,7 +733,11 @@ namespace FichierGenerator
             }
         }
 
-
+        /// <summary>
+        ///     Get the element id who call the function. If not found, return null
+        /// </summary>
+        /// <param name="id_function"> function id </param>
+        /// <returns> element id </returns>
         private string CallFunctionElement(string id_function)
         {
             Dictionary<string, Dictionary<string, List<string>>> dict;
@@ -826,77 +807,16 @@ namespace FichierGenerator
             return id;
         }
 
-        public void Update(string[] views)
-        {
-            //IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
-            //                                   where views.Contains(e.Element(NP + "name").Value)
-            //                                   select e;
-            //foreach (var ele in xeles_view)
-            //{
-            //    List<string> list_ele_child = new List<string>();
-            //    List<string> list_group_child = new List<string>();
-            //    findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
-            //    if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
-            //        dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
-            //    list_group.AddRange(list_group_child);
-            //    list_element.AddRange(list_ele_child);
-            //}
-            List<string> keys = dict_view.Keys.ToList();
-            foreach (var i in keys)
-                if (!views.Contains(dict_view_name[i]))
-                    dict_view.Remove(i);
-        }
-
+        /// <summary>
+        ///     Update the storage structure with selected element names
+        /// </summary>
+        /// <param name="elements"> selected element names </param>
+        /// <param name="name_space"> name space prefix </param>
         public void Update(string[] elements, string name_space)
         {
             this.class_namespace = name_space;
-            //this.types = types.ToList();
-            //// Make the map of views
-            //IEnumerable<XElement> xeles_view = from e in doc.Descendants(NP + "view")
-            //                                   where views.Contains(e.Element(NP + "name").Value)
-            //                                   select e;
-            //foreach (var ele in xeles_view)
-            //{
-            //    List<string> list_ele_child = new List<string>();
-            //    List<string> list_group_child = new List<string>();
-            //    findAllElement(dict_element, xmlns_xsi, NP, doc, ele, ref list_ele_child, ref list_group_child);
-            //    if (!dict_view.ContainsKey(ele.Attribute("identifier").Value))
-            //        dict_view.Add(ele.Attribute("identifier").Value, list_ele_child);
-            //    list_group.AddRange(list_group_child);
-            //    list_element.AddRange(list_ele_child);
-            //}
 
-            //// Make the list of related group and elements
-            //if (groups != null)
-            //{
-            //    foreach (var g in groups)
-            //    {
-            //        var key = dict_namespace[g];
-            //        if (dict_group.ContainsKey(key))
-            //            list_group.Add(key);
-            //    }
-            //}
-            //foreach (var ele in dict_view.Keys)
-            //{
-            //    foreach (var i in dict_view[ele])
-            //    {
-            //        var id_group = dict_group.FirstOrDefault(x => x.Value["class"].Contains(i) || x.Value["interface"].Contains(i)).Key;
-            //        if (id_group != null)
-            //            list_group.Add(id_group);
-            //    }
-            //}
-            //list_group = list_group.Distinct().ToList();
-
-            //List_group_new = list_group.Intersect(dict_group.Keys);
-            //foreach (var g in List_group_new)
-            //{
-            //    if (dict_group.ContainsKey(g))
-            //    {
-            //        list_element.AddRange(dict_group[g]["class"]);
-            //        list_element.AddRange(dict_group[g]["interface"]);
-            //    }
-
-            //}
+            // Create the list of selected element ids with their names
             foreach(var element_name in elements)
             {
                 string id_element = dict_element.FirstOrDefault(x => x.Value.Class_name_.Equals(element_name)).Key;
@@ -972,7 +892,6 @@ namespace FichierGenerator
             }
 
             // Make the mmap of group access
-
             foreach (var g in List_group_new)
             {
                 if (!mmap_group_access.ContainsKey(g))
@@ -993,9 +912,7 @@ namespace FichierGenerator
                     }
                 }
             }
-
-
-
+            
             // Make the mmap of element access
             IEnumerable<XElement> xeles_element_access = from e in doc.Descendants(NP + "relationship")
                                                          where (!List_group_new.Contains(e.Attribute("source").Value)) && e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Access
@@ -1082,6 +999,7 @@ namespace FichierGenerator
                 }
             }
 
+            // Add implementation
             foreach (var id in list_element)
             {
                 switch (dict_element[id].Type_)
@@ -1126,27 +1044,6 @@ namespace FichierGenerator
                     mmap_association[ele.Attribute("target").Value] = list_target2;
                 }
             }
-        }
-
-        private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string, List<string>>> dict_group)
-        {
-            foreach (var g in dict_group.Keys)
-            {
-                foreach (var sg in dict_group[g].Keys)
-                    if (dict_group[g][sg].Contains(id))
-                        return true;
-            }
-            return false;
-        }
-
-        private bool isInSelectedViews(string id, Dictionary<string, List<string>> dict_view)
-        {
-            foreach (var v in dict_view.Keys)
-            {
-                if (dict_view[v].Contains(id))
-                    return true;
-            }
-            return false;
         }
 
         private void findAllElement(Dictionary<string, Element> dict_element, XNamespace xmlns_xsi, XNamespace NP, XElement root, XElement node, ref List<string> list, ref List<string> list_group)
@@ -1201,7 +1098,7 @@ namespace FichierGenerator
         }
 
         /// <summary>
-        ///  Find the project which the element belongs to
+        ///     Find the project which the element belongs to
         /// </summary>
         /// <param name="id">id of element</param>
         private string FindProjectByElement(string id)
