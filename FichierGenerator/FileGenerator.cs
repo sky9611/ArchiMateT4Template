@@ -31,7 +31,7 @@ namespace FichierGenerator
             {ElementConstants.ApplicationComponent, "Component"},
             {ElementConstants.DataObject, "DAO"},
             {ElementConstants.ApplicationProcess, "UseCaseWorkflow"},
-            {ElementConstants.ApplicationService, "UseCaseWorkflow"},
+            {ElementConstants.ApplicationService, "BusinessService"},
         };
 
         public static readonly string[] all_types = {
@@ -290,7 +290,14 @@ namespace FichierGenerator
             ArchiDocument archiDocumentTemp = archiDocument;
             archiDocumentTemp.Update(elements, name_space);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocumentTemp);
-            
+
+            foreach (var id_element in archiDocumentSerialized.List_element)
+            {
+                Element ele = Dict_element[id_element];
+                if (ele.Type_.Equals(ElementConstants.ApplicationComponent))
+                    GenerateProject(solution, ele.Name_);
+            }
+
             foreach (var id_element in archiDocumentSerialized.List_element)
             {
                 Element ele = Dict_element[id_element];
@@ -403,22 +410,39 @@ namespace FichierGenerator
             string projet_name = StringHelper.UpperString(Dict_element[id_project].Class_name_);
             string project_path = Path.Combine(Path.GetFullPath(solution_path), projet_name);
 
-            solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
-                project_path, projet_name);
+            if (!IsProjectIncludedInSolution(projet_name, solution))
+            {
+                solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\ClassLibrary\csClassLibrary.vstemplate"),
+                    project_path, projet_name);
 
-            // Modify AssemblyInfo
-            string text = File.ReadAllText(project_path + "\\Properties\\AssemblyInfo.cs");
-            Regex regex = new Regex(@"" + projet_name);
-            text = regex.Replace(text, solution_name, 1, text.IndexOf(projet_name) + projet_name.Length);
-            File.WriteAllText(project_path + "\\Properties\\AssemblyInfo.cs", text);
+                // Modify AssemblyInfo
+                string text = File.ReadAllText(project_path + "\\Properties\\AssemblyInfo.cs");
+                Regex regex = new Regex(@"" + projet_name);
+                text = regex.Replace(text, solution_name, 1, text.IndexOf(projet_name) + projet_name.Length);
+                File.WriteAllText(project_path + "\\Properties\\AssemblyInfo.cs", text);
 
-            // Store the project directory
-            Dict_project_directory.Add(id_project, Path.Combine(Path.GetFullPath(solution_path), projet_name));
+                // Store the project directory
+                Dict_project_directory.Add(id_project, Path.Combine(Path.GetFullPath(solution_path), projet_name));
 
-            // Remove unused cs class
-            // TODO
-            
-            System.Threading.Thread.Sleep(1000);
+                // Remove unused cs class
+                // TODO
+
+                System.Threading.Thread.Sleep(1000);
+            }
+
+           
+        }
+
+        private bool IsProjectIncludedInSolution(string prjName, Solution solution)
+        {
+            VSProject2 vsproj;
+            foreach (Project proj in solution.Projects)
+            {
+                vsproj = (VSProject2)proj.Object;
+                if (vsproj.Project.Name.Equals(prjName))
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
