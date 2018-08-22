@@ -144,37 +144,40 @@ namespace FichierGenerator.Template
 
 	foreach(var i in business_object.Properties_.Keys)
 	{
-		string name = i;
-		string type = business_object.Properties_[i];
+		if (!i.Contains("$"))
+		{
+			string name = i;
+			string type = business_object.Properties_[i];
 
             
             #line default
             #line hidden
             this.Write("      \r\n      <property name = \"");
             
-            #line 36 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(name));
             
             #line default
             #line hidden
             this.Write("\" column = \"");
             
-            #line 36 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(name));
             
             #line default
             #line hidden
             this.Write("\" type = \"");
             
-            #line 36 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(type));
             
             #line default
             #line hidden
             this.Write("\"/>\r\n");
             
-            #line 37 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+            #line 39 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
 
+		}
 	}
 
             
@@ -184,7 +187,7 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 42 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
+        #line 45 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\MappingTemplate.tt"
 
 	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
 	public string UpperString(string name)

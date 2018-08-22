@@ -30,11 +30,14 @@
 <#
 	foreach(var i in business_object.Properties_.Keys)
 	{
-		string name = i;
-		string type = business_object.Properties_[i];
+		if (!i.Contains("$"))
+		{
+			string name = i;
+			string type = business_object.Properties_[i];
 #>      
       <property name = "<#= name #>" column = "<#= name #>" type = "<#= type #>"/>
 <#
+		}
 	}
 #>          
    </class>
