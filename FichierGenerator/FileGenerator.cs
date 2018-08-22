@@ -181,21 +181,25 @@ namespace FichierGenerator
 
         public string[] getAllSolutions()
         {
-            List<string> list = new List<string>();
-            List<string> list2 = new List<string>();
-            foreach (var x in Dict_element.Keys)
-            {
-                Element element = Dict_element[x];
-                if (element.Type_.Equals(ElementConstants.Product))
-                    if (element.Properties_.ContainsKey("$principal"))
-                    {
-                        list2.Add(element.Name_);
-                        break;
-                    }
-                    else
-                        list.Add(element.Name_);
-            }
-            return list2.Count()>0 ? list2.ToArray() : list.ToArray();
+            //List<string> list = new List<string>();
+            //List<string> list2 = new List<string>();
+            //foreach (var x in Dict_element.Keys)
+            //{
+            //    Element element = Dict_element[x];
+            //    if (element.Type_.Equals(ElementConstants.Product))
+            //        if (element.Properties_.ContainsKey("$principal"))
+            //        {
+            //            list2.Add(element.Name_);
+            //            break;
+            //        }
+            //        else
+            //            list.Add(element.Name_);
+            //}
+            //return list2.Count()>0 ? list2.ToArray() : list.ToArray();
+            if (archiDocument.Solution_principal!=null)
+                return new[] { archiDocument.Solution_principal };
+            else
+                return archiDocument.List_product.ToArray();
         }
 
         public string File_path { get; set; }
@@ -637,8 +641,8 @@ namespace FichierGenerator
             }
             else
             {
-                // Les elements qui ne sont pas li¨¦s ¨¤ un projet(Composant Applicatif) quelconque sont mets dans 
-                // le r¨¦pertoire /<CurrentSolution>/Generated
+                // Les elements qui ne sont pas liï¿½ï¿½s ï¿½ï¿½ un projet(Composant Applicatif) quelconque sont mets dans 
+                // le rï¿½ï¿½pertoire /<CurrentSolution>/Generated
                 Log["warnings"].Add("Element \"" + Dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
                 Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
                 fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type;
@@ -694,8 +698,8 @@ namespace FichierGenerator
             string[] types = list.ToArray();
             //string[] groups = { "Accueil Patient" };
             string[] groups = list.ToArray();
-            //string[] views = { "g¨¦n¨¦ration couches client" };
-            string[] views = { "g¨¦n¨¦ration couches serveur" };
+            //string[] views = { "gï¿½ï¿½nï¿½ï¿½ration couches client" };
+            string[] views = { "gï¿½ï¿½nï¿½ï¿½ration couches serveur" };
             //string[] elements = fileGenerator.getAllElements();
             //string[] elements = list.ToArray();
             //string[] views = list.ToArray();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,6 +11,11 @@ namespace FichierGenerator
     public class ArchiDocument
     {
         string class_namespace;
+
+        string solution_principal = null;
+
+        // list all products(solutions)
+        List<string> list_product = new List<string>();
 
         // Dictionary id_element - id_using_namespace
         Dictionary<string, List<string>> dict_using = new Dictionary<string, List<string>>();
@@ -165,6 +170,8 @@ namespace FichierGenerator
         public Dictionary<string, string> Dict_heritage { get => dict_heritage; set => dict_heritage = value; }
         public Dictionary<string, HashSet<string>> Dict_project_elements { get => dict_project_elements; set => dict_project_elements = value; }
         public Dictionary<string, List<string>> Dict_using { get => dict_using; set => dict_using = value; }
+        public List<string> List_product { get => list_product; set => list_product = value; }
+        public string Solution_principal { get => solution_principal; set => solution_principal = value; }
 
         public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
@@ -497,10 +504,20 @@ namespace FichierGenerator
                                 if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
                                     AddUsing(id, i);
                     }
-                        
                 }
-                    
+                
+                // Find the principal solution
+                if (dict_element[id].Type_.Equals(ElementConstants.Product))
+                {
+                    list_product.Add(id);
+                    if (dict_element[id].Properties_.ContainsKey("$principal"))
+                        Solution_principal = id;
+                }
             }
+
+            // Find the principal solution
+            if (list_product.Count() == 1 && Solution_principal == null)
+                Solution_principal = list_product[0];
 
             // Add properties depends on heritage relationship
             foreach (var i in dict_heritage.Keys)
@@ -705,33 +722,23 @@ namespace FichierGenerator
                     }
                 }
             }
-
-            // Make the dictionary id_element - solution
+            
+            // Make the dictionary id_element - solution  
             foreach (var id_element in dict_element.Keys)
             {
-                Dictionary<string, Dictionary<string, List<string>>> dict;
-                if (mmap_relationship.TryGetValue(id_element, out dict))
+                foreach(var i in list_product)
                 {
-                    List<string> list;
-                    if (dict["target"].TryGetValue(RelationshipConstants.Aggregation, out list))
-                        foreach (var i in list)
-                            if (dict_element[i].Type_.Equals(ElementConstants.Representation) ||
-                                dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
-                                dict_element_solution.Add(id_element, i);
-
-                    if (dict["target"].TryGetValue(RelationshipConstants.Composition, out list))
-                        foreach (var i in list)
-                            if (dict_element[i].Type_.Equals(ElementConstants.Representation) ||
-                                dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
-                                dict_element_solution.Add(id_element, i);
-
-                    if (dict["target"].TryGetValue(RelationshipConstants.Flow, out list))
-                        foreach (var i in list)
-                            if (dict_element[i].Type_.Equals(ElementConstants.Representation) ||
-                                dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
-                                dict_element_solution.Add(id_element, i);
+                    Tuple<string, string> tuple = new Tuple<string, string>(id_element, i);
+                    Tuple<string, string> tuple_reverse = new Tuple<string, string>(i, id_element);
+                    if (dict_relationship.ContainsKey(tuple) || dict_relationship.ContainsKey(tuple_reverse))
+                    {
+                        dict_element_solution.Add(id_element, i);
+                    }
                 }
+                if (!dict_element_solution.ContainsKey(id_element) && Solution_principal!=null)
+                    dict_element_solution.Add(id_element, Solution_principal);
             }
+
             foreach (var id_solution in mmap_solution.Keys)
             {
                 foreach (var id_project in mmap_solution[id_solution])
