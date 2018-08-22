@@ -1016,14 +1016,14 @@ namespace FichierGenerator
             // Create the list of selected element ids with their names
             foreach(var element_name in elements)
             {
-                string id_element = dict_element.FirstOrDefault(x => x.Value.Class_name_.Equals(element_name)).Key;
+                string id_element = dict_element.FirstOrDefault(x => x.Value.Name_.Equals(element_name)).Key;
                 list_element.Add(id_element);
             }
             list_element = list_element.Distinct().ToList();
 
             foreach (var e in list_element)
             {
-                if (!dict_element_group.ContainsKey(e))
+                if (e!=null && !dict_element_group.ContainsKey(e))
                 {
                     if (!list_group.Contains("id-GroupeUnConnu"))
                         list_group.Add("id-GroupeUnConnu");

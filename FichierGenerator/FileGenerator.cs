@@ -70,7 +70,21 @@ namespace FichierGenerator
         {
             List<string> list = new List<string>();
             foreach (var x in Dict_element.Keys)
-                list.Add(Dict_element[x].Name_);
+            {
+                if (getAllType().Contains(Dict_element[x].Type_))
+                    list.Add(Dict_element[x].Name_);
+            }
+            return list.ToArray();
+        }
+
+        public string[] getAllElementID()
+        {
+            List<string> list = new List<string>();
+            foreach (var x in Dict_element.Keys)
+            {
+                if (getAllType().Contains(Dict_element[x].Type_))
+                    list.Add(x);
+            }
             return list.ToArray();
         }
 
@@ -126,6 +140,60 @@ namespace FichierGenerator
                 return list.ToArray();
             }
             return list_element_name.ToArray();
+        }
+
+        public string[] getElementID(string[] types, string[] groups, string[] views, string[] projects)
+        {
+            List<string> list = new List<string>();
+
+            // Get all elements in selected views
+            foreach (var i in views)
+            {
+                string id_view = archiDocument.Dict_view_name.First(x => x.Value.Equals(i)).Key;
+                if (id_view != null)
+                    list.AddRange(archiDocument.Dict_view[id_view]);
+            }
+
+            // Get all elements in selected groups
+            foreach (var i in groups)
+            {
+                string id_group = archiDocument.Dict_namespace[i];
+                list.AddRange(archiDocument.Dict_group[id_group]["interface"]);
+                list.AddRange(archiDocument.Dict_group[id_group]["class"]);
+            }
+
+            // Get all elements in selected components
+            List<string> list_idProject = new List<string>();
+            foreach (var i in projects)
+            {
+                string id_project = archiDocument.Dict_project_elements.FirstOrDefault(x => dict_element[x.Key].Class_name_.Equals(i)).Key;
+                if (id_project != null)
+                {
+                    list.AddRange(archiDocument.Dict_project_elements[id_project]);
+                    list_idProject.Add(id_project);
+                }
+            }
+
+            // Remove dublication
+            list = list.Distinct().ToList();
+            // Remove elements with unselected type
+            list.RemoveAll(x => !types.Contains(Dict_element[x].Type_));
+            // Remove elements don't exist
+            list.RemoveAll(x => !Dict_element.ContainsKey(x));
+            // Remove elements not belong to selected components
+            if (list_idProject.Count() > 0)
+                list.RemoveAll(x => archiDocument.Dict_element_project.Keys.Contains(x) && !list_idProject.Contains(archiDocument.Dict_element_project[x]));
+
+            List<string> list_element_name = new List<string>();
+            list.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
+
+            // If only choose the Application Component as type, ze generate projects instead of classes
+            if (types.Count() == 1 && types[0].Equals(ElementConstants.ApplicationComponent))
+            {
+                list.AddRange(GetProjects(solution));
+                return list.ToArray();
+            }
+            return list.ToArray();
         }
 
 
@@ -258,7 +326,7 @@ namespace FichierGenerator
                                 GenerateRepresentation(archiDocumentSerialized, id_element);
                                 break;
                             case ElementConstants.DataObject:
-                                GenerateRepresentation(archiDocumentSerialized, id_element);
+                                GenerateDataObject(archiDocumentSerialized, id_element);
                                 break;
                         }
                     }
