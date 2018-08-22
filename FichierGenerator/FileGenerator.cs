@@ -633,9 +633,20 @@ namespace FichierGenerator
             var viewTemplate = new ViewTemplate();
             viewTemplate.Session = new TextTemplatingSession();
             if (archiDocument.Dict_element_group.ContainsKey(id_element))
-                viewTemplate.Session["groupName"] = StringHelper.UpperString(archiDocument.Dict_element[archiDocument.Dict_element_group[id_element]].Class_name_);
+            {
+                if (!archiDocument.Dict_element_group[id_element].Contains("id"))
+                {
+                    viewTemplate.Session["groupName"] = archiDocument.Dict_element_group[id_element];
+                }
+                else
+                {
+                    viewTemplate.Session["groupName"] = StringHelper.UpperString(archiDocument.Dict_element[archiDocument.Dict_element_group[id_element]].Class_name_);
+                }
+                
+            }
             else
-                viewTemplate.Session["groupName"] = "UnknownGroup";
+                viewTemplate.Session["groupName"] = "InknownGroup";
+
             viewTemplate.Session["viewName"] = StringHelper.UpperString(name);
             viewTemplate.Initialize();
             generatedText = viewTemplate.TransformText();

@@ -34,7 +34,7 @@ namespace FichierGenerator.Template
         public virtual string TransformText()
         {
             
-            #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InitialiseVar.ttinclude"
+            #line 1 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InitVar.ttinclude"
 
 	string class_namespace = archiDocument.Class_namespace;
 
@@ -104,7 +104,7 @@ namespace FichierGenerator.Template
 
 	string id_group;
 	if (!dict_element_group.ContainsKey(id_element))
-		id_group = "id-GroupeUnConnu";
+		id_group = "id-GroupeInConnu";
 	else
 		id_group = dict_element_group[id_element];
 
@@ -114,7 +114,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\r\nusing System.Collections.Generic;\r\n");
+            this.Write("using System.Collections.Generic;\r\n");
             
             #line 21 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
 	

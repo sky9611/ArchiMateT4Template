@@ -16,7 +16,7 @@
 <#@ import namespace="FichierGenerator" #>
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
-<#@ include file="InitialiseVar.ttinclude" #>
+<#@ include file="InitVar.ttinclude" #>
 <Product>
 <#
 	Dictionary<string, Dictionary<string, List<string>>> dict;

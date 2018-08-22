@@ -763,13 +763,13 @@ namespace FichierGenerator
             }
 
             // Make the map of all groups
-            dict_group_name.Add("id-GroupeUnConnu", class_namespace + "Unconnu");
+            dict_group_name.Add("id-GroupeInConnu", class_namespace + "Inconnu");
             Dictionary<string, List<string>> dict_temp = new Dictionary<string, List<string>>();
             List<string> list_element_temp = new List<string>();
             List<string> list_interface_temp = new List<string>();
             dict_temp.Add("class", list_element_temp);
             dict_temp.Add("interface", list_interface_temp);
-            dict_group.Add("id-GroupeUnConnu", dict_temp);
+            dict_group.Add("id-GroupeInConnu", dict_temp);
             IEnumerable<XElement> xeles_group = from e in doc.Descendants(NP + "element")
                                                 where e.Attribute(xmlns_xsi + "type").Value == ElementConstants.Grouping
                                                 select e;
@@ -1023,14 +1023,16 @@ namespace FichierGenerator
 
             foreach (var e in list_element)
             {
-                if (e!=null && !dict_element_group.ContainsKey(e))
+                if (e != null && !dict_element_group.ContainsKey(e))
                 {
-                    if (!list_group.Contains("id-GroupeUnConnu"))
-                        list_group.Add("id-GroupeUnConnu");
-                    if (dict_element[e].Type_.Equals(ElementConstants.ApplicationInterface))
-                        dict_group["id-GroupeUnConnu"]["interface"].Add(e);
-                    else
-                        dict_group["id-GroupeUnConnu"]["class"].Add(e);
+                    if (dict_element_project.ContainsKey(e))
+                    {
+                        string group_name = class_namespace + StringHelper.UpperString(dict_element[dict_element_project[e]].Name_);
+                        dict_element_group.Add(e, group_name);
+                        if (!dict_group_name.ContainsKey(group_name))
+                            dict_group_name.Add(group_name, group_name);
+                    }
+                        
                 }
             }
             

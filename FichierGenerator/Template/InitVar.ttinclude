@@ -1,4 +1,4 @@
-<#
+﻿<#
 	string class_namespace = archiDocument.Class_namespace;
 
 	// Map id_element - all elements related
@@ -67,7 +67,7 @@
 
 	string id_group;
 	if (!dict_element_group.ContainsKey(id_element))
-		id_group = "id-GroupeUnConnu";
+		id_group = "id-GroupeInConnu";
 	else
 		id_group = dict_element_group[id_element];
 

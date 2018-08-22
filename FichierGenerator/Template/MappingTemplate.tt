@@ -17,7 +17,7 @@
 <#@ parameter name="archiDocument" type="FichierGenerator.ArchiDocumentSerialized" #>
 <#@ parameter name="id_element" type="System.String" #>
 <#@ parameter name="id_business_object" type="System.String" #>
-<#@ include file="InitialiseVar.ttinclude" #>
+<#@ include file="InitVar.ttinclude" #>
 
 <?xml version = "1.0" encoding = "utf-8"?>
 

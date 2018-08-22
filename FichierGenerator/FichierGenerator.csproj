@@ -298,13 +298,11 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>RepresentationTemplate.cs</LastGenOutput>
     </Content>
-    <None Include="Template\InitialiseVar.ttinclude">
-      <LastOutputs>.\Script1.cs</LastOutputs>
-    </None>
     <Content Include="Template\SQLTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>SQLTemplate.cs</LastGenOutput>
     </Content>
+    <None Include="Template\InitVar.ttinclude" />
     <Content Include="Template\ViewTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ViewTemplate.cs</LastGenOutput>
