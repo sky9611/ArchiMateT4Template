@@ -210,7 +210,7 @@ namespace FichierGenerator
                     foreach (var i in ele.Descendants(NP + "property"))
                     {
                         if (property_definition_map[i.Attribute("propertyDefinitionRef").Value].Contains("$"))
-                            properties.Add(StringHelper.LowerString(property_definition_map[i.Attribute("propertyDefinitionRef").Value]), i.Element(NP + "value").Value);
+                            properties.Add("$"+StringHelper.LowerString(property_definition_map[i.Attribute("propertyDefinitionRef").Value]), i.Element(NP + "value").Value);
                         else
                             properties.Add(property_definition_map[i.Attribute("propertyDefinitionRef").Value], i.Element(NP + "value").Value);
                     }
@@ -223,8 +223,8 @@ namespace FichierGenerator
                     Type_ = ele.Attribute(xmlns_xsi + "type").Value
                 };
                 element.Properties_ = properties;
-                if (properties.Keys.Contains("Implementation") && properties["Implementation"].Length > 0)
-                    element.Class_name_ = properties["Implementation"];
+                if (properties.Keys.Contains("$implementation") && properties["$implementation"].Length > 0)
+                    element.Class_name_ = properties["$implementation"];
                 else
                     element.Class_name_ = element.Name_;
                 if (element.Type_.Equals(ElementConstants.ApplicationComponent)) hashset_project.Add(element.Identifier_);

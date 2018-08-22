@@ -197,9 +197,9 @@ namespace FichierGenerator
             //}
             //return list2.Count()>0 ? list2.ToArray() : list.ToArray();
             if (archiDocument.Solution_principal!=null)
-                return new[] { archiDocument.Solution_principal };
+                return new[] { dict_element[archiDocument.Solution_principal].Class_name_ };
             else
-                return archiDocument.List_product.ToArray();
+                return archiDocument.List_product.Select(x => dict_element[x].Class_name_).ToArray();
         }
 
         public string File_path { get; set; }
