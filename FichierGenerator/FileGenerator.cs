@@ -362,17 +362,20 @@ namespace FichierGenerator
                 vsproj = (VSProject2)proj.Object;
                 string id_project = archiDocument.Dict_project_reference.FirstOrDefault(x => Path.GetFileNameWithoutExtension(vsproj.Project.Name).Equals(StringHelper.UpperString(dict_element[x.Key].Class_name_))).Key; 
                 HashSet<string> set_references;
+                if (id_project != null && archiDocument.Dict_project_reference.TryGetValue(id_project, out set_references))
+                    foreach (var id_reference in set_references)
+                    {
+                        if (id_reference!= id_project)
+                        {
+                            if (Dict_project_directory.ContainsKey(id_reference))
+                            {
+                                vsproj.References.AddProject(GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_)));
+                            }
+                            else
+                                Log["errors"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found in this solution");
+                        }
+                    }
 
-                // TO BE DEBUGGED
-                //if (id_project!=null && archiDocument.Dict_project_reference.TryGetValue(id_project, out set_references))
-                //    foreach (var id_reference in set_references)
-                //    {
-                //        if (Dict_project_directory.ContainsKey(id_reference))
-                //            vsproj.References.Add(Path.GetFullPath(Path.Combine(Dict_project_directory[id_reference], StringHelper.UpperString(dict_element[id_reference].Class_name_) + ".csproj")));
-                //        else
-                //            Log["error"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) +"\" has not been found in this solution");
-                //    }
-                        
             }
         }
 
