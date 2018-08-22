@@ -90,7 +90,7 @@ namespace <#= dict_group_name[id_group] #>
 	// Generate all properties
 	foreach(var p in ele.Properties_.Keys)
 	{
-		if (p!="Implementation")
+		if (!p.Contains("$"))
 		{
 #>	
 		<#= ele.Properties_[p] #> <#= p #>;

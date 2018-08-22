@@ -396,7 +396,7 @@ using System.Windows.Shapes;
 		// Generate all properties
 		foreach(var p in ele.Properties_.Keys)
 		{
-			if (p!="Implementation")
+			if (!p.Contains("$"))
 			{
 
             

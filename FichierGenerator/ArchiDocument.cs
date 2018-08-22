@@ -632,9 +632,13 @@ namespace FichierGenerator
             }
 
             // Handle the "$interface" property
-            foreach(var id in dict_element.Keys)
+            List<string> list_keys = dict_element.Keys.ToList();
+            foreach (var id in list_keys)
             {
                 Element element = dict_element[id];
+                string view_id = dict_view.FirstOrDefault(x => x.Value.Contains(id)).Key;
+                string group_id = dict_group.FirstOrDefault(x => x.Value["class"].Contains(id) || x.Value["interface"].Contains(id)).Key;
+
                 if (element.Properties_.ContainsKey("$interface"))
                 {
                     // The project name which element belongs to
@@ -644,81 +648,114 @@ namespace FichierGenerator
                         string project_name = dict_element[project_id].Class_name_;
 
                         //Create new application component element and add it to dict_element
-                        Element new_project = new Element();
-                        new_project.Name_ = project_name + ".Interface";
-                        new_project.Class_name_ = project_name + ".Interface"; 
-                        new_project.Identifier_ = project_name + ".Interface";
-                        new_project.Type_ = ElementConstants.ApplicationComponent;
-                        dict_element.Add(new_project.Identifier_, new_project);
-                        hashset_project.Add(new_project.Identifier_);
-
-                        // Add new project to the references of implementation project 
-                        HashSet<string> set; // Hashset to store the references
-                        if (dict_project_reference.TryGetValue(project_id, out set))
+                        Element new_project = null;
+                        if (!dict_element.ContainsKey(project_name + ".Interface"))
                         {
-                            set.Add(new_project.Identifier_);
+                            new_project = new Element();
+                            new_project.Name_ = project_name + ".Interface";
+                            new_project.Class_name_ = project_name + ".Interface";
+                            new_project.Identifier_ = project_name + ".Interface";
+                            new_project.Properties_ = new Dictionary<string, string>();
+                            new_project.Type_ = ElementConstants.ApplicationComponent;
+                            dict_element.Add(new_project.Identifier_, new_project);
+                            hashset_project.Add(new_project.Identifier_);
+
+                            // Add new project to the references of implementation project 
+                            HashSet<string> set; // Hashset to store the references
+                            if (dict_project_reference.TryGetValue(project_id, out set))
+                            {
+                                set.Add(new_project.Identifier_);
+                            }
+                            else
+                            {
+                                set = new HashSet<string>();
+                                set.Add(new_project.Identifier_);
+                                dict_project_reference.Add(project_id, set);
+                            }
+
+                            // Add new project to the solution
+                            string solution_id = mmap_solution.FirstOrDefault(x => x.Value.Contains(project_id)).Key;
+                            if (solution_id != null)
+                                mmap_solution[solution_id].Add(new_project.Identifier_);
+
+                            // Remove ancient project references and add the news
+                            List<string> keys = dict_project_reference.Keys.ToList();
+                            foreach (var i in keys)
+                            {
+                                if (dict_project_reference[i].Contains(project_id))
+                                {
+                                    dict_project_reference[i].Remove(project_id);
+                                    dict_project_reference[i].Add(new_project.Identifier_);
+                                }
+                            }
+
+                            // Add new project to the view
+                            
+                            if (view_id != null)
+                                dict_view[view_id].Add(new_project.Identifier_);
+
+                            // Add new project to the group
+                            if (group_id != null)
+                                dict_group[group_id]["class"].Add(new_project.Identifier_);
                         }
                         else
                         {
-                            set = new HashSet<string>();
-                            set.Add(new_project.Identifier_);
-                            dict_project_reference.Add(project_id, set);
-                        }
-
-                        // Add new project to the solution
-                        try
-                        {
-                            string solution_id = mmap_solution.First(x => x.Value.Contains(project_id)).Key;
-                            mmap_solution[solution_id].Add(new_project.Identifier_);
-                        }
-                        catch { }
-
-                        // Remove ancient project references and add the news
-                        List<string> keys = dict_project_reference.Keys.ToList();
-                        foreach (var i in keys)
-                        {
-                            if (dict_project_reference[i].Contains(project_id))
-                            {
-                                dict_project_reference[i].Remove(project_id);
-                                dict_project_reference[i].Add(new_project.Identifier_);
-                            }
-
+                            new_project = dict_element[project_name + ".Interface"];
                         }
 
                         //Create new interface element and add it to dict_element
-                        Element new_interface = new Element();
-                        new_interface.Name_ = "I"+ element.Class_name_;
-                        new_interface.Class_name_ = new_project.Name_;
-                        new_interface.Identifier_ = new_project.Name_;
-                        new_interface.Type_ = ElementConstants.ApplicationInterface;
-                        dict_element.Add(new_interface.Identifier_, new_interface);
-
-                        // Move functions into interface
-                        if (element.Type_.Equals(ElementConstants.ApplicationProcess))
+                        if (!dict_element.ContainsKey("I" + element.Class_name_))
                         {
-                            Dictionary<string, Dictionary<string, List<string>>> dict;
-                            if (mmap_relationship.TryGetValue(id, out dict))
+                            Element new_interface = new Element();
+                            new_interface.Name_ = "I" + element.Class_name_;
+                            new_interface.Class_name_ = new_interface.Name_;
+                            new_interface.Identifier_ = new_interface.Name_;
+                            new_interface.Properties_ = new Dictionary<string, string>();
+                            new_interface.Type_ = ElementConstants.ApplicationInterface;
+                            dict_element.Add(new_interface.Identifier_, new_interface);
+
+                            // Add new interface to the project
+                            if (new_project != null)
+                                dict_element_project.Add(new_interface.Identifier_, new_project.Identifier_);
+
+                            // Add new interface to the view
+                            if (view_id != null)
+                                dict_view[view_id].Add(new_interface.Identifier_);
+
+                            // Add new interface to the group
+                            if (group_id != null)
+                                dict_group[group_id]["interface"].Add(new_interface.Identifier_);
+
+                            // Move functions into interface
+                            if (element.Type_.Equals(ElementConstants.ApplicationProcess))
                             {
-                                List<string> list;
-                                if (dict["source"].TryGetValue("Function", out list))
+                                Dictionary<string, Dictionary<string, List<string>>> dict;
+                                if (mmap_relationship.TryGetValue(id, out dict))
                                 {
-                                    foreach (var i in list)
-                                        if (mmap_relationship.ContainsKey(new_interface.Identifier_))
-                                            AddFunctionToElement(i, new_interface.Identifier_);
-                                        else
+                                    List<string> list;
+                                    if (dict["source"].TryGetValue("Function", out list))
+                                    {
+                                        foreach (var i in list)
                                         {
-                                            Dictionary<string, Dictionary<string, List<string>>> dict2 = new Dictionary<string, Dictionary<string, List<string>>>();
-                                            Dictionary<string, List<string>> dict_source = new Dictionary<string, List<string>>();
-                                            dict_source.Add("Function", new List<string>(list));
-                                            dict2.Add("source", dict_source);
-                                            dict2.Add("target", new Dictionary<string, List<string>>());
-                                            mmap_relationship.Add(new_interface.Identifier_, dict2);
+                                            if (mmap_relationship.ContainsKey(new_interface.Identifier_))
+                                                AddFunctionToElement(i, new_interface.Identifier_);
+                                            else
+                                            {
+                                                Dictionary<string, Dictionary<string, List<string>>> dict2 = new Dictionary<string, Dictionary<string, List<string>>>();
+                                                Dictionary<string, List<string>> dict_source = new Dictionary<string, List<string>>();
+                                                dict_source.Add("Function", new List<string>(list));
+                                                dict2.Add("source", dict_source);
+                                                dict2.Add("target", new Dictionary<string, List<string>>());
+                                                mmap_relationship.Add(new_interface.Identifier_, dict2);
+                                            }
                                         }
 
-                                    dict.Remove("Function");
+                                        dict.Remove("Function");
+                                    }
                                 }
                             }
                         }
+                            
                     }
                 }
             }
