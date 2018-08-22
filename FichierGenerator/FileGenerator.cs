@@ -112,7 +112,6 @@ namespace FichierGenerator
             list.RemoveAll(x => !types.Contains(Dict_element[x].Type_));
             // Remove elements don't exist
             list.RemoveAll(x => !Dict_element.ContainsKey(x));
-
             // Remove elements not belong to selected components
             if (list_idProject.Count() > 0)
                 list.RemoveAll(x => archiDocument.Dict_element_project.Keys.Contains(x) && !list_idProject.Contains(archiDocument.Dict_element_project[x]));
@@ -263,7 +262,11 @@ namespace FichierGenerator
             }
         }
 
-
+        /// <summary>
+        ///     Find all the representations related to a solution
+        /// </summary>
+        /// <param name="id_solution"></param>
+        /// <returns></returns>
         private string GetStartUpUri(string id_solution)
         {
             List<string> list_FT;
@@ -288,6 +291,11 @@ namespace FichierGenerator
             return views;
         }
 
+        /// <summary>
+        ///     Generate the App.xaml.cs for the solution
+        /// </summary>
+        /// <param name="solution_name"></param>
+        /// <returns></returns>
         private string GenerateSolutionXamlCs(string solution_name)
         {
             var appXamlCsTemplate = new AppXamlCsTemplate();
@@ -309,6 +317,11 @@ namespace FichierGenerator
             return list_project_name.ToArray();
         }
 
+        /// <summary>
+        ///     Create Project
+        /// </summary>
+        /// <param name="solution"> The solution where the project will be created </param>
+        /// <param name="application_component_name"> The name of the project </param>
         public void GenerateProject(Solution solution,  string application_component_name)
         {
             string id_project = dict_element.First(x => x.Value.Name_.Equals(application_component_name)).Key;
@@ -336,23 +349,29 @@ namespace FichierGenerator
             System.Threading.Thread.Sleep(1000);
         }
 
+        /// <summary>
+        ///     Add referenced projects to each project
+        ///     TO BE TESTED
+        /// </summary>
+        /// <param name="solution"></param>
         public void AddProjectReferences(Solution solution)
         {
-            // Add references
             VSProject2 vsproj;
             foreach (Project proj in solution.Projects)
             {
                 vsproj = (VSProject2)proj.Object;
-                string id_project = archiDocument.Dict_project_reference.FirstOrDefault(x => Path.GetFileNameWithoutExtension(vsproj.Project.Name).Equals(dict_element[x.Key].Class_name_)).Key; 
+                string id_project = archiDocument.Dict_project_reference.FirstOrDefault(x => Path.GetFileNameWithoutExtension(vsproj.Project.Name).Equals(StringHelper.UpperString(dict_element[x.Key].Class_name_))).Key; 
                 HashSet<string> set_references;
-                if (id_project!=null && archiDocument.Dict_project_reference.TryGetValue(id_project, out set_references))
-                    foreach (var id_reference in set_references)
-                    {
-                        if (Dict_project_directory.ContainsKey(id_reference))
-                            vsproj.References.Add(Path.Combine(Dict_project_directory[id_reference], dict_element[id_reference].Class_name_ + ".csproj"));
-                        else
-                            Log["error"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) +"\" has not been found in this solution");
-                    }
+
+                // TO BE DEBUGGED
+                //if (id_project!=null && archiDocument.Dict_project_reference.TryGetValue(id_project, out set_references))
+                //    foreach (var id_reference in set_references)
+                //    {
+                //        if (Dict_project_directory.ContainsKey(id_reference))
+                //            vsproj.References.Add(Path.GetFullPath(Path.Combine(Dict_project_directory[id_reference], StringHelper.UpperString(dict_element[id_reference].Class_name_) + ".csproj")));
+                //        else
+                //            Log["error"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) +"\" has not been found in this solution");
+                //    }
                         
             }
         }
@@ -633,6 +652,12 @@ namespace FichierGenerator
             return null;
         }
 
+        /// <summary>
+        ///     If the file(generated element) is related to a project(Application Component), add to it.
+        /// Otherwise, add it to the solution name project   
+        /// </summary>
+        /// <param name="id_element"></param>
+        /// <param name="filename"></param>
         private void AddFileToProject(string id_element, string filename)
         {
             string id_project;

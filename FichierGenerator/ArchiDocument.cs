@@ -924,7 +924,7 @@ namespace FichierGenerator
         }
 
         /// <summary>
-        ///     Get the element id who call the function. If not found, return null
+        ///     Get id of the element who calls the function. If not found, return null
         /// </summary>
         /// <param name="id_function"> function id </param>
         /// <returns> element id </returns>

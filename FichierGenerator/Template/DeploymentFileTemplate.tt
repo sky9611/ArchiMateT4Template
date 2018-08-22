@@ -98,7 +98,7 @@
 		{
 
 #>
-		<RelatedProduct name="<#= UpperString(i.Class_name_) #>/">
+		<RelatedProduct name="<#= UpperString(i.Class_name_) #>" />
 <#
 		}
 #>
@@ -114,7 +114,7 @@
 		foreach(var i in list_view)
 		{
 #>
-		<Representation name="<#= UpperString(i.Class_name_) #>/">
+		<Representation name="<#= UpperString(i.Class_name_) #>" />
 <#
 		}
 #>
@@ -130,7 +130,7 @@
 		foreach(var i in list_service)
 		{
 #>
-		<ApplicationService name="<#= UpperString(i.Class_name_) #>/">
+		<ApplicationService name="<#= UpperString(i.Class_name_) #>" />
 <#
 		}
 #>
@@ -141,16 +141,16 @@
 	if (list_component.Count()>0)
 	{
 #>
-	<ApplicationComponenets>
+	<ApplicationComponents>
 <#
 		foreach(var i in list_component)
 		{
 #>
-		<ApplicationComponenet name="<#= UpperString(i.Class_name_) #>/">
+		<ApplicationComponent name="<#= UpperString(i.Class_name_) #>" />
 <#
 		}
 #>
-	</ApplicationServices>
+	</ApplicationComponents>
 <#
 	}
 #>

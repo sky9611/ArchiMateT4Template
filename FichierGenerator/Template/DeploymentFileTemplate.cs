@@ -212,7 +212,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("/\">\r\n");
+            this.Write("\" />\r\n");
             
             #line 102 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
@@ -250,7 +250,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("/\">\r\n");
+            this.Write("\" />\r\n");
             
             #line 118 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
@@ -288,7 +288,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("/\">\r\n");
+            this.Write("\" />\r\n");
             
             #line 134 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
@@ -309,7 +309,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\t<ApplicationComponenets>\r\n");
+            this.Write("\t<ApplicationComponents>\r\n");
             
             #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
@@ -319,14 +319,14 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\t\t<ApplicationComponenet name=\"");
+            this.Write("\t\t<ApplicationComponent name=\"");
             
             #line 149 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
-            this.Write("/\">\r\n");
+            this.Write("\" />\r\n");
             
             #line 150 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
@@ -335,7 +335,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\t</ApplicationServices>\r\n");
+            this.Write("\t</ApplicationComponents>\r\n");
             
             #line 154 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
