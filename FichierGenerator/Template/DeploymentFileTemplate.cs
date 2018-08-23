@@ -118,6 +118,7 @@ namespace FichierGenerator.Template
             
             #line 21 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
+    class_name = UpperString(ele.Class_name_);
 	Dictionary<string, Dictionary<string, List<string>>> dict;
 	List<Element> list_product = new List<Element>();
 	List<Element> list_view = new List<Element>();
@@ -196,7 +197,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t<RelatedProducts>\r\n");
             
-            #line 96 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 97 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		foreach(var i in list_product)
 		{
@@ -207,14 +208,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t<RelatedProduct name=\"");
             
-            #line 101 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 102 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("\" />\r\n");
             
-            #line 102 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 103 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		}
 
@@ -223,7 +224,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t</RelatedProducts>\r\n");
             
-            #line 106 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 107 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	}
 
@@ -235,7 +236,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t<Representations>\r\n");
             
-            #line 113 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 114 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		foreach(var i in list_view)
 		{
@@ -245,14 +246,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t<Representation name=\"");
             
-            #line 117 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 118 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("\" />\r\n");
             
-            #line 118 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 119 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		}
 
@@ -261,7 +262,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t</Representations>\r\n");
             
-            #line 122 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 123 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	}
 
@@ -273,7 +274,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t<ApplicationServices>\r\n");
             
-            #line 129 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 130 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		foreach(var i in list_service)
 		{
@@ -283,14 +284,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t<ApplicationService name=\"");
             
-            #line 133 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 134 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("\" />\r\n");
             
-            #line 134 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 135 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		}
 
@@ -299,7 +300,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t</ApplicationServices>\r\n");
             
-            #line 138 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 139 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	}
 
@@ -311,7 +312,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t<ApplicationComponents>\r\n");
             
-            #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 146 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		foreach(var i in list_component)
 		{
@@ -321,14 +322,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t<ApplicationComponent name=\"");
             
-            #line 149 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 150 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(i.Class_name_)));
             
             #line default
             #line hidden
             this.Write("\" />\r\n");
             
-            #line 150 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 151 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 		}
 
@@ -337,7 +338,7 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t</ApplicationComponents>\r\n");
             
-            #line 154 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+            #line 155 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	}
 
@@ -348,14 +349,14 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 159 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
+        #line 160 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\DeploymentFileTemplate.tt"
 
 	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
 	public string UpperString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToUpperInvariant() + name.Substring(1);

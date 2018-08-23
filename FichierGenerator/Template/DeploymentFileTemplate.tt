@@ -19,6 +19,7 @@
 <#@ include file="InitVar.ttinclude" #>
 <Product>
 <#
+    class_name = UpperString(ele.Class_name_);
 	Dictionary<string, Dictionary<string, List<string>>> dict;
 	List<Element> list_product = new List<Element>();
 	List<Element> list_view = new List<Element>();
@@ -161,8 +162,8 @@
 	public string UpperString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToUpperInvariant() + name.Substring(1);

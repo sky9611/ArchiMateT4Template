@@ -32,6 +32,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 <#	
+    class_name = ele.Class_name_;
 	// Generate used namespaces
 	List<string> list_using;
 	if(mmap_group_access.TryGetValue(id_group, out list_using))
@@ -65,7 +66,7 @@ namespace <#= dict_group_name[id_group] #>
 	{
 		list_representation.Add(id_element);
 #>
-	public interface I<#= UpperString(class_name) #>{}
+	public interface I<#= ele.Class_name_ #>{}
 
 <#
 	if (mmap_relationship.ContainsKey(id_element))
@@ -118,7 +119,7 @@ namespace <#= dict_group_name[id_group] #>
 	{
 #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
-	partial class <#= UpperString(class_name) #> : Window
+	partial class <#= ele.Class_name_ #> : Window
 	{
 <#	
 	}
@@ -139,9 +140,9 @@ namespace <#= dict_group_name[id_group] #>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
-	partial class <#= UpperString(class_name) #> : Window, <#= str_parents#>
+	partial class <#= ele.Class_name_ #> : Window, <#= str_parents#>
 	{
-		public MainWindow()
+		public <#= ele.Class_name_ #>()
         {
             InitializeComponent();
         }
@@ -251,8 +252,8 @@ namespace <#= dict_group_name[id_group] #>
 	public string UpperString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToUpperInvariant() + name.Substring(1);
@@ -262,8 +263,8 @@ namespace <#= dict_group_name[id_group] #>
 	public string LowerString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToLowerInvariant() + name.Substring(1);

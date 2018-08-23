@@ -19,6 +19,7 @@
 <#@ include file="InitVar.ttinclude" #>
 using System.Collections.Generic;
 <#	
+    class_name = ele.Class_name_;
 	// Generate used namespaces
 	List<string> list_using;
 	if(mmap_group_access.TryGetValue(id_group, out list_using))
@@ -103,7 +104,7 @@ namespace <#= dict_group_name[id_group] #>
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
-	public interface <#= UpperString(class_name) #> 
+	public interface <#= ele.Class_name_ #>: IView 
 	{
 <#	
 	}
@@ -114,7 +115,7 @@ namespace <#= dict_group_name[id_group] #>
 			list_parent_name.Add(dict_element[e].Class_name_);
 		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 #>
-	public interface <#= UpperString(class_name) #> : <#= str_parents#>
+	public interface <#= ele.Class_name_ #> : IView, <#= str_parents#>
 	{
 
 <#
@@ -182,8 +183,8 @@ namespace <#= dict_group_name[id_group] #>
 	public string UpperString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToUpperInvariant() + name.Substring(1);
@@ -193,8 +194,8 @@ namespace <#= dict_group_name[id_group] #>
 	public string LowerString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToLowerInvariant() + name.Substring(1);

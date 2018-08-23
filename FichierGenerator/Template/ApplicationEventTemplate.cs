@@ -118,6 +118,7 @@ namespace FichierGenerator.Template
             
             #line 21 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 	
+    class_name = ele.Class_name_;
 	// Generate used namespaces
 	// Table.P17.O(3)
 	List<string> list_using;
@@ -131,14 +132,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("using ");
             
-            #line 30 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 31 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id]));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 31 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 32 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 		}
 	}	
@@ -148,14 +149,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\r\nnamespace ");
             
-            #line 36 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 37 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(dict_group_name[id_group]));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 39 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 	// Generate attributes
 	// Table.E17.O(6)
@@ -179,21 +180,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t[ReferenceModel(");
             
-            #line 56 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 57 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 56 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 57 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Name_));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 57 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 58 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 						}
 					}
@@ -216,21 +217,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t[ReferenceModel(");
             
-            #line 74 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 75 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 74 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 75 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_associated.Name_));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 75 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 76 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 					}
 				}
@@ -246,14 +247,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\tpartial class ");
             
-            #line 85 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(class_name)));
+            #line 86 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
             
             #line default
             #line hidden
             this.Write(" \r\n\t{\r\n");
             
-            #line 87 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 88 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 	
 		}
 		else
@@ -274,21 +275,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\tpartial class ");
             
-            #line 102 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(class_name)));
+            #line 103 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
             
             #line default
             #line hidden
             this.Write(" : ");
             
-            #line 102 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 103 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(str_parents));
             
             #line default
             #line hidden
             this.Write("\r\n\t{\r\n");
             
-            #line 104 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 105 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 	}
 
@@ -310,21 +311,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t");
             
-            #line 120 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 121 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 120 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 121 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n\r\n");
             
-            #line 122 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+            #line 123 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 				}
 			}
@@ -338,7 +339,7 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 130 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
+        #line 131 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
 	{
@@ -379,8 +380,8 @@ namespace FichierGenerator.Template
 	public string UpperString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToUpperInvariant() + name.Substring(1);
@@ -390,8 +391,8 @@ namespace FichierGenerator.Template
 	public string LowerString(string name)
 	{
 		//name = Regex.Replace(name, @"\s\(.*\)", "");
-		name = name.Replace(".", " ");
-        name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+		//name = name.Replace(".", " ");
+        //name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
         name = name.Replace(" ", "");
 		name = Regex.Replace(name, @"[^\w\.@_]", "");
 		return name[0].ToString().ToLowerInvariant() + name.Substring(1);

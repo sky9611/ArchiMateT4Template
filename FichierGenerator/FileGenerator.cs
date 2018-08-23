@@ -95,7 +95,7 @@ namespace FichierGenerator
             foreach (var i in views)
             {
                 string id_view = archiDocument.Dict_view_name.FirstOrDefault(x => x.Value.Equals(i)).Key;
-                if (id_view!=null)
+                if (id_view != null)
                     list.AddRange(archiDocument.Dict_view[id_view]);
             }
 
@@ -125,6 +125,8 @@ namespace FichierGenerator
             list.RemoveAll(x => !types.Contains(Dict_element[x].Type_));
             // Remove elements don't exist
             list.RemoveAll(x => !Dict_element.ContainsKey(x));
+            // Remove elements with $generation = false
+            list.RemoveAll(x => Dict_element[x].Properties_.ContainsKey("$generation") && Dict_element[x].Properties_["$generation"].Equals("false"));
             // Remove elements not belong to selected components
             if (list_idProject.Count() > 0)
                 list.RemoveAll(x => archiDocument.Dict_element_project.Keys.Contains(x) && !list_idProject.Contains(archiDocument.Dict_element_project[x]));
@@ -290,12 +292,20 @@ namespace FichierGenerator
             archiDocumentTemp.Update(elements, name_space);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocumentTemp);
 
+            bool hasGeneratedProjects = false;
+
             foreach (var id_element in archiDocumentSerialized.List_element)
             {
                 Element ele = Dict_element[id_element];
                 if (ele.Type_.Equals(ElementConstants.ApplicationComponent))
+                {
+                    hasGeneratedProjects = true;
                     GenerateProject(solution, ele.Name_);
+                }
             }
+
+            if(hasGeneratedProjects)
+                AddProjectReferences(solution);
 
             foreach (var id_element in archiDocumentSerialized.List_element)
             {
@@ -385,11 +395,11 @@ namespace FichierGenerator
 
         public string[] GetProjects(Solution solution)
         {
-            string solution_name = Path.GetFileNameWithoutExtension(solution.FullName);
-            var id_solution = archiDocument.Mmap_solution.FirstOrDefault(x => StringHelper.UpperString(Dict_element[x.Key].Name_) == solution_name).Key;
-            List<string> list_project = archiDocument.Mmap_solution[id_solution];
+            //string solution_name = Path.GetFileNameWithoutExtension(solution.FullName);
+            //var id_solution = archiDocument.Mmap_solution.FirstOrDefault(x => StringHelper.UpperString(Dict_element[x.Key].Name_) == solution_name).Key;
+            //List<string> list_project = archiDocument.Mmap_solution[id_solution];
             List<string> list_project_name = new List<string>();
-            foreach (var i in list_project)
+            foreach (var i in archiDocument.Hashset_project)
                 list_project_name.Add(dict_element[i].Name_);
 
             return list_project_name.ToArray();
@@ -424,7 +434,15 @@ namespace FichierGenerator
                 Dict_project_directory.Add(id_project, Path.Combine(Path.GetFullPath(solution_path), projet_name));
 
                 // Remove unused cs class
-                // TODO
+                var proj = GetProjectByName(solution, projet_name);
+                var item = proj.ProjectItems.Item("Class1.cs");
+                if (item != null)
+                {
+                    String filename = item.get_FileNames(0);
+                    item.Remove(); // remove the item from project
+                    File.Delete(filename); //delete the file
+                }
+
 
                 System.Threading.Thread.Sleep(1000);
             }
@@ -460,7 +478,7 @@ namespace FichierGenerator
                 if (id_project != null && archiDocument.Dict_project_reference.TryGetValue(id_project, out set_references))
                     foreach (var id_reference in set_references)
                     {
-                        if (id_reference!= id_project)
+                        if (id_reference!= id_project && vsproj.Project.Name!= StringHelper.UpperString(dict_element[id_reference].Class_name_))
                         {
                             if (Dict_project_directory.ContainsKey(id_reference))
                             {
@@ -700,6 +718,9 @@ namespace FichierGenerator
                     }
                 }
             }
+
+            if (dict_element[id_element].Properties_.FirstOrDefault(x => !x.Key.Contains("$")).Key != null)
+                Log["errors"].Add("DataObject \"" + dict_element[id_element].Class_name_ + "\" doesn't have any properties");
         }
 
         /// <summary>
@@ -737,7 +758,7 @@ namespace FichierGenerator
                 {
                     Log["warnings"].Add("The project \"" + StringHelper.UpperString(dict_element[id_project].Class_name_) + "which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
                     Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
-                    fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type;
+                    fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + ".generated" + type;
                     File.WriteAllText(fullname, generatedText);
                 }
             }
@@ -747,7 +768,7 @@ namespace FichierGenerator
                 // le r��pertoire /<CurrentSolution>/Generated
                 Log["warnings"].Add("Element \"" + Dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
                 Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
-                fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type;
+                fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + ".generated" + type;
                 File.WriteAllText(fullname, generatedText);
             }
             return fullname;

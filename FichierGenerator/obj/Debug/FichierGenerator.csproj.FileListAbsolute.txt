@@ -97,3 +97,6 @@ D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\F
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.csproj.CopyComplete
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.dll
 D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\obj\Debug\FichierGenerator.pdb
+D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Tools.dll
+D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Tools.pdb
+D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\bin\Debug\Tools.dll.config

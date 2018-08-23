@@ -645,7 +645,7 @@ namespace FichierGenerator
                     string project_id;
                     if (dict_element_project.TryGetValue(id, out project_id))
                     {
-                        string project_name = dict_element[project_id].Class_name_;
+                        string project_name = StringHelper.UpperString(dict_element[project_id].Class_name_);
 
                         //Create new application component element and add it to dict_element
                         Element new_project = null;
@@ -704,10 +704,10 @@ namespace FichierGenerator
                         }
 
                         //Create new interface element and add it to dict_element
-                        if (!dict_element.ContainsKey("I" + element.Class_name_))
+                        if (!dict_element.ContainsKey("I" + StringHelper.UpperString(element.Class_name_)))
                         {
                             Element new_interface = new Element();
-                            new_interface.Name_ = "I" + element.Class_name_;
+                            new_interface.Name_ = "I" + StringHelper.UpperString(element.Class_name_);
                             new_interface.Class_name_ = new_interface.Name_;
                             new_interface.Identifier_ = new_interface.Name_;
                             new_interface.Properties_ = new Dictionary<string, string>();
@@ -716,7 +716,20 @@ namespace FichierGenerator
 
                             // Add new interface to the project
                             if (new_project != null)
+                            {
                                 dict_element_project.Add(new_interface.Identifier_, new_project.Identifier_);
+                                HashSet<string> set;
+                                if (dict_project_elements.TryGetValue(new_project.Identifier_, out set))
+                                {
+                                    set.Add(new_interface.Identifier_);
+                                }
+                                else
+                                {
+                                    set = new HashSet<string>();
+                                    set.Add(new_interface.Identifier_);
+                                    dict_project_elements.Add(new_project.Identifier_, set);
+                                }
+                            }
 
                             // Add new interface to the view
                             if (view_id != null)

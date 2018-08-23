@@ -141,10 +141,6 @@
     <Reference Include="System.Xml.XPath.XDocument, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Xml.XPath.XDocument.4.3.0\lib\net46\System.Xml.XPath.XDocument.dll</HintPath>
     </Reference>
-    <Reference Include="Tools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Tools.dll</HintPath>
-    </Reference>
     <Reference Include="VSLangProj, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -286,6 +282,7 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>DeploymentFileTemplate.cs</LastGenOutput>
     </Content>
+    <None Include="Template\InitVar.ttinclude" />
     <Content Include="Template\InterfaceTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InterfaceTemplate.cs</LastGenOutput>
@@ -302,7 +299,6 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>SQLTemplate.cs</LastGenOutput>
     </Content>
-    <None Include="Template\InitVar.ttinclude" />
     <Content Include="Template\ViewTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ViewTemplate.cs</LastGenOutput>
@@ -331,6 +327,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Tools\ArchiTools\StringHelper\Tools.csproj">
+      <Project>{66663383-a411-49dd-bade-863939d4fa6d}</Project>
+      <Name>Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
