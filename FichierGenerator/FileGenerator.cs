@@ -35,7 +35,6 @@ namespace FichierGenerator
         };
 
         public static readonly string[] all_types = {
-            ElementConstants.Product,
             ElementConstants.BusinessObject,
             ElementConstants.Contract,
             ElementConstants.Representation,
@@ -95,7 +94,7 @@ namespace FichierGenerator
             // Get all elements in selected views
             foreach (var i in views)
             {
-                string id_view = archiDocument.Dict_view_name.First(x => x.Value.Equals(i)).Key;
+                string id_view = archiDocument.Dict_view_name.FirstOrDefault(x => x.Value.Equals(i)).Key;
                 if (id_view!=null)
                     list.AddRange(archiDocument.Dict_view[id_view]);
             }
@@ -149,7 +148,7 @@ namespace FichierGenerator
             // Get all elements in selected views
             foreach (var i in views)
             {
-                string id_view = archiDocument.Dict_view_name.First(x => x.Value.Equals(i)).Key;
+                string id_view = archiDocument.Dict_view_name.FirstOrDefault(x => x.Value.Equals(i)).Key;
                 if (id_view != null)
                     list.AddRange(archiDocument.Dict_view[id_view]);
             }
