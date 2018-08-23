@@ -28,17 +28,16 @@ namespace FichierGenerator.Template
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("\r\n");
-            this.Write("\r\n<Window x:Class=\"");
+            this.Write("<Window x:Class=\"");
             
-            #line 10 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
+            #line 8 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(groupName));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 10 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
+            #line 8 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(viewName));
             
             #line default
@@ -50,20 +49,20 @@ namespace FichierGenerator.Template
         xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006""
         xmlns:local=""clr-namespace:");
             
-            #line 15 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
+            #line 13 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(groupName));
             
             #line default
             #line hidden
             this.Write("\"\r\n        mc:Ignorable=\"d\"\r\n        Title=\"");
             
-            #line 17 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
+            #line 15 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ViewTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(viewName));
             
             #line default
             #line hidden
-            this.Write("\" Height=\"868\" Width=\"1563\" ResizeMode=\"NoResize\">\r\n    <Grid>       \r\n    </Grid" +
-                    ">\r\n</Window>");
+            this.Write("\" Height=\"868\" Width=\"1563\" ResizeMode=\"NoResize\">\r\n    <Grid>\r\n\t</Grid>\r\n</Windo" +
+                    "w>");
             return this.GenerationEnvironment.ToString();
         }
         
