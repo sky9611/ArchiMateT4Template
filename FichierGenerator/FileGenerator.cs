@@ -285,11 +285,10 @@ namespace FichierGenerator
         /// <summary>
         ///     Method to run the t4 template to generate files with selected elements
         /// </summary>
-        /// <param name="destinationFolder"> The destination folder</param>
         /// <param name="elements"> The selected elements </param>
         /// <param name="name_space"> The namespace of generated class </param>
         /// <param name="solution"> The current solution </param>
-        public void Generate(string destinationFolder, string[] elements, string name_space, Solution solution)
+        public void Generate(string[] elements, string name_space, Solution solution)
         {
             this.solution = solution;
             ArchiDocument archiDocumentTemp = archiDocument;
