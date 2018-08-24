@@ -288,7 +288,7 @@ namespace FichierGenerator
         /// <param name="elements"> The selected elements </param>
         /// <param name="name_space"> The namespace of generated class </param>
         /// <param name="solution"> The current solution </param>
-        public void Generate(string[] elements, string name_space, Solution solution)
+        public void Generate(string[] types, string[] elements, string name_space, Solution solution)
         {
             this.solution = solution;
             ArchiDocument archiDocumentTemp = archiDocument;
@@ -297,7 +297,7 @@ namespace FichierGenerator
             // Create the list of selected element ids with their names
             foreach (var element_name in elements)
             {
-                string id_element = dict_element.FirstOrDefault(x => x.Value.Name_.Equals(element_name)).Key;
+                string id_element = dict_element.FirstOrDefault(x => x.Value.Name_.Equals(element_name) && types.Contains(x.Value.Type_) && !list_element.Contains(x.Key)).Key;
                 list_element.Add(id_element);
             }
             //Add new element because of $interface
@@ -307,10 +307,10 @@ namespace FichierGenerator
                 if (archiDocument.Dict_old_new.ContainsKey(list_element[i]))
                     list_element.AddRange(archiDocument.Dict_old_new[list_element[i]]);
             }
-            List<string> list_element_name = new List<string>();
-            list_element.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
+            //List<string> list_element_name = new List<string>();
+            //list_element.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
 
-            archiDocumentTemp.Update(list_element_name.ToArray(), name_space);
+            archiDocumentTemp.Update(list_element.ToArray(), name_space);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocumentTemp);
 
             bool hasGeneratedProjects = false;

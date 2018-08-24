@@ -672,6 +672,18 @@ namespace FichierGenerator
                             new_project = dict_element[project_name + ".Interface"];
                             // Add relation to the old element
                             list_new.Add(new_project.Identifier_);
+
+                            // Add using
+                            if (dict_using.ContainsKey(id))
+                            {
+                                dict_using[id].Add(new_project.Identifier_);
+                            }
+                            else
+                            {
+                                List<string> l = new List<string>();
+                                l.Add(new_project.Identifier_);
+                                dict_using.Add(id, l);
+                            }
                         }
 
                         //Create new interface element and add it to dict_element
@@ -700,6 +712,19 @@ namespace FichierGenerator
                                     set.Add(new_interface.Identifier_);
                                     dict_project_elements.Add(new_project.Identifier_, set);
                                 }
+                            }
+
+                            // Add implementation
+                            List<string> list_implementation;
+                            if( mmap_specialization.TryGetValue(id, out list_implementation))
+                            {
+                                list_implementation.Add(new_interface.Identifier_);
+                            }
+                            else
+                            {
+                                list_implementation = new List<string>();
+                                list_implementation.Add(new_interface.Identifier_);
+                                mmap_specialization.Add(id, list_implementation);
                             }
 
                             // Add new interface to the view
@@ -1187,12 +1212,12 @@ namespace FichierGenerator
             this.class_namespace = name_space;
 
             // Create the list of selected element ids with their names
-            foreach(var element_name in elements)
-            {
-                string id_element = dict_element.FirstOrDefault(x => x.Value.Name_.Equals(element_name)).Key;
-                list_element.Add(id_element);
-            }
-            list_element = list_element.Distinct().ToList();
+            //foreach(var element_name in elements)
+            //{
+            //    string id_element = dict_element.FirstOrDefault(x => x.Value.Name_.Equals(element_name)).Key;
+            //    list_element.Add(id_element);
+            //}
+            list_element = elements.ToList();
             
             // Make the mmap of element access
             IEnumerable<XElement> xeles_element_access = from e in doc.Descendants(NP + "relationship")

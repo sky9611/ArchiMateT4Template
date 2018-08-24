@@ -31,6 +31,17 @@ using <#= dict_group_name[id] #>;
 <#
 		}
 	}
+
+	if(dict_using.TryGetValue(id_element, out list_using))
+	{
+		list_using = list_using.Distinct().ToList();
+		foreach(var id in list_using)
+		{
+#>
+using <#= dict_group_name[id] #>;
+<#
+		}
+	}
 #>
 
 namespace <#= dict_group_name[id_group] #>
