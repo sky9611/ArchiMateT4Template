@@ -114,7 +114,7 @@ namespace <#= dict_group_name[id_group] #>
 		{
 #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
-	partial class <#= ele.Class_name_ #> : Window
+	public partial class <#= ele.Class_name_ #> : Window
 	{
 <#	
 		}
@@ -135,7 +135,7 @@ namespace <#= dict_group_name[id_group] #>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
-	partial class <#= ele.Class_name_ #> : Window, <#= str_parents#>
+	public partial class <#= ele.Class_name_ #> : Window, <#= str_parents#>
 	{
 		public <#= ele.Class_name_ #>()
         {

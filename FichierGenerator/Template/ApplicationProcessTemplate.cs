@@ -186,7 +186,7 @@ namespace FichierGenerator.Template
             this.Write("Archimate, \"");
             
             #line 50 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Name_));
             
             #line default
             #line hidden
@@ -306,7 +306,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\tpartial class ");
+            this.Write("\tpublic partial class ");
             
             #line 111 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
@@ -334,7 +334,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\tpartial class ");
+            this.Write("\tpublic partial class ");
             
             #line 128 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
@@ -372,7 +372,7 @@ namespace FichierGenerator.Template
             this.Write("\t\t[Model(");
             
             #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Type_));
+            this.Write(this.ToStringHelper.ToStringWithCulture(function.Type_));
             
             #line default
             #line hidden
@@ -478,91 +478,6 @@ namespace FichierGenerator.Template
 		}
 	}
 
-	// Generate reference of a class
-	if (mmap_relationship.ContainsKey(id_element))
-	{
-		List<string> list_associated;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Access", out list_associated))
-		{
-			foreach(var id_associated in list_associated)
-			{
-				if(dict_element.ContainsKey(id_associated))
-				{
-					Element element_associated = dict_element[id_associated];
-					if( element_associated.Type_.Equals("BusinessOnject") || 
-						element_associated.Type_.Equals("Representation") || 
-						element_associated.Type_.Equals("DataObject"))
-					{
-						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
-						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
-
-            
-            #line default
-            #line hidden
-            this.Write("\t\t");
-            
-            #line 214 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
-            
-            #line default
-            #line hidden
-            this.Write(" ");
-            
-            #line 214 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
-            
-            #line default
-            #line hidden
-            this.Write("_ ;\r\n\r\n");
-            
-            #line 216 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-					}
-				}
-			}
-		}
-
-		List<string> list_flow;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Flow", out list_flow))
-		{
-			foreach(var id_associated in list_flow)
-			{
-				if(dict_element.ContainsKey(id_associated))
-				{
-					Element element_associated = dict_element[id_associated];
-					if( element_associated.Type_.Equals("ApplicationProcess") || 
-						element_associated.Type_.Equals("ApplicationFunction") )
-					{
-						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
-						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
-
-            
-            #line default
-            #line hidden
-            this.Write("\t\t");
-            
-            #line 236 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
-            
-            #line default
-            #line hidden
-            this.Write(" ");
-            
-            #line 236 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
-            
-            #line default
-            #line hidden
-            this.Write("_ ;\r\n\r\n");
-            
-            #line 238 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
-
-					}
-				}
-			}
-		}
-	}
-
             
             #line default
             #line hidden
@@ -570,7 +485,7 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 247 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
+        #line 198 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationProcessTemplate.tt"
 
 	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
 	{

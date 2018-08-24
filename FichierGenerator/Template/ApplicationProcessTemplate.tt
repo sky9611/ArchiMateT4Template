@@ -47,7 +47,7 @@ using <#= dict_group_name[id] #>;
 namespace <#= dict_group_name[id_group] #>
 {
 
-	[Model(<#= ele.Type_ #>Archimate, "<#= ele.Class_name_ #>")]
+	[Model(<#= ele.Type_ #>Archimate, "<#= ele.Name_ #>")]
 <#
 	// Generate attributes
 	if( mmap_relationship.ContainsKey(id_element) )
@@ -108,7 +108,7 @@ namespace <#= dict_group_name[id_group] #>
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
-	partial class <#= ele.Class_name_ #> 
+	public partial class <#= ele.Class_name_ #> 
 	{
 <#	
 	}
@@ -125,7 +125,7 @@ namespace <#= dict_group_name[id_group] #>
 		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 						
 #>
-	partial class <#= ele.Class_name_ #> : <#= str_parents#>
+	public partial class <#= ele.Class_name_ #> : <#= str_parents#>
 	{
 <#
 	}
@@ -142,7 +142,7 @@ namespace <#= dict_group_name[id_group] #>
 				Element function = dict_element[i];
 				string function_name = UpperString(function.Name_);
 #>
-		[Model(<#= ele.Type_ #>Archimate, "<#= function_name #>")]
+		[Model(<#= function.Type_ #>Archimate, "<#= function_name #>")]
 <#
 				// Add reference
 				Dictionary<string, Dictionary<string, List<string>>> dict_function;
@@ -189,55 +189,6 @@ namespace <#= dict_group_name[id_group] #>
 		public void <#= function_name #>(){}
 
 <#
-			}
-		}
-	}
-
-	// Generate reference of a class
-	if (mmap_relationship.ContainsKey(id_element))
-	{
-		List<string> list_associated;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Access", out list_associated))
-		{
-			foreach(var id_associated in list_associated)
-			{
-				if(dict_element.ContainsKey(id_associated))
-				{
-					Element element_associated = dict_element[id_associated];
-					if( element_associated.Type_.Equals("BusinessOnject") || 
-						element_associated.Type_.Equals("Representation") || 
-						element_associated.Type_.Equals("DataObject"))
-					{
-						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
-						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
-#>
-		<#= UpperString(element_associated.Class_name_) #> <#= var_name #>_ ;
-
-<#
-					}
-				}
-			}
-		}
-
-		List<string> list_flow;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Flow", out list_flow))
-		{
-			foreach(var id_associated in list_flow)
-			{
-				if(dict_element.ContainsKey(id_associated))
-				{
-					Element element_associated = dict_element[id_associated];
-					if( element_associated.Type_.Equals("ApplicationProcess") || 
-						element_associated.Type_.Equals("ApplicationFunction") )
-					{
-						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
-						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
-#>
-		<#= UpperString(element_associated.Class_name_) #> <#= var_name #>_ ;
-
-<#
-					}
-				}
 			}
 		}
 	}

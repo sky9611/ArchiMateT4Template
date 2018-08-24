@@ -502,7 +502,7 @@ namespace FichierGenerator
                     {
                         if (id_reference!= id_project && vsproj.Project.Name!= StringHelper.UpperString(dict_element[id_reference].Class_name_))
                         {
-                            if (Dict_project_directory.ContainsKey(id_reference))
+                            if (GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_))!=null)
                             {
                                 vsproj.References.AddProject(GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_)));
                             }
@@ -757,6 +757,10 @@ namespace FichierGenerator
             string fullname;
             string id_project;
             string file_name = StringHelper.UpperString(Dict_element[id_element].Class_name_);
+
+            if (type != ".xaml" && type != ".sql")
+                type = ".generated" + type;
+
             if (archiDocument.Dict_element_project.TryGetValue(id_element, out id_project))
             {
                 Project project = GetProjectByName(solution, StringHelper.UpperString(dict_element[id_project].Class_name_));
@@ -780,7 +784,7 @@ namespace FichierGenerator
                 {
                     Log["warnings"].Add("The project \"" + StringHelper.UpperString(dict_element[id_project].Class_name_) + "which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
                     Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
-                    fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + ".generated" + type;
+                    fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type;
                     File.WriteAllText(fullname, generatedText);
                 }
             }
@@ -790,7 +794,7 @@ namespace FichierGenerator
                 // le r��pertoire /<CurrentSolution>/Generated
                 Log["warnings"].Add("Element \"" + Dict_element[id_element].Name_ + "\" is not related to any projects in this solution");
                 Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
-                fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + ".generated" + type;
+                fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type;
                 File.WriteAllText(fullname, generatedText);
             }
             return fullname;

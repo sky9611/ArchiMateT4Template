@@ -314,7 +314,7 @@ using System.Windows.Shapes;
             
             #line default
             #line hidden
-            this.Write("\")]\r\n\tpartial class ");
+            this.Write("\")]\r\n\tpublic partial class ");
             
             #line 117 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
@@ -357,7 +357,7 @@ using System.Windows.Shapes;
             
             #line default
             #line hidden
-            this.Write("\")]\r\n\tpartial class ");
+            this.Write("\")]\r\n\tpublic partial class ");
             
             #line 138 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\RepresentationTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));

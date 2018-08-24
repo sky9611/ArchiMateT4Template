@@ -45,7 +45,7 @@ using <#= dict_group_name[id] #>;
 
 namespace <#= dict_group_name[id_group] #>
 {
-	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
+	[Model(<#= ele.Type_ #>Archimate, "<#= ele.Name_ #>")]
 <#
 	if (mmap_relationship.ContainsKey(id_element))
 	{
@@ -71,7 +71,7 @@ namespace <#= dict_group_name[id_group] #>
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
-	partial class <#= ele.Class_name_ #> 
+	public partial class <#= ele.Class_name_ #> 
 	{
 <#	
 	}
@@ -88,7 +88,7 @@ namespace <#= dict_group_name[id_group] #>
 		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 						
 #>
-	partial class <#= ele.Class_name_ #> : <#= str_parents#>
+	public partial class <#= ele.Class_name_ #> : <#= str_parents#>
 	{
 <#
 	}

@@ -245,7 +245,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\tpartial class ");
+            this.Write("\tpublic partial class ");
             
             #line 86 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
@@ -273,7 +273,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\tpartial class ");
+            this.Write("\tpublic partial class ");
             
             #line 103 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));

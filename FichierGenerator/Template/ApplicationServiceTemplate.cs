@@ -186,7 +186,7 @@ namespace FichierGenerator.Template
             this.Write("Archimate, \"");
             
             #line 49 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationServiceTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(class_name));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Name_));
             
             #line default
             #line hidden
@@ -324,7 +324,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\tpartial class ");
+            this.Write("\tpublic partial class ");
             
             #line 121 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationServiceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
@@ -352,7 +352,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write("\tpartial class ");
+            this.Write("\tpublic partial class ");
             
             #line 138 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationServiceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));

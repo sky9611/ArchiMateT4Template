@@ -121,6 +121,7 @@ namespace <#= dict_group_name[id_group] #>
 <#
 	}
 
+	// Table.G19.S(2)
 	if( mmap_association.ContainsKey(id_element))
 	{
 		foreach(var id_associated in mmap_association[id_element])
@@ -137,6 +138,70 @@ namespace <#= dict_group_name[id_group] #>
 
 <#
 				}
+			}
+		}
+	}
+
+	// Generate functions
+	Dictionary<string, Dictionary<string, List<string>>> dict;
+	if (mmap_relationship.TryGetValue(id_element, out dict))
+	{
+		List<string> list;
+		if (dict["source"].TryGetValue("Function", out list))
+		{
+			list = list.Distinct().ToList();
+			foreach(var i in list)
+			{
+				Element function = dict_element[i];
+				string function_name = UpperString(function.Name_);
+#>
+		[Model(<#= function.Type_ #>Archimate, "<#= function_name #>")]
+<#
+				// Add reference
+				Dictionary<string, Dictionary<string, List<string>>> dict_function;
+				if (mmap_relationship.TryGetValue(function.Identifier_, out dict_function))
+				{
+					List<string> list_reference;
+					if (dict_function["source"].TryGetValue("Realization", out list_reference))
+					{
+						foreach(var id_ref in list_reference)
+						{
+							Element element_ref = dict_element[id_ref];
+							if( element_ref.Type_.Equals("BusinessFunction") ||
+								element_ref.Type_.Equals("BusinessProcess") ||
+								element_ref.Type_.Equals("Requirement") ||
+								(element_ref.Properties_.ContainsKey("$type") && element_ref.Properties_["$type"].Equals("Macro")))
+							{
+#>
+		[ReferenceModel(<#= element_ref.Type_ #>Archimate, "<#= element_ref.Name_ #>")]
+<#
+							}
+						}
+					}
+				}
+
+				// Add Eventhandler
+				if (mmap_relationship.TryGetValue(function.Identifier_, out dict_function))
+				{
+					List<string> list_reference;
+					if (dict_function["target"].TryGetValue("Triggering", out list_reference))
+					{
+						foreach(var id_ref in list_reference)
+						{
+							Element element_ref = dict_element[id_ref];
+							if( element_ref.Type_.Equals("ApplicationEvent") )
+							{
+#>
+		[EventHandler("<#= element_ref.Name_ #>")]
+<#
+							}
+						}
+					}
+				}
+#>
+		void <#= function_name #>();
+
+<#
 			}
 		}
 	}
