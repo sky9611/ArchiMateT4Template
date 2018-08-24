@@ -651,7 +651,7 @@ namespace FichierGenerator
             viewTemplate.Session = new TextTemplatingSession();
             if (archiDocument.Dict_element_group.ContainsKey(id_element))
             {
-                if (!archiDocument.Dict_element_group[id_element].Contains("id"))
+                if (!archiDocument.Dict_element_group[id_element].StartsWith("id"))
                 {
                     viewTemplate.Session["groupName"] = archiDocument.Dict_element_group[id_element];
                 }
@@ -719,7 +719,7 @@ namespace FichierGenerator
                 }
             }
 
-            if (dict_element[id_element].Properties_.FirstOrDefault(x => !x.Key.Contains("$")).Key != null)
+            if (dict_element[id_element].Properties_.FirstOrDefault(x => !x.Key.StartsWith("$")).Key != null)
                 Log["errors"].Add("DataObject \"" + dict_element[id_element].Class_name_ + "\" doesn't have any properties");
         }
 

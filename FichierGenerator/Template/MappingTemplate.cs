@@ -144,7 +144,7 @@ namespace FichierGenerator.Template
 
 	foreach(var i in business_object.Properties_.Keys)
 	{
-		if (!i.Contains("$"))
+		if (!i.StartsWith("$"))
 		{
 			string name = i;
 			string type = business_object.Properties_[i];

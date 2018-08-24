@@ -323,7 +323,7 @@ namespace FichierGenerator.Template
 		List<string> list_parent_name = new List<string>();
 		foreach(var e in mmap_specialization[id_element])
 		{
-			if(e.Contains("id"))
+			if(e.StartsWith("id"))
 				list_parent_name.Add(dict_element[e].Class_name_);
 			else
 				list_parent_name.Add(e);

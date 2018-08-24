@@ -209,7 +209,7 @@ namespace FichierGenerator
                 if (ele.Descendants(NP + "properties") != null)
                     foreach (var i in ele.Descendants(NP + "property"))
                     {
-                        if (property_definition_map[i.Attribute("propertyDefinitionRef").Value].Contains("$"))
+                        if (property_definition_map[i.Attribute("propertyDefinitionRef").Value].StartsWith("$"))
                             properties.Add("$"+StringHelper.LowerString(property_definition_map[i.Attribute("propertyDefinitionRef").Value]), i.Element(NP + "value").Value);
                         else
                             properties.Add(property_definition_map[i.Attribute("propertyDefinitionRef").Value], i.Element(NP + "value").Value);
