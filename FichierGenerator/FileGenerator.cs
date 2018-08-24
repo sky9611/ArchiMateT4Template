@@ -135,11 +135,11 @@ namespace FichierGenerator
             list.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
 
             // If only choose the Application Component as type, ze generate projects instead of classes
-            if (types.Count() == 1 && types[0].Equals(ElementConstants.ApplicationComponent))
-            {
-                list.AddRange(GetProjects(solution));
-                return list.ToArray();
-            }
+            //if (types.Count() == 1 && types[0].Equals(ElementConstants.ApplicationComponent))
+            //{
+            //    list.AddRange(GetProjects(solution));
+            //    return list.ToArray();
+            //}
             return list_element_name.ToArray();
         }
 
