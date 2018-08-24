@@ -484,6 +484,14 @@ namespace FichierGenerator
                         foreach (var i in list_element)
                             if (dict_element[i].Type_.Equals(ElementConstants.ApplicationComponent))
                                 AddProjectReference(id_project, i);
+
+                    if (mmap_relationship[id_project]["target"].TryGetValue(RelationshipConstants.Serving, out list_element))
+                        foreach (var i in list_element)
+                            if ((dict_element[i].Type_.Equals(ElementConstants.TechnologyInterface) ||
+                                dict_element[i].Type_.Equals(ElementConstants.SystemSoftware)) &&
+                                dict_element[i].Properties_.ContainsKey("$implementation") &&
+                                dict_element[i].Properties_["$implementation"].Length>0)
+                                AddProjectReference(id_project, dict_element[i].Properties_["$implementation"]);
                 }
 
                 HashSet<string> set;
@@ -491,6 +499,42 @@ namespace FichierGenerator
                 {
                     foreach(var id_element in set)
                     {
+                        // Reference to assemblie externe
+                        // Table.Z16-Z23|AE16-AE23.V31/V32
+                        if (dict_element[id_element].Type_.Equals(ElementConstants.Representation) ||
+                            dict_element[id_element].Type_.Equals(ElementConstants.ApplicationFunction))
+                        {
+                            if (mmap_relationship.ContainsKey(id_element))
+                            {
+                                if (mmap_relationship[id_element]["target"].TryGetValue(RelationshipConstants.Serving, out list_element))
+                                {
+                                    foreach (var i in list_element)
+                                        if ((dict_element[i].Type_.Equals(ElementConstants.TechnologyInterface) ||
+                                            dict_element[i].Type_.Equals(ElementConstants.SystemSoftware)) &&
+                                            dict_element[i].Properties_.ContainsKey("$implementation") &&
+                                            dict_element[i].Properties_["$implementation"].Length > 0)
+                                            AddProjectReference(id_project, dict_element[i].Properties_["$implementation"]);
+                                }
+                            }
+                        }
+
+                        if (dict_element[id_element].Type_.Equals(ElementConstants.ApplicationService) ||
+                            dict_element[id_element].Type_.Equals(ElementConstants.ApplicationProcess))
+                        {
+                            if (mmap_relationship.ContainsKey(id_element))
+                            {
+                                if (mmap_relationship[id_element]["target"].TryGetValue(RelationshipConstants.Serving, out list_element))
+                                {
+                                    foreach (var i in list_element)
+                                        if ((dict_element[i].Type_.Equals(ElementConstants.TechnologyInterface) ||
+                                            dict_element[i].Type_.Equals(ElementConstants.SystemSoftware)) &&
+                                            dict_element[i].Properties_.ContainsKey("$implementation") &&
+                                            dict_element[i].Properties_["$implementation"].Length > 0)
+                                            errors.Add("Opération non autorisé: element \"" + dict_element[id_element].Name_ + "\" utilise un " + dict_element[i].Type_ + "comme assemblie externe");
+                                }
+                            }
+                        }
+
                         if (dict_element[id_element].Type_.Equals(ElementConstants.ApplicationFunction) ||
                             dict_element[id_element].Type_.Equals(ElementConstants.ApplicationProcess))
                         {
