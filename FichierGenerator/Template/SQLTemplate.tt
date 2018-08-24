@@ -24,21 +24,24 @@ CREATE TABLE <#= UpperString(ele.Class_name_) #>
 <#	
 	foreach(var p in ele.Properties_.Keys)
 	{
-		int i=0;
-		if (i!=ele.Properties_.Keys.Count()-1)
+		if (!p.StartsWith("$"))
 		{
+			int i=0;
+			if (i!=ele.Properties_.Keys.Count()-1)
+			{
 #>
 	<#= p #> <#= ele.Properties_[p] #>, 
 
 <#
-		}
-		else
-		{
+			}
+			else
+			{
 #>
 	<#= p #> <#= ele.Properties_[p] #> 
 <#
+			}
+			i++;
 		}
-		i++;
 	}
 #>
 )

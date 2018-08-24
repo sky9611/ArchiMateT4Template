@@ -125,6 +125,8 @@ namespace FichierGenerator
             list.RemoveAll(x => !types.Contains(Dict_element[x].Type_));
             // Remove elements don't exist
             list.RemoveAll(x => !Dict_element.ContainsKey(x));
+            // Remove new elements because of $interface
+            list.RemoveAll(x => !x.StartsWith("id"));
             // Remove elements with $generation = false
             list.RemoveAll(x => Dict_element[x].Properties_.ContainsKey("$generation") && Dict_element[x].Properties_["$generation"].Equals("false"));
             // Remove elements not belong to selected components
@@ -181,6 +183,8 @@ namespace FichierGenerator
             list.RemoveAll(x => !types.Contains(Dict_element[x].Type_));
             // Remove elements don't exist
             list.RemoveAll(x => !Dict_element.ContainsKey(x));
+            // Remove new elements because of $interface
+            list.RemoveAll(x => !x.StartsWith("id"));
             // Remove elements not belong to selected components
             if (list_idProject.Count() > 0)
                 list.RemoveAll(x => archiDocument.Dict_element_project.Keys.Contains(x) && !list_idProject.Contains(archiDocument.Dict_element_project[x]));
@@ -289,7 +293,25 @@ namespace FichierGenerator
         {
             this.solution = solution;
             ArchiDocument archiDocumentTemp = archiDocument;
-            archiDocumentTemp.Update(elements, name_space);
+
+            List<string> list_element = new List<string>();
+            // Create the list of selected element ids with their names
+            foreach (var element_name in elements)
+            {
+                string id_element = dict_element.FirstOrDefault(x => x.Value.Name_.Equals(element_name)).Key;
+                list_element.Add(id_element);
+            }
+            //Add new element because of $interface
+            int n = list_element.Count();
+            for (int i=0; i<n; i++)
+            {
+                if (archiDocument.Dict_old_new.ContainsKey(list_element[i]))
+                    list_element.AddRange(archiDocument.Dict_old_new[list_element[i]]);
+            }
+            List<string> list_element_name = new List<string>();
+            list_element.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
+
+            archiDocumentTemp.Update(list_element_name.ToArray(), name_space);
             ArchiDocumentSerialized archiDocumentSerialized = new ArchiDocumentSerialized(archiDocumentTemp);
 
             bool hasGeneratedProjects = false;

@@ -14,6 +14,9 @@ namespace FichierGenerator
 
         string solution_principal = null;
 
+        // Dictionary old element - new element ($interface)
+        Dictionary<string, List<string>> dict_old_new = new Dictionary<string, List<string>>();
+
         // list all products(solutions)
         List<string> list_product = new List<string>();
 
@@ -172,6 +175,7 @@ namespace FichierGenerator
         public Dictionary<string, List<string>> Dict_using { get => dict_using; set => dict_using = value; }
         public List<string> List_product { get => list_product; set => list_product = value; }
         public string Solution_principal { get => solution_principal; set => solution_principal = value; }
+        public Dictionary<string, List<string>> Dict_old_new { get => dict_old_new; set => dict_old_new = value; }
 
         public ArchiDocument(Dictionary<string, string> dict_implementation, string path, string[] types = null, string[] groups = null, string[] views = null, string name_space = "Maidis.Vnext.")
         {
@@ -641,8 +645,12 @@ namespace FichierGenerator
 
                 if (element.Properties_.ContainsKey("$interface"))
                 {
-                    // The project name which element belongs to
+                    // The project id which element belongs to
                     string project_id;
+                    // Add relation to the old element
+                    List<string> list_new = new List<string>();
+                    dict_old_new.Add(id, list_new);
+
                     if (dict_element_project.TryGetValue(id, out project_id))
                     {
                         string project_name = StringHelper.UpperString(dict_element[project_id].Class_name_);
@@ -690,13 +698,27 @@ namespace FichierGenerator
                             }
 
                             // Add new project to the view
-                            
                             if (view_id != null)
                                 dict_view[view_id].Add(new_project.Identifier_);
 
                             // Add new project to the group
                             if (group_id != null)
                                 dict_group[group_id]["class"].Add(new_project.Identifier_);
+
+                            // Add using
+                            if (dict_using.ContainsKey(project_id))
+                            {
+                                dict_using[project_id].Add(new_project.Identifier_);
+                            }
+                            else
+                            {
+                                List<string> l = new List<string>();
+                                l.Add(new_project.Identifier_);
+                                dict_using.Add(project_id, l);
+                            }
+
+                            // Add relation to the old element
+                            list_new.Add(new_project.Identifier_);
                         }
                         else
                         {
@@ -738,6 +760,9 @@ namespace FichierGenerator
                             // Add new interface to the group
                             if (group_id != null)
                                 dict_group[group_id]["interface"].Add(new_interface.Identifier_);
+
+                            // Add relation to the old element
+                            list_new.Add(new_interface.Identifier_);
 
                             // Move functions into interface
                             if (element.Type_.Equals(ElementConstants.ApplicationProcess))

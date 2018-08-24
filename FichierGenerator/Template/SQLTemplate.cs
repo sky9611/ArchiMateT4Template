@@ -54,58 +54,61 @@ namespace FichierGenerator.Template
 	
 	foreach(var p in ele.Properties_.Keys)
 	{
-		int i=0;
-		if (i!=ele.Properties_.Keys.Count()-1)
+		if (!p.StartsWith("$"))
 		{
+			int i=0;
+			if (i!=ele.Properties_.Keys.Count()-1)
+			{
 
             
             #line default
             #line hidden
             this.Write("\t");
             
-            #line 31 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 33 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(p));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 31 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 33 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
             
             #line default
             #line hidden
             this.Write(", \r\n\r\n");
             
-            #line 33 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 35 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
 
-		}
-		else
-		{
+			}
+			else
+			{
 
             
             #line default
             #line hidden
             this.Write("\t");
             
-            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 40 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(p));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 38 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 40 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
             
             #line default
             #line hidden
             this.Write(" \r\n");
             
-            #line 39 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+            #line 41 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
 
+			}
+			i++;
 		}
-		i++;
 	}
 
             
@@ -115,7 +118,7 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 46 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
+        #line 49 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\SQLTemplate.tt"
 
 	// Method for creating the class name, deleting the spaces, special characters and uppercasing the string
 	public string UpperString(string name)

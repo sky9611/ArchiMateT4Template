@@ -64,76 +64,71 @@ namespace <#= dict_group_name[id_group] #>
 	// Generate representation
 	if(ele.Type_.Equals("Representation"))
 	{
-		list_representation.Add(id_element);
-#>
-	public interface I<#= ele.Class_name_ #>{}
-
-<#
-	if (mmap_relationship.ContainsKey(id_element))
-	{
-		List<string> list_associated;
-		if (mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_associated))
+		if (mmap_relationship.ContainsKey(id_element))
 		{
-			foreach(var id_associated in list_associated)
+			List<string> list_associated;
+			if (mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_associated))
+			{
+				foreach(var id_associated in list_associated)
+				{
+					if(dict_element.ContainsKey(id_associated))
+					{
+						Element element_associated = dict_element[id_associated];
+						if(element_associated.Type_.Equals("Requirement"))
+						{
+#>
+	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
+<#
+						}
+					}
+				}
+			}
+		}
+
+		if( mmap_association.ContainsKey(id_element))
+		{
+			foreach(var id_associated in mmap_association[id_element])
 			{
 				if(dict_element.ContainsKey(id_associated))
 				{
 					Element element_associated = dict_element[id_associated];
-					if(element_associated.Type_.Equals("Requirement"))
+					if( element_associated.Type_.Equals("BusinessService") || 
+						element_associated.Type_.Equals("ApplicationProcess"))
 					{
 #>
 	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
 <#
 					}
-				}
-			}
-		}
-	}
-
-	if( mmap_association.ContainsKey(id_element))
-	{
-		foreach(var id_associated in mmap_association[id_element])
-		{
-			if(dict_element.ContainsKey(id_associated))
-			{
-				Element element_associated = dict_element[id_associated];
-				if( element_associated.Type_.Equals("BusinessService") || 
-					element_associated.Type_.Equals("ApplicationProcess"))
-				{
-#>
-	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
-<#
-				}
-				if(element_associated.Type_.Equals("Artifact"))
-				{
+					if(element_associated.Type_.Equals("Artifact"))
+					{
 #>
 	[Reference("<#= element_associated.Name_ #>")]
 <#
+					}
 				}
 			}
 		}
-	}
 
 
-	if (!mmap_specialization.Keys.Contains(id_element))
-	{
+		if (!mmap_specialization.Keys.Contains(id_element))
+		{
 #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
 	partial class <#= ele.Class_name_ #> : Window
 	{
 <#	
-	}
-	else
-	{
-		List<string> list_parent_name = new List<string>();
-		foreach(var e in mmap_specialization[id_element])
-		{
-			if(e.StartsWith("id"))
-				list_parent_name.Add(dict_element[e].Class_name_);
-			else
-				list_parent_name.Add(e);
 		}
-		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
+		else
+		{
+			List<string> list_parent_name = new List<string>();
+			foreach(var e in mmap_specialization[id_element])
+			{
+				if(e.StartsWith("id"))
+					list_parent_name.Add(dict_element[e].Class_name_);
+				else
+					list_parent_name.Add(e);
+			}
+			string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 						
 #>
 	/// <summary>
@@ -147,55 +142,32 @@ namespace <#= dict_group_name[id_group] #>
             InitializeComponent();
         }
 <#
-		}
+			}
 
-		// Generate all properties
-		foreach(var p in ele.Properties_.Keys)
-		{
-			if (!p.StartsWith("$"))
+			// Generate all properties
+			foreach(var p in ele.Properties_.Keys)
 			{
+				if (!p.StartsWith("$"))
+				{
 #>	
 		<#= ele.Properties_[p] #> <#= p #>;
 <#
-			}
-		}
-
-		// Generate representation constructor 
-		// TODO
-
-		// Generate référence d'une classe.
-		if( mmap_association.ContainsKey(id_element))
-		{
-			foreach(var id_associated in mmap_association[id_element])
-			{
-				if(dict_element.ContainsKey(id_associated))
-				{
-					Element element_associated = dict_element[id_associated];
-					if(element_associated.Equals("BusinessObject") || 
-						element_associated.Equals("ApplicationInterface"))
-					{
-						Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
-						string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
-#>
-		<#= UpperString(element_associated.Class_name_) #> <#= var_name #>_ ;
-
-<#
-					}
 				}
 			}
-		}
 
-		if (mmap_relationship.ContainsKey(id_element))
-		{
-			List<string> list_associated;
-			if (mmap_relationship[id_element]["source"].TryGetValue("Access", out list_associated))
+			// Generate representation constructor 
+			// TODO
+
+			// Generate référence d'une classe.
+			if( mmap_association.ContainsKey(id_element))
 			{
-				foreach(var id_associated in list_associated)
+				foreach(var id_associated in mmap_association[id_element])
 				{
 					if(dict_element.ContainsKey(id_associated))
 					{
 						Element element_associated = dict_element[id_associated];
-						if(element_associated.Type_.Equals("ApplicationProcess"))
+						if(element_associated.Equals("BusinessObject") || 
+							element_associated.Equals("ApplicationInterface"))
 						{
 							Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
 							string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
@@ -207,8 +179,31 @@ namespace <#= dict_group_name[id_group] #>
 					}
 				}
 			}
+
+			if (mmap_relationship.ContainsKey(id_element))
+			{
+				List<string> list_associated;
+				if (mmap_relationship[id_element]["source"].TryGetValue("Access", out list_associated))
+				{
+					foreach(var id_associated in list_associated)
+					{
+						if(dict_element.ContainsKey(id_associated))
+						{
+							Element element_associated = dict_element[id_associated];
+							if(element_associated.Type_.Equals("ApplicationProcess"))
+							{
+								Tuple<string, string> tuple =  new Tuple<string, string>(id_element,id_associated);
+								string var_name = dict_relationship.ContainsKey(tuple) ? LowerString(dict_relationship[tuple]) : LowerString(element_associated.Class_name_);
+#>
+		<#= UpperString(element_associated.Class_name_) #> <#= var_name #>_ ;
+
+<#
+							}
+						}
+					}
+				}
+			}
 		}
-	}
 #>
 	}
 }
