@@ -317,7 +317,12 @@ namespace FichierGenerator.Template
 	{
 		List<string> list_parent_name = new List<string>();
 		foreach(var e in mmap_specialization[id_element])
-			list_parent_name.Add(dict_element[e].Class_name_);
+		{
+			if (e.StartsWith("id"))
+				list_parent_name.Add(dict_element[e].Class_name_);
+			else
+				list_parent_name.Add(e);
+		}
 		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 
             
@@ -325,21 +330,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\tpublic interface ");
             
-            #line 122 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 127 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(ele.Class_name_)));
             
             #line default
             #line hidden
-            this.Write("  : IView, ");
+            this.Write("  : ");
             
-            #line 122 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 127 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(str_parents));
             
             #line default
             #line hidden
             this.Write("\r\n\t{\r\n\r\n");
             
-            #line 125 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 130 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 
 	}
 
@@ -361,21 +366,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t");
             
-            #line 141 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 146 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 141 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 146 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n\r\n");
             
-            #line 143 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 148 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 
 				}
 			}
@@ -401,21 +406,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t[Model(");
             
-            #line 163 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 168 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(function.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 163 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 168 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(function_name));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 164 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 169 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 
 				// Add reference
 				Dictionary<string, Dictionary<string, List<string>>> dict_function;
@@ -438,21 +443,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t[ReferenceModel(");
             
-            #line 181 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 186 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_ref.Type_));
             
             #line default
             #line hidden
             this.Write("Archimate, \"");
             
-            #line 181 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 186 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_ref.Name_));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 182 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 187 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 
 							}
 						}
@@ -476,14 +481,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t[EventHandler(\"");
             
-            #line 200 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 205 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(element_ref.Name_));
             
             #line default
             #line hidden
             this.Write("\")]\r\n");
             
-            #line 201 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 206 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 
 							}
 						}
@@ -495,14 +500,14 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\tvoid ");
             
-            #line 207 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 212 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(function_name));
             
             #line default
             #line hidden
             this.Write("();\r\n\r\n");
             
-            #line 209 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+            #line 214 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 
 			}
 		}
@@ -515,7 +520,7 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 216 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
+        #line 221 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 
 	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
 	{

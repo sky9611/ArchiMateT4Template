@@ -415,6 +415,15 @@ namespace FichierGenerator
                         addImplementation(ref mmap_specialization, id, i);
                 }
 
+                if (mmap_relationship.ContainsKey(id) &&
+                   mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Influence) &&
+                   dict_element[id].Type_.Equals(ElementConstants.ApplicationService))
+                {
+                    foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Influence])
+                        if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
+                            addImplementation(ref mmap_specialization, id, i);
+                }
+
                 // Find the principal solution
                 if (dict_element[id].Type_.Equals(ElementConstants.Product))
                 {
@@ -774,7 +783,7 @@ namespace FichierGenerator
                         }
 
                         //Create new interface element and add it to dict_element
-                        if (!dict_element.ContainsKey("I" + StringHelper.UpperString(element.Class_name_)))
+                        if (!dict_element.ContainsKey("I" + StringHelper.UpperString(element.Class_name_)) && !dict_element[id].Type_.Equals(ElementConstants.ApplicationFunction))
                         {
                             Element new_interface = new Element();
                             new_interface.Name_ = "I" + StringHelper.UpperString(element.Class_name_);
@@ -813,6 +822,15 @@ namespace FichierGenerator
                                 list_implementation.Add(new_interface.Identifier_);
                                 mmap_specialization.Add(id, list_implementation);
                             }
+
+                            // Add implementation of new interface
+                            list_implementation = new List<string>();
+                            if (Dict_implementation.ContainsKey(dict_element[id].Type_))
+                                list_implementation.Add("I"+Dict_implementation[dict_element[id].Type_]);
+                            else if (dict_element[id].Type_.Equals(ElementConstants.Representation))
+                                list_implementation.Add("IView");
+
+                            mmap_specialization.Add(new_interface.Identifier_, list_implementation);
 
                             // Add new interface to the view
                             if (view_id != null)
@@ -874,7 +892,6 @@ namespace FichierGenerator
                                 }
                             }
                         }
-                            
                     }
                     else
                     {

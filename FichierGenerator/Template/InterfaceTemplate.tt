@@ -116,10 +116,15 @@ namespace <#= dict_group_name[id_group] #>
 	{
 		List<string> list_parent_name = new List<string>();
 		foreach(var e in mmap_specialization[id_element])
-			list_parent_name.Add(dict_element[e].Class_name_);
+		{
+			if (e.StartsWith("id"))
+				list_parent_name.Add(dict_element[e].Class_name_);
+			else
+				list_parent_name.Add(e);
+		}
 		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 #>
-	public interface <#= UpperString(ele.Class_name_) #>  : IView, <#= str_parents#>
+	public interface <#= UpperString(ele.Class_name_) #>  : <#= str_parents#>
 	{
 
 <#
