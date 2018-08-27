@@ -494,10 +494,11 @@ namespace FichierGenerator
                 if (id_project != null && archiDocument.Dict_project_reference.TryGetValue(id_project, out set_references))
                     foreach (var id_reference in set_references)
                     {
-                        if (id_reference!= id_project && vsproj.Project.Name!= StringHelper.UpperString(dict_element[id_reference].Class_name_))
+                        if (Path.GetExtension(id_reference) != ".dll")
                         {
-                            if (Path.GetExtension(id_reference)!=".dll")
+                            if (id_reference!= id_project && vsproj.Project.Name!= StringHelper.UpperString(dict_element[id_reference].Class_name_))
                             {
+                            
                                 if (GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_)) != null)
                                 {
                                     vsproj.References.AddProject(GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_)));
@@ -505,17 +506,15 @@ namespace FichierGenerator
                                 else
                                     Log["errors"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found in this solution");
                             }
+                        }
+                        else
+                        {
+                            if (File.Exists(id_reference))
+                                vsproj.References.Add(id_reference);
                             else
-                            {
-                                if (File.Exists(id_reference))
-                                    vsproj.References.Add(id_reference);
-                                else
-                                    Log["errors"].Add("The reference \"" + id_reference + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found");
-                            }
-                            
+                                Log["errors"].Add("The reference \"" + id_reference + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found");
                         }
                     }
-
             }
         }
 
