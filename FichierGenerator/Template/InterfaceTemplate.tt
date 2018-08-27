@@ -53,11 +53,11 @@ namespace <#= dict_group_name[id_group] #>
 				}
 			}
 		}
-		// Table.H19.I(6)
-		List<string> list_influence;
-		if(mmap_relationship[id_element]["source"].TryGetValue("Influence", out list_influence))
+		// Table.R19.I(6)
+		List<string> list_serving;
+		if(mmap_relationship[id_element]["source"].TryGetValue("Serving", out list_serving))
 		{
-			foreach(var i in list_influence)
+			foreach(var i in list_serving)
 			{
 				Element element_associated = dict_element[i];
 				if (element_associated.Type_.Equals("ApplicationService"))
@@ -108,7 +108,7 @@ namespace <#= dict_group_name[id_group] #>
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
-	public interface <#= UpperString(ele.Class_name_) #> : IView 
+	public interface <#= UpperString(ele.Class_name_) #>
 	{
 <#	
 	}

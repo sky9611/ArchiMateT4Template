@@ -193,11 +193,11 @@ namespace FichierGenerator.Template
 				}
 			}
 		}
-		// Table.H19.I(6)
-		List<string> list_influence;
-		if(mmap_relationship[id_element]["source"].TryGetValue("Influence", out list_influence))
+		// Table.R19.I(6)
+		List<string> list_serving;
+		if(mmap_relationship[id_element]["source"].TryGetValue("Serving", out list_serving))
 		{
-			foreach(var i in list_influence)
+			foreach(var i in list_serving)
 			{
 				Element element_associated = dict_element[i];
 				if (element_associated.Type_.Equals("ApplicationService"))
@@ -308,7 +308,7 @@ namespace FichierGenerator.Template
             
             #line default
             #line hidden
-            this.Write(" : IView \r\n\t{\r\n");
+            this.Write("\r\n\t{\r\n");
             
             #line 113 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\InterfaceTemplate.tt"
 	

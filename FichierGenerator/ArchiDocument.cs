@@ -416,10 +416,10 @@ namespace FichierGenerator
                 }
 
                 if (mmap_relationship.ContainsKey(id) &&
-                   mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Influence) &&
+                   mmap_relationship[id]["target"].ContainsKey(RelationshipConstants.Serving) &&
                    dict_element[id].Type_.Equals(ElementConstants.ApplicationService))
                 {
-                    foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Influence])
+                    foreach (var i in mmap_relationship[id]["target"][RelationshipConstants.Serving])
                         if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
                             addImplementation(ref mmap_specialization, id, i);
                 }
@@ -1200,9 +1200,9 @@ namespace FichierGenerator
                 {
                     if (mmap_relationship.ContainsKey(id))
                     {
-                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Influence))
+                        if (mmap_relationship[id]["target"].ContainsKey(RelationshipConstants.Serving))
                         {
-                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Influence])
+                            foreach (var i in mmap_relationship[id]["target"][RelationshipConstants.Serving])
                                 if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
                                     AddUsing(id, i);
                         }
