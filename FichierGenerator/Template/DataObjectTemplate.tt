@@ -74,6 +74,7 @@ namespace <#= dict_group_name[id_group] #>
 		}
 	}
 
+	// Table.W24.S(2)
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
@@ -112,6 +113,7 @@ namespace <#= dict_group_name[id_group] #>
 	}
 
 	// Generate collection sur classe.
+	// Table.W24.G(3)
 	if( mmap_relationship.ContainsKey(id_element) && 
 		mmap_relationship[id_element].ContainsKey("source") && 
 		mmap_relationship[id_element]["source"].ContainsKey("Aggregation") )

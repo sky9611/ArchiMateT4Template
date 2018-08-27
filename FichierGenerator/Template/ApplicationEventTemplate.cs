@@ -159,7 +159,7 @@ namespace FichierGenerator.Template
             #line 39 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ApplicationEventTemplate.tt"
 
 	// Generate attributes
-	// Table.E17.O(6)
+	// Table.E17.O(6) | Table.BI17.R(6)
 	if( mmap_relationship.ContainsKey(id_element) &&
 		mmap_relationship[id_element].ContainsKey("source") && 
 		mmap_relationship[id_element]["source"].ContainsKey("Realization") )
@@ -238,7 +238,7 @@ namespace FichierGenerator.Template
 			}
 		}
 		
-		// Table.P17.S(2)
+		// Table.P17.S(2)O(3)
 		if (!mmap_specialization.Keys.Contains(id_element))
 		{
 

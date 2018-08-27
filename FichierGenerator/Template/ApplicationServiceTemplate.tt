@@ -49,6 +49,7 @@ namespace <#= dict_group_name[id_group] #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= ele.Name_ #>")]
 <#
 	// Generate attributes
+	// Table.G18.O(6)|BJ8.O(6)
 	if( mmap_relationship.ContainsKey(id_element) )
 	{
 		if ( mmap_relationship[id_element].ContainsKey("source") && 
@@ -72,7 +73,7 @@ namespace <#= dict_group_name[id_group] #>
 				}
 			}
 		}
-
+		// Table.I18|J18|K18|L18.V(6)
 		if ( mmap_relationship[id_element].ContainsKey("target") && 
 				mmap_relationship[id_element]["target"].ContainsKey("Serving") )
 		{
@@ -141,6 +142,7 @@ namespace <#= dict_group_name[id_group] #>
 	}
 
 	// Generate collection sur classe.
+	// Table.R18.G(3)S(2)
 	if( mmap_relationship.ContainsKey(id_element) && 
 		mmap_relationship[id_element].ContainsKey("source") && 
 		mmap_relationship[id_element]["source"].ContainsKey("Aggregation") )

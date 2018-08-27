@@ -39,6 +39,7 @@ namespace <#= dict_group_name[id_group] #>
 	if(mmap_relationship.ContainsKey(id_element))
 	{
 		List<string> list_realization;
+		// Table.BJ19.R(6)
 		if(mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_realization))
 		{
 			foreach(var i in list_realization)
@@ -52,7 +53,7 @@ namespace <#= dict_group_name[id_group] #>
 				}
 			}
 		}
-
+		// Table.H19.I(6)
 		List<string> list_influence;
 		if(mmap_relationship[id_element]["source"].TryGetValue("Influence", out list_influence))
 		{
@@ -67,7 +68,8 @@ namespace <#= dict_group_name[id_group] #>
 				}
 			}
 		}
-					
+		
+		// Table.H19.A(17)
 		List<string> list_access;
 		if(mmap_relationship[id_element]["source"].TryGetValue("Access", out list_access))
 		{
@@ -100,7 +102,8 @@ namespace <#= dict_group_name[id_group] #>
 			}
 		}
 	}
-
+	
+	// Table.Q19.S(2)
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
@@ -121,7 +124,7 @@ namespace <#= dict_group_name[id_group] #>
 <#
 	}
 
-	// Table.G19.S(2)
+	// Table.G19.G(3)
 	if( mmap_association.ContainsKey(id_element))
 	{
 		foreach(var id_associated in mmap_association[id_element])

@@ -86,6 +86,7 @@ namespace <#= dict_group_name[id_group] #>
 			}
 		}
 
+		// Table.R9.A(17)
 		List<string> list_access;
 		if(mmap_relationship[id_element]["source"].TryGetValue("Access", out list_access))
 		{
@@ -101,8 +102,26 @@ namespace <#= dict_group_name[id_group] #>
 				}
 			}
 		}
+		// Table.R9.O17)
+		if( mmap_association.ContainsKey(id_element))
+		{
+			foreach(var id_associated in mmap_association[id_element])
+			{
+				if(dict_element.ContainsKey(id_associated))
+				{
+					Element element_associated = dict_element[id_associated];
+					if(element_associated.Equals("ApplicationService"))
+					{	
+#>
+	[Contract("<#=element_associated.Name_#>","<#=element_associated.Class_name_#>")]
+<#
+					}
+				}
+			}
+		}
 	}
 
+	// Table.M14.S(2)
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
@@ -129,6 +148,7 @@ namespace <#= dict_group_name[id_group] #>
 	}
 
 	// Generate collection sur classe.
+	// Table.M14.G(4)
 	if( mmap_relationship.ContainsKey(id_element) && 
 		mmap_relationship[id_element].ContainsKey("source") && 
 		mmap_relationship[id_element]["source"].ContainsKey("Aggregation") )
@@ -149,6 +169,7 @@ namespace <#= dict_group_name[id_group] #>
 	}
 
 	// Generate référence d'une classe.
+	// Table.M14.O(3)
 	if( mmap_association.ContainsKey(id_element))
 	{
 		foreach(var id_associated in mmap_association[id_element])

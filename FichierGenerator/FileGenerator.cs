@@ -485,7 +485,7 @@ namespace FichierGenerator
 
         /// <summary>
         ///     Add referenced projects to each project
-        ///     TO BE TESTED
+        ///     All Table.(14)
         /// </summary>
         /// <param name="solution"></param>
         public void AddProjectReferences(Solution solution)
@@ -781,7 +781,7 @@ namespace FichierGenerator
                 }
                 else
                 {
-                    Log["warnings"].Add("The project \"" + StringHelper.UpperString(dict_element[id_project].Class_name_) + "which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
+                    Log["warnings"].Add("The project \"" + StringHelper.UpperString(dict_element[id_project].Class_name_) + "\" which element \"" + Dict_element[id_element].Name_ + "\" is related to has not been found");
                     Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")));
                     fullname = Path.GetFullPath(Path.Combine(Path.Combine(Current_solution_path, Path.GetFileNameWithoutExtension(Current_solution_name)), "Generated")) + "\\" + file_name + type;
                     File.WriteAllText(fullname, generatedText);

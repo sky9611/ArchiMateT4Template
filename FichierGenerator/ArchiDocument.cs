@@ -407,8 +407,6 @@ namespace FichierGenerator
                 if (id_parent != null)
                     dict_heritage.Add(id, id_parent);
 
-                
-                
                 // Find the principal solution
                 if (dict_element[id].Type_.Equals(ElementConstants.Product))
                 {
@@ -435,6 +433,36 @@ namespace FichierGenerator
                         if (!child.Properties_.ContainsKey(p))
                             child.Properties_.Add(p, root.Properties_[p]);
                     }
+                }
+            }
+
+            // Make the multimap of association-relationship
+            IEnumerable<XElement> xeles_association = from e in doc.Descendants(NP + "relationship")
+                                                      where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Association
+                                                      select e;
+            foreach (var ele in xeles_association)
+            {
+                List<string> list_target;
+                List<string> list_target2;
+                if (mmap_association.TryGetValue(ele.Attribute("source").Value, out list_target))
+                {
+                    list_target.Add(ele.Attribute("target").Value);
+                }
+                else
+                {
+                    list_target = new List<string>();
+                    list_target.Add(ele.Attribute("target").Value);
+                    mmap_association[ele.Attribute("source").Value] = list_target;
+                }
+                if (mmap_association.TryGetValue(ele.Attribute("target").Value, out list_target))
+                {
+                    list_target.Add(ele.Attribute("source").Value);
+                }
+                else
+                {
+                    list_target2 = new List<string>();
+                    list_target2.Add(ele.Attribute("source").Value);
+                    mmap_association[ele.Attribute("target").Value] = list_target2;
                 }
             }
 
@@ -895,6 +923,7 @@ namespace FichierGenerator
 
 
             // Make the dictionary of using
+            // Table.(2)(3)(4)(13)(14)
             foreach (var id in dict_element.Keys)
             {
                 if (dict_element[id].Type_.Equals(ElementConstants.Contract))
@@ -907,13 +936,28 @@ namespace FichierGenerator
                                 if (dict_element[i].Type_.Equals(ElementConstants.Contract))
                                     AddUsing(id, i);
                         }
-                        else if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Composition))
-                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Composition])
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Specialization))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Specialization])
                                 if (dict_element[i].Type_.Equals(ElementConstants.Contract))
                                     AddUsing(id, i);
+                        }
+                    }
+                    if (mmap_association.ContainsKey(id))
+                    {
+                        foreach (var i in mmap_association[id])
+                        {
+                            if (dict_element.ContainsKey(i))
+                            {
+                                Element element_associated = dict_element[i];
+                                if (element_associated.Equals(ElementConstants.Contract))
+                                {
+                                    AddUsing(id, i);
+                                }
+                            }
+                        }
                     }
                 }
-
 
                 if (dict_element[id].Type_.Equals(ElementConstants.BusinessObject))
                 {
@@ -925,13 +969,91 @@ namespace FichierGenerator
                                 if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject))
                                     AddUsing(id, i);
                         }
-                        else if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Composition))
-                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Composition])
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Specialization))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Specialization])
                                 if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject))
                                     AddUsing(id, i);
+                        }
+                    }
+                    if (mmap_association.ContainsKey(id))
+                    {
+                        foreach (var i in mmap_association[id])
+                        {
+                            if (dict_element.ContainsKey(i))
+                            {
+                                Element element_associated = dict_element[i];
+                                if (element_associated.Equals(ElementConstants.BusinessObject))
+                                {
+                                    AddUsing(id, i);
+                                }
+                            }
+                        }
                     }
                 }
 
+                if (dict_element[id].Type_.Equals(ElementConstants.ApplicationInterface))
+                {
+                    if (mmap_relationship.ContainsKey(id))
+                    {
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Specialization))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Specialization])
+                                if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
+                                    AddUsing(id, i);
+                        }
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Aggregation))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Aggregation])
+                                if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
+                                    AddUsing(id, i);
+                        }
+                    }
+                }
+
+                if (dict_element[id].Type_.Equals(ElementConstants.DataObject))
+                {
+                    if (mmap_relationship.ContainsKey(id))
+                    {
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Specialization))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Specialization])
+                                if (dict_element[i].Type_.Equals(ElementConstants.DataObject))
+                                    AddUsing(id, i);
+                        }
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Aggregation))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Aggregation])
+                                if (dict_element[i].Type_.Equals(ElementConstants.DataObject))
+                                    AddUsing(id, i);
+                        }
+                    }
+                }
+
+                if (dict_element[id].Type_.Equals(ElementConstants.ApplicationService))
+                {
+                    if (mmap_relationship.ContainsKey(id))
+                    {
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Influence))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Influence])
+                                if (dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
+                                    AddUsing(id, i);
+                        }
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Specialization))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Specialization])
+                                if (dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
+                                    AddUsing(id, i);
+                        }
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Aggregation))
+                        {
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Aggregation])
+                                if (dict_element[i].Type_.Equals(ElementConstants.ApplicationService))
+                                    AddUsing(id, i);
+                        }
+                    }
+                }
 
                 if (dict_element[id].Type_.Equals(ElementConstants.ApplicationService) ||
                     dict_element[id].Type_.Equals(ElementConstants.ApplicationProcess))
@@ -943,6 +1065,15 @@ namespace FichierGenerator
                                     AddUsing(id, i);
                 }
 
+                if (dict_element[id].Type_.Equals(ElementConstants.ApplicationService) ||
+                    dict_element[id].Type_.Equals(ElementConstants.ApplicationProcess))
+                {
+                    if (mmap_relationship.ContainsKey(id))
+                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Access))
+                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Access])
+                                if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject))
+                                    AddUsing(id, i);
+                }
 
                 if (dict_element[id].Type_.Equals(ElementConstants.ApplicationProcess))
                 {
@@ -959,9 +1090,7 @@ namespace FichierGenerator
                                     dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
                                     AddUsing(id, i);
                     }
-
                 }
-
 
                 if (dict_element[id].Type_.Equals(ElementConstants.ApplicationFunction))
                 {
@@ -982,20 +1111,29 @@ namespace FichierGenerator
 
                 }
 
-
                 if (dict_element[id].Type_.Equals(ElementConstants.Representation))
                 {
                     if (mmap_relationship.ContainsKey(id))
                     {
-                        if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Association))
-                            foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Association])
-                                if (dict_element[i].Type_.Equals(ElementConstants.BusinessObject) ||
-                                    dict_element[i].Type_.Equals(ElementConstants.ApplicationInterface))
-                                    AddUsing(id, i);
                         if (mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Access))
                             foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Access])
                                 if (dict_element[i].Type_.Equals(ElementConstants.ApplicationProcess))
                                     AddUsing(id, i);
+                    }
+                    if (mmap_association.ContainsKey(id))
+                    {
+                        foreach (var i in mmap_association[id])
+                        {
+                            if (dict_element.ContainsKey(i))
+                            {
+                                Element element_associated = dict_element[i];
+                                if (element_associated.Equals(ElementConstants.BusinessObject) ||
+                                    element_associated.Equals(ElementConstants.ApplicationInterface))
+                                {
+                                    AddUsing(id, i);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1321,35 +1459,6 @@ namespace FichierGenerator
                 }
             }
 
-            // Make the multimap of association-relationship
-            IEnumerable<XElement> xeles_association = from e in doc.Descendants(NP + "relationship")
-                                                      where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Association
-                                                      select e;
-            foreach (var ele in xeles_association)
-            {
-                List<string> list_target;
-                List<string> list_target2;
-                if (mmap_association.TryGetValue(ele.Attribute("source").Value, out list_target))
-                {
-                    list_target.Add(ele.Attribute("target").Value);
-                }
-                else
-                {
-                    list_target = new List<string>();
-                    list_target.Add(ele.Attribute("target").Value);
-                    mmap_association[ele.Attribute("source").Value] = list_target;
-                }
-                if (mmap_association.TryGetValue(ele.Attribute("target").Value, out list_target))
-                {
-                    list_target.Add(ele.Attribute("source").Value);
-                }
-                else
-                {
-                    list_target2 = new List<string>();
-                    list_target2.Add(ele.Attribute("source").Value);
-                    mmap_association[ele.Attribute("target").Value] = list_target2;
-                }
-            }
         }
 
         private void findAllElement(Dictionary<string, Element> dict_element, XNamespace xmlns_xsi, XNamespace NP, XElement root, XElement node, ref List<string> list, ref List<string> list_group)

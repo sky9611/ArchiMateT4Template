@@ -50,6 +50,7 @@ namespace <#= dict_group_name[id_group] #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= ele.Name_ #>")]
 <#
 	// Generate attributes
+	// Table.J22|K22|L22|BJ22.R(6)
 	if( mmap_relationship.ContainsKey(id_element) )
 	{ 
 		List<string> list_associated;
