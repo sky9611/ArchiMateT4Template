@@ -509,8 +509,8 @@ namespace FichierGenerator
                         }
                         else
                         {
-                            if (File.Exists(id_reference))
-                                vsproj.References.Add(id_reference);
+                            if (File.Exists(Path.GetFullPath(id_reference)))
+                                vsproj.References.Add(Path.GetFullPath(id_reference));
                             else
                                 Log["errors"].Add("The reference \"" + id_reference + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found");
                         }
