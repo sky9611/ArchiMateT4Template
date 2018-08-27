@@ -353,11 +353,11 @@ namespace FichierGenerator.Template
             this.Write("\tpublic partial class ");
             
             #line 128 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ContractTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(ele.Class_name_)));
             
             #line default
             #line hidden
-            this.Write(" \r\n\t{\r\n");
+            this.Write("  \r\n\t{\r\n");
             
             #line 130 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ContractTemplate.tt"
 	
@@ -381,11 +381,11 @@ namespace FichierGenerator.Template
             this.Write("\tpublic partial class ");
             
             #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ContractTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(ele.Class_name_)));
             
             #line default
             #line hidden
-            this.Write(" : ");
+            this.Write("  : ");
             
             #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\ContractTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(str_parents));

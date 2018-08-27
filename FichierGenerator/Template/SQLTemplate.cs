@@ -54,9 +54,9 @@ namespace FichierGenerator.Template
 	
 	foreach(var p in ele.Properties_.Keys)
 	{
+		int i=0;
 		if (!p.StartsWith("$"))
 		{
-			int i=0;
 			if (i!=ele.Properties_.Keys.Count()-1)
 			{
 

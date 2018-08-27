@@ -39,11 +39,11 @@ namespace <#= dict_group_name[id_group] #>
 <#
 	// Generate attributes
 	// Table.E17.O(6) | Table.BI17.R(6)
+	List<string> list_associated;
 	if( mmap_relationship.ContainsKey(id_element) &&
 		mmap_relationship[id_element].ContainsKey("source") && 
 		mmap_relationship[id_element]["source"].ContainsKey("Realization") )
 	{
-		List<string> list_associated;
 		if (mmap_relationship[id_element]["source"].TryGetValue("Realization", out list_associated))
 		{
 			foreach(var id_associated in list_associated)
@@ -56,51 +56,75 @@ namespace <#= dict_group_name[id_group] #>
 #>
 	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
 <#
-						}
 					}
 				}
 			}
 		}
+	}
 
-		if( mmap_association.ContainsKey(id_element))
+	// Table.Y17.T(6)
+	if (mmap_relationship.ContainsKey(id_element) && 
+		mmap_relationship[id_element]["source"].TryGetValue("Triggering", out list_associated))
+	{
+		foreach(var id_associated in list_associated)
 		{
-			foreach(var id_associated in mmap_association[id_element])
+			if(dict_element.ContainsKey(id_associated))
 			{
-				if(dict_element.ContainsKey(id_associated))
+				Element element_associated = dict_element[id_associated];
+				if(element_associated.Type_.Equals("TechnologyEvent"))
 				{
-					Element element_associated = dict_element[id_associated];
-					if(element_associated.Equals("BusinessEvent"))
-					{
 #>
 	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
 <#
-					}
 				}
 			}
 		}
-		
-		// Table.P17.S(2)O(3)
-		if (!mmap_specialization.Keys.Contains(id_element))
+	}
+
+	if( mmap_association.ContainsKey(id_element))
+	{
+		foreach(var id_associated in mmap_association[id_element])
 		{
+			if(dict_element.ContainsKey(id_associated))
+			{
+				Element element_associated = dict_element[id_associated];
+				if(element_associated.Equals("BusinessEvent"))
+				{
 #>
-	public partial class <#= ele.Class_name_ #> 
+	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
+<#
+				}
+			}
+		}
+	}
+		
+	// Table.P17.S(2)O(3)
+	if (!mmap_specialization.Keys.Contains(id_element))
+	{
+#>
+	public partial class <#= UpperString(ele.Class_name_) #> 
 	{
 <#	
-		}
-		else
+	}
+	else
+	{
+		List<string> list_parent_name = new List<string>();
+		foreach(var e in mmap_specialization[id_element])
 		{
-			List<string> list_parent_name = new List<string>();
-			foreach(var e in mmap_specialization[id_element])
+			if(e.StartsWith("id"))
 			{
-				if(e.StartsWith("id"))
-					list_parent_name.Add(dict_element[e].Class_name_);
+				if (dict_element[e].Type_.Equals("ApplicationEvent"))
+					list_parent_name.Insert(0, dict_element[e].Class_name_);
 				else
-					list_parent_name.Add(e);
+					list_parent_name.Add(dict_element[e].Class_name_);
 			}
-			string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
+			else
+				list_parent_name.Add(e);
+		}
+		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 						
 #>
-	public partial class <#= ele.Class_name_ #> : <#= str_parents#>
+	public partial class <#= UpperString(ele.Class_name_) #> : <#= str_parents#>
 	{
 <#
 	}

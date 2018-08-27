@@ -109,7 +109,7 @@ namespace <#= dict_group_name[id_group] #>
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
-	public partial class <#= ele.Class_name_ #> 
+	public partial class <#= UpperString(ele.Class_name_) #> 
 	{
 <#	
 	}
@@ -126,12 +126,13 @@ namespace <#= dict_group_name[id_group] #>
 		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 						
 #>
-	public partial class <#= ele.Class_name_ #> : <#= str_parents#>
+	public partial class <#= UpperString(ele.Class_name_) #> : <#= str_parents#>
 	{
 <#
 	}
 
 	// Generate functions
+	// Table.A21.(12)
 	Dictionary<string, Dictionary<string, List<string>>> dict;
 	if (mmap_relationship.TryGetValue(id_element, out dict))
 	{
@@ -169,6 +170,7 @@ namespace <#= dict_group_name[id_group] #>
 				}
 
 				// Add Eventhandler
+				// Table.U17.T(25)
 				if (mmap_relationship.TryGetValue(function.Identifier_, out dict_function))
 				{
 					List<string> list_reference;

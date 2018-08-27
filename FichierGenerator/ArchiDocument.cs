@@ -372,21 +372,21 @@ namespace FichierGenerator
                 }
             }
 
-            
-            foreach(var id in dict_element.Keys)
+
+            foreach (var id in dict_element.Keys)
             {
                 // Add function relations
                 if (dict_element[id].Type_.Equals(ElementConstants.ApplicationFunction))
                 {
                     string id_first_function = GetFirstFunction(id);
                     string id_element = CallFunctionElement(id_first_function);
-                    if (id_element!=null)
+                    if (id_element != null)
                         AddFunctionToElement(id_first_function, id_element);
                 }
 
                 // Make the dict id_element - project
                 string id_project = FindProjectByElement(id);
-                if (id_project !=null)
+                if (id_project != null)
                 {
                     dict_element_project.Add(id, id_project);
                     HashSet<string> set_elements;
@@ -401,11 +401,19 @@ namespace FichierGenerator
                         dict_project_elements.Add(id_project, set_elements);
                     }
                 }
-                
+
                 // Make the heritage dictionary 
                 string id_parent = GetParentElement(id);
                 if (id_parent != null)
                     dict_heritage.Add(id, id_parent);
+
+                // Make the map of specialzation-relationship
+                if (mmap_relationship.ContainsKey(id) &&
+                    mmap_relationship[id]["source"].ContainsKey(RelationshipConstants.Specialization))
+                {
+                    foreach (var i in mmap_relationship[id]["source"][RelationshipConstants.Specialization])
+                        addImplementation(ref mmap_specialization, id, i);
+                }
 
                 // Find the principal solution
                 if (dict_element[id].Type_.Equals(ElementConstants.Product))
@@ -489,8 +497,49 @@ namespace FichierGenerator
                     dict_view_types.Add(id, set_type);
                 }
             }
-            
-            
+
+            IEnumerable<XElement> xeles_implementation = from e in doc.Descendants(NP + "relationship")
+                                                         where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Association
+                                                         select e;
+            foreach (var ele in xeles_implementation)
+            {
+                string id_source = ele.Attribute("source").Value;
+                string id_target = ele.Attribute("target").Value;
+
+                if (dict_element.Keys.Contains(id_source) && dict_element.Keys.Contains(id_target))
+                {
+                    Element element_source = dict_element[id_source];
+                    Element element_target = dict_element[id_target];
+
+                    List<string> list_parent = new List<string>();
+
+                    if (element_source.Type_.Equals(ElementConstants.ApplicationInterface) && (!element_target.Type_.Equals(ElementConstants.ApplicationInterface)))
+                    {
+                        if (!mmap_specialization.ContainsKey(id_target))
+                        {
+                            list_parent.Add(id_source);
+                            mmap_specialization.Add(id_target, list_parent);
+                        }
+                        else
+                        {
+                            mmap_specialization[id_target].Add(id_source);
+                        }
+                    }
+                    else if ((!element_source.Type_.Equals(ElementConstants.ApplicationInterface)) && element_target.Type_.Equals(ElementConstants.ApplicationInterface))
+                    {
+                        if (!mmap_specialization.ContainsKey(id_source))
+                        {
+                            list_parent.Add(id_target);
+                            mmap_specialization.Add(id_source, list_parent);
+                        }
+                        else
+                        {
+                            mmap_specialization[id_source].Add(id_target);
+                        }
+                    }
+                }
+            }
+
 
             // Make the dictionary of project references
             foreach (var id_project in hashset_project)
@@ -558,7 +607,7 @@ namespace FichierGenerator
                                             dict_element[i].Type_.Equals(ElementConstants.SystemSoftware)) &&
                                             dict_element[i].Properties_.ContainsKey("$implementation") &&
                                             dict_element[i].Properties_["$implementation"].Length > 0)
-                                            errors.Add("Opération non autorisé: element \"" + dict_element[id_element].Name_ + "\" utilise un " + dict_element[i].Type_ + "comme assemblie externe");
+                                            errors.Add("Error de modèle: Opération non autorisé: element \"" + dict_element[id_element].Name_ + "\" utilise un " + dict_element[i].Type_ + "comme assemblie externe");
                                 }
                             }
                         }
@@ -618,7 +667,6 @@ namespace FichierGenerator
                 {
                     // The project id which element belongs to
                     string project_id;
-                    
 
                     if (dict_element_project.TryGetValue(id, out project_id))
                     {
@@ -816,6 +864,96 @@ namespace FichierGenerator
                             }
                         }
                             
+                    }
+                    else
+                    {
+                        // Add relation to the old element
+                        List<string> list_new = new List<string>();
+                        dict_old_new.Add(id, list_new);
+                        //Create new interface element and add it to dict_element
+                        if (!dict_element.ContainsKey("I" + StringHelper.UpperString(element.Class_name_)))
+                        {
+                            Element new_interface = new Element();
+                            new_interface.Name_ = "I" + StringHelper.UpperString(element.Class_name_);
+                            new_interface.Class_name_ = new_interface.Name_;
+                            new_interface.Identifier_ = new_interface.Name_;
+                            new_interface.Properties_ = new Dictionary<string, string>();
+                            new_interface.Type_ = ElementConstants.ApplicationInterface;
+                            dict_element.Add(new_interface.Identifier_, new_interface);
+
+                            // Add implementation
+                            List<string> list_implementation;
+                            if (mmap_specialization.TryGetValue(id, out list_implementation))
+                            {
+                                list_implementation.Add(new_interface.Identifier_);
+                            }
+                            else
+                            {
+                                list_implementation = new List<string>();
+                                list_implementation.Add(new_interface.Identifier_);
+                                mmap_specialization.Add(id, list_implementation);
+                            }
+
+                            // Add new interface to the view
+                            if (view_id != null)
+                                dict_view[view_id].Add(new_interface.Identifier_);
+
+                            // Add new interface to the group
+                            if (group_id != null)
+                                dict_group[group_id]["interface"].Add(new_interface.Identifier_);
+
+                            // Add relation to the old element
+                            list_new.Add(new_interface.Identifier_);
+
+                            // Add element - group
+                            dict_element_group.Add(new_interface.Identifier_, "id-GroupeInConnu");
+
+                            // Move functions into interface
+                            if (element.Type_.Equals(ElementConstants.ApplicationFunction))
+                            {
+                                if (mmap_relationship.ContainsKey(new_interface.Identifier_))
+                                    AddFunctionToElement(element.Identifier_, new_interface.Identifier_);
+                                else
+                                {
+                                    Dictionary<string, Dictionary<string, List<string>>> dict2 = new Dictionary<string, Dictionary<string, List<string>>>();
+                                    Dictionary<string, List<string>> dict_source = new Dictionary<string, List<string>>();
+                                    List<string> list_func = new List<string>();
+                                    list_func.Add(element.Identifier_);
+                                    dict_source.Add("Function", list_func);
+                                    dict2.Add("source", dict_source);
+                                    dict2.Add("target", new Dictionary<string, List<string>>());
+                                    mmap_relationship.Add(new_interface.Identifier_, dict2);
+                                }
+                            }
+
+                            if (element.Type_.Equals(ElementConstants.ApplicationProcess))
+                            {
+                                Dictionary<string, Dictionary<string, List<string>>> dict;
+                                if (mmap_relationship.TryGetValue(id, out dict))
+                                {
+                                    List<string> list;
+                                    if (dict["source"].TryGetValue("Function", out list))
+                                    {
+                                        foreach (var i in list)
+                                        {
+                                            if (mmap_relationship.ContainsKey(new_interface.Identifier_))
+                                                AddFunctionToElement(i, new_interface.Identifier_);
+                                            else
+                                            {
+                                                Dictionary<string, Dictionary<string, List<string>>> dict2 = new Dictionary<string, Dictionary<string, List<string>>>();
+                                                Dictionary<string, List<string>> dict_source = new Dictionary<string, List<string>>();
+                                                dict_source.Add("Function", new List<string>(list));
+                                                dict2.Add("source", dict_source);
+                                                dict2.Add("target", new Dictionary<string, List<string>>());
+                                                mmap_relationship.Add(new_interface.Identifier_, dict2);
+                                            }
+                                        }
+
+                                        dict.Remove("Function");
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1349,99 +1487,7 @@ namespace FichierGenerator
         {
             this.class_namespace = name_space;
 
-            // Create the list of selected element ids with their names
-            //foreach(var element_name in elements)
-            //{
-            //    string id_element = dict_element.FirstOrDefault(x => x.Value.Name_.Equals(element_name)).Key;
-            //    list_element.Add(id_element);
-            //}
             list_element = elements.ToList();
-            
-            // Make the mmap of element access
-            IEnumerable<XElement> xeles_element_access = from e in doc.Descendants(NP + "relationship")
-                                                         where (!List_group_new.Contains(e.Attribute("source").Value)) && e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Access
-                                                         select e;
-            foreach (var ele in xeles_element_access)
-            {
-                List<string> list_target;
-                if (mmap_element_access.TryGetValue(ele.Attribute("source").Value, out list_target))
-                {
-                    list_target.Add(ele.Attribute("target").Value);
-                }
-                else
-                {
-                    list_target = new List<string>();
-                    list_target.Add(ele.Attribute("target").Value);
-                    mmap_element_access[ele.Attribute("source").Value] = list_target;
-                }
-            }
-
-            // Make the map of specialzation-relationship
-            IEnumerable<XElement> xeles_specialization = from e in doc.Descendants(NP + "relationship")
-                                                         where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Specialization
-                                                         select e;
-            foreach (var ele in xeles_specialization)
-            {
-                string id_child = ele.Attribute("source").Value;
-                string id_parent = ele.Attribute("target").Value;
-
-                Element element_child = dict_element[id_child];
-                Element element_parent = dict_element[id_parent];
-
-                List<string> list_parent = new List<string>();
-
-                if (!mmap_specialization.ContainsKey(id_child))
-                {
-                    list_parent.Add(id_parent);
-                    mmap_specialization.Add(id_child, list_parent);
-                }
-                else
-                {
-                    mmap_specialization[id_child].Add(id_parent);
-                }
-            }
-
-            IEnumerable<XElement> xeles_implementation = from e in doc.Descendants(NP + "relationship")
-                                                         where e.Attribute(xmlns_xsi + "type").Value == RelationshipConstants.Association
-                                                         select e;
-            foreach (var ele in xeles_implementation)
-            {
-                string id_source = ele.Attribute("source").Value;
-                string id_target = ele.Attribute("target").Value;
-
-                if (dict_element.Keys.Contains(id_source) && dict_element.Keys.Contains(id_target))
-                {
-                    Element element_source = dict_element[id_source];
-                    Element element_target = dict_element[id_target];
-
-                    List<string> list_parent = new List<string>();
-
-                    if (element_source.Type_.Equals(ElementConstants.ApplicationInterface) && (!element_target.Type_.Equals(ElementConstants.ApplicationInterface)))
-                    {
-                        if (!mmap_specialization.ContainsKey(id_target))
-                        {
-                            list_parent.Add(id_source);
-                            mmap_specialization.Add(id_target, list_parent);
-                        }
-                        else
-                        {
-                            mmap_specialization[id_target].Add(id_source);
-                        }
-                    }
-                    else if ((!element_source.Type_.Equals(ElementConstants.ApplicationInterface)) && element_target.Type_.Equals(ElementConstants.ApplicationInterface))
-                    {
-                        if (!mmap_specialization.ContainsKey(id_source))
-                        {
-                            list_parent.Add(id_target);
-                            mmap_specialization.Add(id_source, list_parent);
-                        }
-                        else
-                        {
-                            mmap_specialization[id_source].Add(id_target);
-                        }
-                    }
-                }
-            }
 
             // Add implementation
             foreach (var id in list_element)
@@ -1449,7 +1495,6 @@ namespace FichierGenerator
                 switch (dict_element[id].Type_)
                 {
                     case ElementConstants.BusinessObject: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.BusinessObject]); break;
-                    case ElementConstants.Representation: addImplementation(ref mmap_specialization, id, "I" + StringHelper.UpperString(dict_element[id].Class_name_)); break;
                     case ElementConstants.Contract: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.Contract]); break;
                     case ElementConstants.ApplicationEvent: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.ApplicationEvent]); break;
                     case ElementConstants.ApplicationComponent: addImplementation(ref mmap_specialization, id, Dict_implementation[ElementConstants.ApplicationComponent]); break;
@@ -1498,7 +1543,39 @@ namespace FichierGenerator
             }
             else
             {
-                mmap_specialization[id_child].Add(parent);
+                if (mmap_specialization[id_child][0].StartsWith("id"))
+                {
+                    Element first_implementation = dict_element[mmap_specialization[id_child][0]];
+                    if (parent.StartsWith("id"))
+                    {
+                        if (dict_element[id_child].Type_.Equals(dict_element[parent].Type_))
+                        {
+                            if (first_implementation.Type_.Equals(dict_element[id_child].Type_))
+                            {
+                                errors.Add("Element \"" + dict_element[id_child].Class_name_ + "\" has two base classes");
+                            }
+                            else
+                            {
+                                mmap_specialization[id_child].Insert(0, parent);
+                            }
+                        }
+                        else
+                        {
+                            mmap_specialization[id_child].Add(parent);
+                        }
+                    }
+                    else
+                    {
+                        if (!first_implementation.Type_.Equals(dict_element[id_child].Type_))
+                        {
+                            mmap_specialization[id_child].Insert(0, parent);
+                        }
+                    }
+                }
+                else
+                {
+                    mmap_specialization[id_child].Insert(0, parent);
+                }
             }
         }
 

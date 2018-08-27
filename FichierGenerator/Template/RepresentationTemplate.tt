@@ -82,13 +82,14 @@ namespace <#= dict_group_name[id_group] #>
 						}
 					}
 				}
-			}
+			}			
 		}
 
 		if( mmap_association.ContainsKey(id_element))
 		{
 			foreach(var id_associated in mmap_association[id_element])
 			{
+				// Table.G16|Q(6).O(6)
 				if(dict_element.ContainsKey(id_associated))
 				{
 					Element element_associated = dict_element[id_associated];
@@ -99,6 +100,7 @@ namespace <#= dict_group_name[id_group] #>
 	[ReferenceModel(<#= element_associated.Type_ #>Archimate, "<#= element_associated.Name_ #>")]
 <#
 					}
+					// Table.AG(6).O(7)
 					if(element_associated.Type_.Equals("Artifact"))
 					{
 #>
@@ -114,7 +116,7 @@ namespace <#= dict_group_name[id_group] #>
 		{
 #>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
-	public partial class <#= ele.Class_name_ #> : Window
+	public partial class <#= UpperString(ele.Class_name_) #>  : Window
 	{
 <#	
 		}
@@ -128,6 +130,7 @@ namespace <#= dict_group_name[id_group] #>
 				else
 					list_parent_name.Add(e);
 			}
+			list_parent_name = list_parent_name.Distinct().ToList();
 			string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 						
 #>
@@ -135,9 +138,9 @@ namespace <#= dict_group_name[id_group] #>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
 	[Model(<#= ele.Type_ #>Archimate, "<#= class_name #>")]
-	public partial class <#= ele.Class_name_ #> : Window, <#= str_parents#>
+	public partial class <#= UpperString(ele.Class_name_) #>  : Window, <#= str_parents#>
 	{
-		public <#= ele.Class_name_ #>()
+		public <#= UpperString(ele.Class_name_) #> ()
         {
             InitializeComponent();
         }

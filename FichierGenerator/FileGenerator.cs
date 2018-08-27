@@ -192,12 +192,6 @@ namespace FichierGenerator
             List<string> list_element_name = new List<string>();
             list.ForEach(x => list_element_name.Add(Dict_element[x].Name_));
 
-            // If only choose the Application Component as type, ze generate projects instead of classes
-            if (types.Count() == 1 && types[0].Equals(ElementConstants.ApplicationComponent))
-            {
-                list.AddRange(GetProjects(solution));
-                return list.ToArray();
-            }
             return list.ToArray();
         }
 
@@ -446,6 +440,7 @@ namespace FichierGenerator
                     project_path, projet_name);
 
                 // Modify AssemblyInfo
+                // Table.N23.O(23)
                 string text = File.ReadAllText(project_path + "\\Properties\\AssemblyInfo.cs");
                 Regex regex = new Regex(@"" + projet_name);
                 text = regex.Replace(text, solution_name, 1, text.IndexOf(projet_name) + projet_name.Length);
@@ -501,12 +496,23 @@ namespace FichierGenerator
                     {
                         if (id_reference!= id_project && vsproj.Project.Name!= StringHelper.UpperString(dict_element[id_reference].Class_name_))
                         {
-                            if (GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_))!=null)
+                            if (Path.GetExtension(id_reference)!=".dll")
                             {
-                                vsproj.References.AddProject(GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_)));
+                                if (GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_)) != null)
+                                {
+                                    vsproj.References.AddProject(GetProjectByName(solution, StringHelper.UpperString(dict_element[id_reference].Class_name_)));
+                                }
+                                else
+                                    Log["errors"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found in this solution");
                             }
                             else
-                                Log["errors"].Add("The reference \"" + dict_element[id_reference].Class_name_ + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found in this solution");
+                            {
+                                if (File.Exists(id_reference))
+                                    vsproj.References.Add(id_reference);
+                                else
+                                    Log["errors"].Add("The reference \"" + id_reference + "\" of project \"" + Path.GetFileNameWithoutExtension(vsproj.Project.Name) + "\" has not been found");
+                            }
+                            
                         }
                     }
 
@@ -544,11 +550,13 @@ namespace FichierGenerator
             solution.SaveAs(Path.GetFullPath(Path.Combine(solution_path, solution_name) + ".sln"));
 
             // Generate the project with the same name of solution
+            // Table.A15.(19)
             Project project;
             project = solution.AddFromTemplate(Path.GetFullPath(@"..\..\lib\WPFApplication\csWPFApplication.vstemplate"),
                 Path.Combine(Path.GetFullPath(solution_path), solution_name), solution_name);
 
             // Generate manifest
+            // Table.N15.G(21)
             var template = new DeploymentFileTemplate();
             template.Session = new TextTemplatingSession();
             template.Session["archiDocument"] = archiDocumentSerialized;
@@ -740,7 +748,7 @@ namespace FichierGenerator
                 }
             }
 
-            if (dict_element[id_element].Properties_.FirstOrDefault(x => !x.Key.StartsWith("$")).Key != null)
+            if (dict_element[id_element].Properties_.FirstOrDefault(x => !x.Key.StartsWith("$")).Key == null)
                 Log["errors"].Add("DataObject \"" + dict_element[id_element].Class_name_ + "\" doesn't have any properties");
         }
 

@@ -243,11 +243,11 @@ namespace FichierGenerator.Template
             this.Write("\tpublic partial class ");
             
             #line 75 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(ele.Class_name_)));
             
             #line default
             #line hidden
-            this.Write(" \r\n\t{\r\n");
+            this.Write("  \r\n\t{\r\n");
             
             #line 77 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
 	
@@ -258,7 +258,12 @@ namespace FichierGenerator.Template
 		foreach(var e in mmap_specialization[id_element])
 		{
 			if(e.StartsWith("id"))
-				list_parent_name.Add(dict_element[e].Class_name_);
+			{
+				if (dict_element[e].Type_.Equals("BusinessObject"))
+					list_parent_name.Insert(0, dict_element[e].Class_name_);
+				else
+					list_parent_name.Add(dict_element[e].Class_name_);
+			}
 			else
 				list_parent_name.Add(e);
 		}
@@ -270,21 +275,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\tpublic partial class ");
             
-            #line 92 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ele.Class_name_));
+            #line 97 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(ele.Class_name_)));
             
             #line default
             #line hidden
-            this.Write(" : ");
+            this.Write("  : ");
             
-            #line 92 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 97 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(str_parents));
             
             #line default
             #line hidden
             this.Write("\r\n\t{\r\n");
             
-            #line 94 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 99 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
 
 	}
 
@@ -299,21 +304,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t");
             
-            #line 103 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 108 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ele.Properties_[p]));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 103 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 108 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(p));
             
             #line default
             #line hidden
             this.Write(";\r\n\r\n");
             
-            #line 105 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 110 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
 
 		}
 	}
@@ -337,21 +342,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\tList<");
             
-            #line 123 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 128 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(elementTarget.Class_name_)));
             
             #line default
             #line hidden
             this.Write("> ");
             
-            #line 123 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 128 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n");
             
-            #line 124 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 129 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
 
 			}
 		}
@@ -376,21 +381,21 @@ namespace FichierGenerator.Template
             #line hidden
             this.Write("\t\t");
             
-            #line 143 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 148 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UpperString(element_associated.Class_name_)));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 143 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 148 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(var_name));
             
             #line default
             #line hidden
             this.Write("_ ;\r\n\r\n");
             
-            #line 145 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+            #line 150 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
 
 				}
 			}
@@ -404,7 +409,7 @@ namespace FichierGenerator.Template
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 154 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
+        #line 159 "D:\documents\INSA\maidis\vs\Projet\FichierGenerator\FichierGenerator\Template\BusinessObjectTemplate.tt"
 
 	private bool isInSelectedGroups(string id, Dictionary<string, Dictionary<string,List<string>>> dict_group)
 	{

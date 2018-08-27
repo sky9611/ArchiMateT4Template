@@ -86,6 +86,7 @@ namespace <#= dict_group_name[id_group] #>
 			}
 		}
 
+		// Table.Q17.T(25)
 		List<string> list_trigger;
 		if(mmap_relationship[id_element]["target"].TryGetValue("Triggering", out list_trigger))
 		{
@@ -107,7 +108,7 @@ namespace <#= dict_group_name[id_group] #>
 	if (!mmap_specialization.Keys.Contains(id_element))
 	{
 #>
-	public interface <#= ele.Class_name_ #>: IView 
+	public interface <#= UpperString(ele.Class_name_) #> : IView 
 	{
 <#	
 	}
@@ -118,7 +119,7 @@ namespace <#= dict_group_name[id_group] #>
 			list_parent_name.Add(dict_element[e].Class_name_);
 		string str_parents = String.Join(", ", list_parent_name.Select(i => UpperString(i.ToString())).ToArray());
 #>
-	public interface <#= ele.Class_name_ #> : IView, <#= str_parents#>
+	public interface <#= UpperString(ele.Class_name_) #>  : IView, <#= str_parents#>
 	{
 
 <#
@@ -146,6 +147,7 @@ namespace <#= dict_group_name[id_group] #>
 	}
 
 	// Generate functions
+	// Table.A21.(12)
 	Dictionary<string, Dictionary<string, List<string>>> dict;
 	if (mmap_relationship.TryGetValue(id_element, out dict))
 	{
