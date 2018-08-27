@@ -177,6 +177,7 @@ namespace FichierGenerator
                 }
             }
 
+            list.AddRange(list_idProject);
             // Remove dublication
             list = list.Distinct().ToList();
             // Remove elements with unselected type
@@ -415,7 +416,8 @@ namespace FichierGenerator
             //List<string> list_project = archiDocument.Mmap_solution[id_solution];
             List<string> list_project_name = new List<string>();
             foreach (var i in archiDocument.Hashset_project)
-                list_project_name.Add(dict_element[i].Name_);
+                if (i.StartsWith("id"))
+                    list_project_name.Add(dict_element[i].Name_);
 
             return list_project_name.ToArray();
         }

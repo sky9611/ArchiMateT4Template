@@ -742,6 +742,17 @@ namespace FichierGenerator
 
                             // Add relation to the old element
                             list_new.Add(new_project.Identifier_);
+
+                            List<string> list;
+                            if (dict_old_new.TryGetValue(project_id, out list))
+                                list.Add(new_project.Identifier_);
+                            else
+                            {
+                                list  = new List<string>();
+                                list.Add(new_project.Identifier_);
+                                dict_old_new.Add(project_id, list);
+                            }
+
                         }
                         else
                         {
